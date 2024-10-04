@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Alternative MyGes Client</title>
+
+	<link rel="stylesheet" type="text/css" href="src/CSS/tagsStyle.css">
+    <link rel="stylesheet" type="text/css" href="src/CSS/idStyle.css">
+    <link rel="stylesheet" type="text/css" href="src/CSS/classStyle.css">
+
+    <script type="module" src="./src/JS/start.js" defer></script>
+
+    <script type="application/javascript" src="./src/JS/index_events.js" defer></script>
+
+</head>
+<body class="dark">
+
+    <div id="utilities">
+        <div id="eula">
+            <div class="box maxHeight40Pourcent">
+                <h1 class="textCenter">User agreements</h1>
+                <hr>
+                <span class="underline">By using this software, you agree to :</span>
+                <ul>
+                    <li>Let this software retrieve informations from your myGes account</li>
+                    <li>Store your myGes data account (username & password) into json file</li>
+                    <li>Store your myGes data (Grades, Absences, Schedule, etc...) into json file</li>
+                    <li>Neither sold nor making money nor inject malicious code inside the software</li>
+                    <li>This yerk software is designed to work with a 1920x1080 screen (but have responsive design)</li>
+                    <li>This is an open source project, but good luck to take back the dev of this software (。﹏。)</li>
+                </ul>
+                <input id="buttonEula" class="marginTop10" type="button" value="Agree">
+            </div>
+        </div>
+
+        <div id="connection">
+            <div class="box maxHeight40Pourcent">
+                <h1 class="textCenter">Connexion</h1>
+                <hr>
+                <span class="underline textCenter width100 marginTop10" style="display: block;">Renseigner votre login et mot de passe myGes</span>
+                <div class="flex flexCenter">
+                    <ul class="noDecoration noMargin noPadding">
+                        <li><input type="text" id="username" placeholder="Username" required></li>
+                        <li><input type="text" id="password" class="marginTop10" placeholder="Password" required></li>
+                    </ul>
+                </div>
+                <div class="flex flexCenter wrap" style="margin-bottom: 0;">
+                    <input id="buttonConnection" class="marginTop10" type="button" value="Save and Connect">
+                    <input id="buttonCancelConnection" class="marginTop10" type="button" value="Cancel Connection">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header id="header">
+        <div id="logoGES" class="flex flexCenter">
+            <img src="./src/assets/images/GES_Master_logo.png" alt="GES logo">
+        </div>
+        <div class="textCenter" id="mainHeader">
+            <h1 class="bold underline" id="headerTitle">Accueil</h1>
+        </div>
+        <div class="flex flexCenter">
+            <img src="./src/assets/images/black-moon.png" alt="light/dark mode" id="theme">
+        </div>
+    </header>
+
+    <main>
+
+        <div id="rightPart"> <!--class="simplebar">-->
+
+            <!--Up list-->
+            <nav>
+                <ul>
+                    <li onclick="loadPageH('dashboard', event)">
+                        Accueil
+                    </li>
+                    <li onclick="loadPageH('schedule', event)">
+                        Agenda
+                    </li>
+                    <li onclick="loadPageH('grades', event)">
+                        Notes
+                    </li>
+                    <li onclick="loadPageH('absences', event)">
+                        Absences
+                    </li>
+                    <li onclick="loadPageH('courses', event)">
+                        Cours
+                    </li>
+                    <li onclick="loadPageH('projects', event)">
+                        Projets de Groupes
+                    </li>    
+                    <li onclick="loadPageH('account', event)">
+                        Mon Compte
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="ulBottom flex flexCenter"><a class="underlinePointer" onclick="loadPageH('credits')">Credit</a> <a class="underlinePointer" onclick="loadPageH('softwareAccount')">Mon compte</a></div>
+
+        </div>  <!--softwareAccount-->
+
+        <div id="mainPart">
+
+            <div id="popupMaster" class="textCenter">
+                <div id="stillpopup" class="popup">
+                    <div class="flex flexStart no-wrap">
+                        <div>What a strange message</div>
+                    </div>
+                </div>
+                <div id="normalpopup" class="popup">
+                    <div class="flex flexCenter">What a strange message</div>
+                </div>
+            </div>
+
+            <div id="replace">
+                <div class="flex flexCenter">
+                    <div class="box flex flexCenter" style="width: inherit"><p>You're in a strange place...</p></div>
+                </div>
+            </div>
+            
+        </div>
+
+
+    </main>
+
+    <footer>
+    </footer>
+
+</body>
+</html>

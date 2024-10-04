@@ -1,0 +1,39 @@
+:root{
+    --rightPartWidth: 15%;
+    --mainPartWidth: 85%;
+    --mainPartHeight: 90vh;
+    --headerPartHeight: 10vh;
+}
+
+.light{
+    --rightPartColor: #364156;
+    --mainPartColor: rgb(212, 212, 212);
+	--colorMain: #9F9E9E;
+    --policeColor : white;
+    --mainPoliceColor : black;
+    /* --popupColor : rgb(168, 168, 168);
+    --boxBackgroundColor : #a8a8a8; */
+    
+    --popupColor : #364156;
+    --boxBackgroundColor : #536483;
+
+    transition: all ease-in-out 0.5s;
+
+}
+
+.dark{
+    --rightPartColor: #2b2b2b;
+    --mainPartColor: #444444;
+	--colorMain: #1D1D1D;
+    --policeColor : white;
+    --mainPoliceColor : white;
+    --popupColor : grey;
+    --boxBackgroundColor : rgb(104, 104, 104);
+
+
+    /* --rightPartColor: #2d3943;
+    --popupColor : #2d3943;
+    --boxBackgroundColor : rgb(81, 104, 122); */
+
+    transition: all ease-in-out 0.5s;
+}
