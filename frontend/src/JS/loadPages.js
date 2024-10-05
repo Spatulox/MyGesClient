@@ -5,7 +5,9 @@ import {capitalizeFirstLetter, log} from "./functions";
 import {GetPageContent, UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
 
 // Page Functions
-import {dashboard} from "../JS-Page/dashbord";
+// They are used
+import {dashboard} from "../JS-Page/dashbord.js";
+import {schedule} from "../JS-Page/schedule";
 
 export async function loadPageGo(string, event = null){
 
@@ -16,10 +18,10 @@ export async function loadPageGo(string, event = null){
 
     try {
         mainPart.innerHTML = await GetPageContent(string)
-        updatePages(string)
+        updatePages(string.split(".html")[0])
 
-    } catch{
-        log("ERROR : An error occured in the loadPage function")
+    } catch(err){
+        log("ERROR : An error occured in the loadPage function : "+err)
     }
 
     if (event != null){
@@ -35,14 +37,19 @@ export async function loadPageGo(string, event = null){
 }
 
 function updatePages(pages){
-    const regex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-    //try{
-    if (regex.test(pages) && pages !=="softwareAccount" && pages !=="credits") {
-        eval(pages + '()');
-    }
-    else if(pages === "cya"){
 
+    switch (pages){
+        case 'account':
+            //account()
+            break
+        case 'dashboard':
+            dashboard()
+            break
+        case 'schedule':
+            schedule()
+            break
     }
+
     // }
     // catch(err){
     //     log(`Can't execute ${pages}() function, name is not valid : ${err}`);
