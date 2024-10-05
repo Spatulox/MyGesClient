@@ -45,6 +45,7 @@ func (a *App) GetProfile() (string, error) {
 	if api == nil {
 		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil") // Vérifiez si l'instance est valide
 	}
+	FETCHINGPROFILE = 0
 	return api.GetProfile() // Retourne le profil via GESapi
 }
 
@@ -74,6 +75,7 @@ func (a *App) GetAgenda(start string, end string) (string, error) {
 	if api == nil {
 		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
 	}
+	FETCHINGSCHEDULE = 0
 	return api.GetAgenda(start, end)
 }
 
@@ -88,5 +90,6 @@ func (a *App) GetGrades(year string) (string, error) {
 	if api == nil {
 		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
 	}
+	FETCHINGGRADES = 0
 	return api.GetGrades(year)
 }
