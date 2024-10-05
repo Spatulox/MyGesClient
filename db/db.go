@@ -9,10 +9,18 @@ import (
 	"os"
 )
 
-func InitDB() (*sql.DB, error) {
+func InitDBConnexion() (*sql.DB, error) {
 	cwd, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de l'obtention du répertoire de travail: %v", err)
+	}
 
 	println("Current working directory:", cwd)
+
+	if err := createDB(); err != nil {
+		return nil, err
+	}
+
 	db, err := sql.Open("sqlite", "./db.sqlite")
 	if err != nil {
 		fmt.Printf("Error opening database: %v\n", err)
@@ -25,7 +33,7 @@ func CreateUser(db *sql.DB, username string, password string) (bool, error) {
 	// Désélectionner tous les utilisateurs existants
 	_, err := db.Exec("UPDATE USER SET selected = 0")
 	if err != nil {
-		return false, fmt.Errorf("Erreur lors de la désélection des utilisateurs existants : %w", err)
+		return false, fmt.Errorf("Erreur lors de l'update des utilisateurs existants (selected column) : %w", err)
 	}
 
 	// Insérer le nouvel utilisateur

@@ -54,7 +54,7 @@ func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 
 	var err error
-	a.db, err = InitDB()
+	a.db, err = InitDBConnexion()
 	if err != nil {
 		println("Failed to initialize database:", err)
 		return
