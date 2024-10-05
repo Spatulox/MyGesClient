@@ -138,3 +138,45 @@ func (a *App) UpdateDiscordRPC(details string, state string) error {
 		LargeText:  "GES_logo",
 	})
 }
+
+// -------------------------------------------------------------------------- //
+
+func (a *App) CheckInternetConnection() bool {
+	// Définir un délai d'attente pour la requête
+	internetClient := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	// Effectuer une requête GET vers un site connu
+	resp, err := internetClient.Get("http://www.google.com")
+	if err != nil {
+		return false // Une erreur signifie qu'il n'y a pas de connexion
+	}
+	defer resp.Body.Close()
+
+	// Vérifier le statut de la réponse
+	return resp.StatusCode == http.StatusOK
+}
+
+func (a *App) CheckXTimeInternetConnection(attempts int) bool {
+	// Définir un délai d'attente pour la requête
+	internetClient := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	// Effectuer des tentatives de connexion
+	for i := 0; i < attempts; i++ {
+		resp, err := internetClient.Get("http://www.google.com")
+		if err == nil {
+			defer resp.Body.Close() // Fermer le corps de la réponse
+			// Vérifier le statut de la réponse
+			if resp.StatusCode == http.StatusOK {
+				return true // Connexion réussie
+			}
+		}
+		// Attendre un court moment avant la prochaine tentative
+		time.Sleep(2 * time.Second) // Optionnel : ajustez le délai si nécessaire
+	}
+
+	return false // Retourne false si aucune connexion n'est établie après les tentatives
+}
