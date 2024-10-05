@@ -5,12 +5,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Alternative MyGes Client</title>
 
+    <link rel="stylesheet" type="text/css" href="src/CSS/animations.css">
 	<link rel="stylesheet" type="text/css" href="src/CSS/tagsStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/idStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/classStyle.css">
 
+    <!--Don't interact with html element, mandatory to be module (better)-->
     <script type="module" src="./src/JS/start.js" defer></script>
 
+    <!--Interact with html element, impossible to be modules-->
+    <script type="application/javascript" src="./src/JS/loadingGoFuncOutsideModule.js" defer></script>
+    <script type="application/javascript" src="./src/JS/popups.js" defer></script>
     <script type="application/javascript" src="./src/JS/index_events.js" defer></script>
 
 </head>
@@ -24,8 +29,8 @@
                 <span class="underline">By using this software, you agree to :</span>
                 <ul>
                     <li>Let this software retrieve informations from your myGes account</li>
-                    <li>Store your myGes data account (username & password) into json file</li>
-                    <li>Store your myGes data (Grades, Absences, Schedule, etc...) into json file</li>
+                    <li>Store your myGes data account (username & password) into a local database</li>
+                    <li>Store your myGes data (Grades, Absences, Schedule, etc...) a local database</li>
                     <li>Neither sold nor making money nor inject malicious code inside the software</li>
                     <li>This yerk software is designed to work with a 1920x1080 screen (but have responsive design)</li>
                     <li>This is an open source project, but good luck to take back the dev of this software (。﹏。)</li>
@@ -72,46 +77,45 @@
             <!--Up list-->
             <nav>
                 <ul>
-                    <li onclick="loadPageH('dashboard', event)">
+                    <li onclick="loadPage('dashboard', event)">
                         Accueil
                     </li>
-                    <li onclick="loadPageH('schedule', event)">
+                    <li onclick="loadPage('schedule', event)">
                         Agenda
                     </li>
-                    <li onclick="loadPageH('grades', event)">
+                    <li onclick="loadPage('grades', event)">
                         Notes
                     </li>
-                    <li onclick="loadPageH('absences', event)">
+                    <li onclick="loadPage('absences', event)">
                         Absences
                     </li>
-                    <li onclick="loadPageH('courses', event)">
+                    <li onclick="loadPage('courses', event)">
                         Cours
                     </li>
-                    <li onclick="loadPageH('projects', event)">
+                    <li onclick="loadPage('projects', event)">
                         Projets de Groupes
                     </li>    
-                    <li onclick="loadPageH('account', event)">
+                    <li onclick="loadPage('account', event)">
                         Mon Compte
                     </li>
                 </ul>
             </nav>
 
-            <div class="ulBottom flex flexCenter"><a class="underlinePointer" onclick="loadPageH('credits')">Credit</a> <a class="underlinePointer" onclick="loadPageH('softwareAccount')">Mon compte</a></div>
+            <div class="ulBottom flex flexCenter"><a class="underlinePointer" onclick="loadPage('credits')">Credit</a> <a class="underlinePointer" onclick="loadPage('softwareAccount')">Mon compte</a></div>
 
         </div>  <!--softwareAccount-->
 
         <div id="mainPart">
 
             <div id="popupMaster" class="textCenter">
-                <div id="stillpopup" class="popup">
-                    <div class="flex flexStart no-wrap">
-                        <div>What a strange message</div>
-                    </div>
+                <div id="stillpopup" class="popup-container">
+                    <!-- Les popups "still" seront ajoutées ici dynamiquement -->
                 </div>
-                <div id="normalpopup" class="popup">
-                    <div class="flex flexCenter">What a strange message</div>
+                <div id="normalpopup" class="popup-container">
+                    <!-- Les popups "normal" seront ajoutées ici dynamiquement -->
                 </div>
             </div>
+
 
             <div id="replace">
                 <div class="flex flexCenter">

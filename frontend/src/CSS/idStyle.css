@@ -252,7 +252,7 @@
     transition: all ease-in-out 0.3s;
 }
 
-#normalpopup div{
+#normalpopup > div{
     position: absolute;
     z-index: 2409;
     left: 50%;
@@ -262,7 +262,7 @@
     transition: all ease-in-out 0.5s;
 }
 
-#normalpopup div.active{
+#normalpopup > div.active{
     top: 5px;
     transition: all ease-in-out 0.5s;
 }
@@ -325,7 +325,7 @@
     margin-top: 30px;
 }
 
-#stillpopup div{
+#stillpopup > div{
     position: absolute;
     z-index: 2409;
     right: 10px;
@@ -339,7 +339,7 @@
     margin-right: 10px;
 }
 
-#stillpopup div.active{
+#stillpopup > div.active{
     top: 5px;
     transition: all ease-in-out 0.5s;
 }

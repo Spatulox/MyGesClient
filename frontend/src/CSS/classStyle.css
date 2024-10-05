@@ -225,7 +225,7 @@
     cursor: pointer;
 }
 
-.popup div{
+.popup > div{
     z-index: 2409;
     min-width: 200px;
     max-width: 300px;
@@ -237,6 +237,8 @@
     padding: 10px;
     background-color: var(--popupColor);
     color : var(--policeColor);
+
+    animation: popupSlideDown 0.3s ease-out forwards;
 }
 
 
