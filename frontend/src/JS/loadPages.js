@@ -16,8 +16,6 @@ export async function loadPageGo(string, event = null){
 
     try {
         mainPart.innerHTML = await GetPageContent(string)
-        console.log(await GetPageContent(string))
-
         updatePages(string)
 
     } catch{
