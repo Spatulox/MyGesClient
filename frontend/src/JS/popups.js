@@ -1,5 +1,6 @@
 let popupStillCounter = 0;
 let popupNormalCounter = 0;
+const MAX_POPUPS = 5;
 
 function createPopup(type, content) {
     const popupContainer = document.querySelector(`#${type}popup`);
@@ -23,6 +24,15 @@ function createPopup(type, content) {
 
     popupContainer.appendChild(newPopup);
     newPopup.classList.add('active');
+
+    const totalPopups = popupContainer.querySelectorAll('.popup').length;
+    if (totalPopups > MAX_POPUPS) {
+        // Supprimer la première popup (celle en haut)
+        const firstPopup = popupContainer.querySelector('.popup');
+        if (firstPopup) {
+            removePopup(firstPopup.id);
+        }
+    }
 
     updatePopupPositions(type);
 
@@ -62,6 +72,15 @@ function removePopup(popupId) {
 
 function stillPopup(string = "Error when passing args to still popup") {
     return createPopup('still', string);
+}
+
+function editStillPopup( popupId, string = "Error when passing args to still popup") {
+    const pop = document.getElementById(popupId)
+    pop.innerHTML = `
+            <div class="flex flexStart no-wrap">
+                <img src="./src/assets/images/circle-loading.gif" alt="loading circle">
+                <div>${string}</div>
+            </div>`;
 }
 
 function stopStillPopup(popupId) {
