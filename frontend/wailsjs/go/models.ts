@@ -1,4 +1,4 @@
-export namespace db {
+export namespace structures {
 	
 	export class UserSettings {
 	    ID: number;
