@@ -1,4 +1,5 @@
 build/bin
+build/log
 node_modules
 frontend/dist
 .idea
