@@ -1,27 +1,37 @@
 package backend
 
 import (
+	. "MyGesClient/api"
 	. "MyGesClient/db"
+	. "MyGesClient/structures"
 	"context"
 	"database/sql"
 	"fmt"
 	"github.com/hugolgst/rich-go/client"
 	_ "modernc.org/sqlite"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
-	db  *sql.DB
+	ctx  context.Context
+	db   *sql.DB
+	api  *GESapi
+	user UserSettings
 }
+
+// -------------------------------------------------------------------------- //
 
 // NewApp creates a new App application struct
 func NewApp() *App {
 	return &App{}
 }
+
+// -------------------------------------------------------------------------- //
 
 func (a *App) CheckOpenDb() bool {
 	if a.db == nil {
@@ -54,6 +64,24 @@ func (a *App) Startup(ctx context.Context) {
 		println("Failed to ping database:", err)
 		return
 	}
+
+	userLocal, err := GetUser(a.db)
+
+	if err != nil {
+		println("Impossible to initialize the DB part")
+		return
+	}
+
+	a.user = userLocal
+
+	userApi, err := GESLogin(a.user.Username, a.user.Password)
+
+	if err != nil {
+		println("Impossible to initialize the API part")
+		return
+	}
+
+	a.api = userApi
 }
 
 func (a *App) Cleanup() {
@@ -61,6 +89,8 @@ func (a *App) Cleanup() {
 		a.db.Close()
 	}
 }
+
+// -------------------------------------------------------------------------- //
 
 func (a *App) GetParentDir() string {
 	execPath, err := os.Executable()
@@ -108,6 +138,8 @@ func (a *App) GetPageContent(page string) (string, error) {
 	}
 	return string(content), nil
 }
+
+// -------------------------------------------------------------------------- //
 
 func (a *App) InitDiscordRPC() error {
 	err := client.Login("1196836862447329351")
