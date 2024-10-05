@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+var FETCHINGSCHEDULE = 0
+var FETCHINGGRADES = 0
+var FETCHINGPROFILE = 0
+
 func createErrorMessage(message string) string {
 	return fmt.Sprintf("{'message':'%s'}", message)
 }
@@ -31,6 +35,11 @@ func checkDateFormat(date string) (string, error) {
 // ------------------------------------------------ //
 
 func (a *App) GetProfile() (string, error) {
+	if FETCHINGPROFILE == 1 {
+		return createErrorMessage("Waiting for the previous profile fetch to end"), errors.New("Waiting for the previous profile fetch to end")
+	}
+	FETCHINGPROFILE = 1
+
 	api := a.api
 	println(api)
 	if api == nil {
@@ -49,6 +58,11 @@ func (a *App) GetYears() (string, error) {
 
 func (a *App) GetAgenda(start string, end string) (string, error) {
 
+	if FETCHINGSCHEDULE == 1 {
+		return createErrorMessage("Waiting for the previous schedule fetch to end"), errors.New("Waiting for the previous schedule fetch to end")
+	}
+	FETCHINGSCHEDULE = 1
+
 	start, startInt := checkDateFormat(start)
 	end, endInt := checkDateFormat(end)
 
@@ -64,6 +78,12 @@ func (a *App) GetAgenda(start string, end string) (string, error) {
 }
 
 func (a *App) GetGrades(year string) (string, error) {
+
+	if FETCHINGGRADES == 1 {
+		return createErrorMessage("Waiting for the previous grades fetch to end"), errors.New("Waiting for the previous grades fetch to end")
+	}
+	FETCHINGGRADES = 1
+
 	api := a.api
 	if api == nil {
 		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
