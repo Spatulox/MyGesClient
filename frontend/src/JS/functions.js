@@ -1,5 +1,6 @@
-import { GetParentDir, WriteLogFile } from "../../wailsjs/go/backend/App";
+import {GetParentDir, WriteLogFile} from "../../wailsjs/go/backend/App";
 
+// ------------------------------------------------ //
 
 export function log(str) {
 
@@ -11,7 +12,7 @@ export function log(str) {
         var today = new Date();
         let previousStr = `[${today.toLocaleDateString()} - ${today.toLocaleTimeString()}] `;
 
-        console.log(previousStr + str);
+        //console.log(previousStr + str);
         WriteLogFile(filePath, previousStr + str + '\n')
             .then(()=>{
                 console.log(previousStr + str + '\n')
@@ -25,6 +26,8 @@ export function log(str) {
     });
 }
 
+// ------------------------------------------------ //
+
 export function capitalizeFirstLetter(string) {
     // Séparer la chaîne et prendre la première partie
     let part = string.split(".html")[0];
@@ -34,4 +37,84 @@ export function capitalizeFirstLetter(string) {
 
     // Mettre en majuscule la première lettre et la concaténer avec le reste de la chaîne
     return part.charAt(0).toUpperCase() + part.slice(1);
+}
+
+// ------------------------------------------------ //
+
+export function todayDate(addedDays = 0){
+    // Créer un nouvel objet Date
+    const date = new Date();
+
+    // Ajouter le nombre de jours au jour actuel
+    date.setDate(date.getDate() + addedDays);
+
+    // Récupérer le jour, le mois et l'année
+    const jour = date.getDate();
+    const mois = date.getMonth() + 1; // Les mois sont indexés à partir de 0, donc on ajoute 1
+    const annee = date.getFullYear();
+
+    // Afficher la date au format "jj/mm/aaaa"
+    const dateFormatee = jour.toString().padStart(2, '0') + "/" + mois.toString().padStart(2, '0') + "/" + annee;
+
+
+    const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const jourDeLaSemaine = jours[date.getDay()];
+
+    return [dateFormatee, jourDeLaSemaine];
+}
+
+// ------------------------------------------------ //
+
+export function getDateInfo(dateString) {
+    const parts = dateString.split('/');
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    const date = new Date(year, month - 1, day); // Month is 0-based
+
+    const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const jourDeLaSemaine = jours[date.getDay()];
+
+    const dateFormatee = day.toString().padStart(2, '0') + "/" + month.toString().padStart(2, '0') + "/" + year;
+
+    return [dateFormatee, jourDeLaSemaine];
+}
+
+// ------------------------------------------------ //
+
+export function getYear() {
+    const currentDate = new Date();
+    return currentDate.getFullYear();
+}
+
+// ------------------------------------------------ //
+
+export function getMonday() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+
+    // Si aujourd'hui est Dimanche (0), on ajoute 1 jour pour obtenir Lundi de la semaine prochaine
+    const offset = dayOfWeek === 0 ? 1 : (dayOfWeek === 1 ? 0 : -dayOfWeek + 1);
+
+    // Calculer le Lundi
+    today.setDate(today.getDate() + offset);
+    today.setHours(0, 0, 0, 0); // Réinitialiser l'heure à minuit
+
+    return today;
+}
+
+// ------------------------------------------------ //
+
+export function getSaturday() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+
+    // Si aujourd'hui est Dimanche (0), on ajoute 1 jour pour obtenir Samedi de la semaine prochaine
+    const offset = dayOfWeek === 0 ? 6 : (dayOfWeek === 6 ? 0 : (6 - dayOfWeek));
+
+    // Calculer le Samedi
+    today.setDate(today.getDate() + offset);
+    today.setHours(23, 59, 59, 999); // Réinitialiser l'heure à la fin de la journée
+
+    return today;
 }
