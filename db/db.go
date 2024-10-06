@@ -3,7 +3,6 @@ package db
 import (
 	. "MyGesClient/structures"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	_ "modernc.org/sqlite"
@@ -38,21 +37,18 @@ func CreateUser(db *sql.DB, username string, password string) (bool, error) {
 	// Désélectionner tous les utilisateurs existants
 	_, err := db.Exec("UPDATE USER SET selected = false")
 	if err != nil {
-		println("1")
 		return false, fmt.Errorf("Erreur lors de l'update des utilisateurs existants (selected column) : %w", err)
 	}
 
 	// Insérer le nouvel utilisateur
 	result, err := db.Exec("INSERT INTO USER (username, password, selected) VALUES (?, ?, true)", username, password)
 	if err != nil {
-		println("2")
 		return false, fmt.Errorf("Erreur lors de l'insertion du nouvel utilisateur : %w", err)
 	}
 
 	// Récupérer l'ID du nouvel utilisateur
 	_, err = result.LastInsertId()
 	if err != nil {
-		println("3")
 		return false, fmt.Errorf("Erreur lors de la récupération de l'ID du nouvel utilisateur : %w", err)
 	}
 	return true, nil
@@ -117,3 +113,7 @@ func UpdateUserTheme(db *sql.DB, value string) (bool, error) {
 
 	return true, nil
 }
+
+/*func GetDBUserGrades(db *sql.DB) (string, error) {
+	return grades, nil
+}*/
