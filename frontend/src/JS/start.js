@@ -1,5 +1,6 @@
-import { GetUserData, InitDiscordRPC, UpdateDiscordRPC } from "../../wailsjs/go/backend/App";
+import { GetUserData, InitDiscordRPC, UpdateDiscordRPC, GlobalRefresh } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
+import {getMonday, getSaturday, getYear, todayDate} from "./functions";
 
 export async function start(){
 
@@ -39,6 +40,14 @@ export async function start(){
         console.error("Erreur lors de la récupération des données utilisateur :", error);
     }
 
+    try{
+        const year = getYear().toString()
+        const debut = getMonday().toISOString().split("T")[0]
+        const end = getSaturday().toISOString().split("T")[0]
+        GlobalRefresh(year, debut, end)
+    } catch (e) {
+        popup("Erreur lors de la mise à jour des données utilisateur :" + e)
+    }
 
 
 }
