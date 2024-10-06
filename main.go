@@ -2,6 +2,7 @@ package main
 
 import (
 	. "MyGesClient/backend"
+	. "MyGesClient/log"
 	"embed"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -12,8 +13,10 @@ import (
 var assets embed.FS
 
 func main() {
+	Log.Infos("Launching...")
 	// Create an instance of the app structure
 	app := NewApp()
+	Log.Infos("Running app")
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -30,8 +33,9 @@ func main() {
 	})
 
 	if err != nil {
-		println("Error:", err.Error())
+		Log.Error(err.Error())
 	}
 
+	Log.Infos("Closing App")
 	defer app.Cleanup()
 }
