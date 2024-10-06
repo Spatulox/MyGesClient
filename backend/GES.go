@@ -11,7 +11,7 @@ var FETCHINGGRADES = 0
 var FETCHINGPROFILE = 0
 
 func createErrorMessage(message string) string {
-	return fmt.Sprintf("{'message':'%s'}", message)
+	return fmt.Sprintf("{\"message\":\"%s\"}", message)
 }
 
 func checkDateFormat(date string) (string, error) {
