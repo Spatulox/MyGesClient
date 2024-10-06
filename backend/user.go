@@ -2,6 +2,7 @@ package backend
 
 import (
 	. "MyGesClient/api"
+	. "MyGesClient/log"
 	"database/sql"
 	"fmt"
 )
@@ -11,13 +12,16 @@ import . "MyGesClient/db"
 // Function called by the front end
 // ------------------------------------------------ //
 
+/*
+Verifie if the user exists on myges
+*/
 func (a *App) VerifyUser(username string, password string) (string, error) {
 
 	// Check the api if this is the right informations
 	userApi, err := GESLogin(username, password)
 
 	if err != nil {
-		println("Impossible to connect to MyGes")
+		Log.Error("Impossible to connect to Myges")
 		return createErrorMessage("Impossible to connect to MyGes, bad username or password"), err
 	}
 
@@ -27,23 +31,22 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 	// Create the local user
 	user, err := CreateUser(a.db, username, password)
 	if !user {
-		println("Impossible to save your info in local DB")
-		println(err)
+		Log.Error(fmt.Sprintf("Impossible to save your info in local DB : %v", err))
 		return createErrorMessage("Impossible to save your info in local DB"), err
 	}
 
 	// Get the local user
 	userLocal, err := GetUser(a.db)
 	if err != nil {
-		println("Impossible to get your local infos")
+		Log.Error(fmt.Sprintf("Impossible to get your local infos %v", err))
 		return createErrorMessage("Impossible to get your local infos"), err
 	}
 	a.user = userLocal
-
+	Log.Infos("Your datas have beed correctely saved")
 	return createErrorMessage("Your datas have been correctely saved"), nil
 }
 
-func (a *App) CreateUser(username string, password string) (*UserSettings, error) {
+func (a *App) GetUserData() (*UserSettings, error) {
 
 	user, err := GetUser(a.db)
 	if err != nil {
@@ -52,6 +55,7 @@ func (a *App) CreateUser(username string, password string) (*UserSettings, error
 		}
 		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -70,4 +74,18 @@ func (a *App) UpdateUserTheme(value string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// ------------------------------------------------ //
+
+func (a *App) GetProfile() (string, error) {
+	return "coucku", nil
+}
+
+func (a *App) GetYears() (string, error) {
+	api := a.api
+	if api == nil {
+		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
+	}
+	return api.GetYears()
 }
