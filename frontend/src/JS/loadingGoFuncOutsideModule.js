@@ -1,7 +1,10 @@
 // Async imports
 let loadPageGo;
+let start
 let UpdateUserEula
 let UpdateUserTheme
+let CreateUser
+let VerifyUser
 
 import('./loadPages.js')
     .then(module => {
@@ -9,9 +12,17 @@ import('./loadPages.js')
     })
     .catch(err => console.error('Erreur de chargement du module:', err));
 
+import('./start')
+    .then(module => {
+        start = module.start;
+    })
+    .catch(err => console.error('Erreur de chargement du module:', err));
+
 import('../../wailsjs/go/backend/App')
     .then(module => {
-        UpdateUserEula = module.UpdateUserEula;
+        UpdateUserEula = module.UpdateUserEula
         UpdateUserTheme = module.UpdateUserTheme
+        CreateUser = module.CreateUser
+        VerifyUser = module.VerifyUser
     })
     .catch(err => console.error('Erreur de chargement du module:', err));

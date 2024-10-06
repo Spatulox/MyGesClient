@@ -12,7 +12,7 @@ const USER = `CREATE TABLE USER (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
-    theme TEXT NOT NULL,
+    theme TEXT NOT NULL DEFAULT 'dark',
     eula BOOLEAN NOT NULL DEFAULT 0,
     selected BOOLEAN NOT NULL DEFAULT 0
 );`
@@ -32,7 +32,7 @@ const PROFS = `CREATE TABLE IF NOT EXISTS PROFS (
 
 const DISCIPLINES = `CREATE TABLE IF NOT EXISTS DISCIPLINES (
     discip_id INTEGER PRIMARY KEY,
-    disci_name TEXT NOT NULL,
+    discip_name TEXT NOT NULL,
     teacher_id INTEGER NOT NULL,
     coef REAL NOT NULL,
     trimestre INTEGER NOT NULL,
@@ -57,7 +57,7 @@ const AGENDA = `CREATE TABLE IF NOT EXISTS AGENDA (
 );`
 
 func initDBTables() {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
+	db, err := sql.Open("sqlite", "./db.sqlite")
 	if err != nil {
 		fmt.Printf("Erreur lors de l'ouverture de la base de données: %v\n", err)
 		return

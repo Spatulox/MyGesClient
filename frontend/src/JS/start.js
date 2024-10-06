@@ -1,13 +1,15 @@
 import { GetUserData, InitDiscordRPC, UpdateDiscordRPC } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
 
-async function start(){
+export async function start(){
 
     try {
-        const user = await GetUserData();
-        if (user === null || user.password) {
+        let user = await GetUserData();
+        if (user === null || !user.Password) {
+            buttonCancelConnection.style.visibility = "hidden"
             const connection = document.getElementById('connection')
             connection.classList.add('active')
+            return
         }
         // Check if the eula is accepted
         if(!user.EULA || user.EULA === false)

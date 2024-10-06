@@ -40,12 +40,37 @@ buttonEula.addEventListener('click', function() {
     eula.classList.remove('active')
 })
 
+
+buttonConnection.addEventListener("click", async function() {
+    const username = document.getElementById("username").value
+    const password = document.getElementById("password").value
+    if(!username || !password){
+        popup("Les deux champs doivent être rempli")
+        return
+    }
+    const still = stillPopup("Verifying infos")
+    try{
+        const message = await VerifyUser(username, password);
+        stopStillPopup(still)
+        popup(JSON.parse(message).message)
+
+    } catch (err){
+        stopStillPopup(still)
+        popup(err)
+        return
+    }
+
+    buttonCancelConnection.style.visibility = "visible"
+    const connection = document.getElementById('connection')
+    connection.classList.remove("active")
+    start()
+});
+
 buttonCancelConnection.addEventListener('click', function() {
     const connection = document.getElementById('connection')
     connection.classList.remove("active")
 
 })
-
 
 // ------------ Popup events -------------- //
 
