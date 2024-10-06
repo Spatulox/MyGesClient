@@ -27,7 +27,7 @@ type GESapi struct {
 }
 
 // AgendaRoom représente une salle dans l'agenda
-type AgendaRoom struct {
+type agendaRoom struct {
 	RoomID    int    `json:"room_id"`
 	Name      string `json:"name"`
 	Floor     string `json:"floor"`
@@ -38,7 +38,7 @@ type AgendaRoom struct {
 }
 
 // AgendaDiscipline représente une discipline dans l'agenda
-type AgendaDiscipline struct {
+type agendaDiscipline struct {
 	Coef             interface{} `json:"coef"`
 	ECTS             interface{} `json:"ects"`
 	Name             string      `json:"name"`
@@ -58,9 +58,9 @@ type AgendaDiscipline struct {
 }
 
 // AgendaItem représente un élément de l'agenda
-type AgendaItem struct {
+type agendaItem struct {
 	ReservationID         int              `json:"reservation_id"`
-	Rooms                 []AgendaRoom     `json:"rooms"`
+	Rooms                 []agendaRoom     `json:"rooms"`
 	Type                  string           `json:"type"`
 	Modality              string           `json:"modality"`
 	Author                int              `json:"author"`
@@ -71,7 +71,7 @@ type AgendaItem struct {
 	Comment               interface{}      `json:"comment"`
 	Classes               interface{}      `json:"classes"`
 	Name                  string           `json:"name"`
-	Discipline            AgendaDiscipline `json:"discipline"`
+	Discipline            agendaDiscipline `json:"discipline"`
 	Teacher               string           `json:"teacher"`
 	Promotion             string           `json:"promotion"`
 	PrestationType        int              `json:"prestation_type"`
@@ -196,12 +196,12 @@ func (ges *GESapi) GetAgenda(start string, end string) (string, error) {
 	// Parser les chaînes en time.Time
 	startTime, err := time.Parse(layout, start)
 	if err != nil {
-		log.Fatalf("Erreur lors du parsing de la date de début: %v", err)
+		log.Fatalf("Erreur lors du parsing de la date de début GetAgenda: %v", err)
 	}
 
 	endTime, err := time.Parse(layout, end)
 	if err != nil {
-		log.Fatalf("Erreur lors du parsing de la date de fin: %v", err)
+		log.Fatalf("Erreur lors du parsing de la date de fin GetAgenda: %v", err)
 	}
 
 	// Convertir les time.Time en millisecondes Unix
@@ -217,12 +217,12 @@ func (ges *GESapi) GetAgenda(start string, end string) (string, error) {
 		return errMessage, err
 	}
 	// Convertir le résultat en []AgendaItem
-	var agendaItems []AgendaItem
+	var agendaItems []agendaItem
 	if items, ok := result["items"].([]interface{}); ok {
 		for _, item := range items {
-			if agendaItem, ok := item.(map[string]interface{}); ok {
-				var ai AgendaItem
-				if err := mapToStruct(agendaItem, &ai); err != nil {
+			if agendaItemVar, ok := item.(map[string]interface{}); ok {
+				var ai agendaItem
+				if err := mapToStruct(agendaItemVar, &ai); err != nil {
 					return errMessage, fmt.Errorf("erreur lors de la conversion d'un élément de l'agenda: %w", err)
 				}
 				agendaItems = append(agendaItems, ai)
