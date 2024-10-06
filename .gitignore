@@ -6,3 +6,5 @@ frontend/wailsjs
 .idea
 .env
 config.json
+
+log/
