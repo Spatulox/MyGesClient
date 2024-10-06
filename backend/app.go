@@ -3,6 +3,7 @@ package backend
 import (
 	. "MyGesClient/api"
 	. "MyGesClient/db"
+	. "MyGesClient/log"
 	. "MyGesClient/structures"
 	"context"
 	"database/sql"
@@ -28,6 +29,7 @@ type App struct {
 
 // NewApp creates a new App application struct
 func NewApp() *App {
+	Log.Infos("Creating App")
 	return &App{}
 }
 
@@ -35,12 +37,12 @@ func NewApp() *App {
 
 func (a *App) CheckOpenDb() bool {
 	if a.db == nil {
-		println("ERROR : Not connected to DB")
+		Log.Error("Not connected to DB")
 		return false
 	}
 
 	if err := a.db.Ping(); err != nil {
-		println("ERROR : Failed to ping DB")
+		Log.Error("Failed to ping DB")
 		return false
 	}
 
@@ -51,24 +53,25 @@ func (a *App) CheckOpenDb() bool {
 // so we can call the runtime methods
 
 func (a *App) Startup(ctx context.Context) {
+	Log.Infos("Initializing App")
 	a.ctx = ctx
 
 	var err error
 	a.db, err = InitDBConnexion()
 	if err != nil {
-		println("Failed to initialize database:", err)
+		Log.Error(fmt.Sprintf("Failed to initialize DB : %s", err))
 		return
 	}
 
 	if err := a.db.Ping(); err != nil {
-		println("Failed to ping database:", err)
+		Log.Error(fmt.Sprintf("Failed to ping DB %v", err))
 		return
 	}
 
 	userLocal, err := GetUser(a.db)
 
 	if err != nil {
-		println("Impossible to initialize the DB part")
+		Log.Error(fmt.Sprintf("Impossible to initialize the user, the database is may be empty ? %v", err))
 		return
 	}
 
@@ -77,7 +80,7 @@ func (a *App) Startup(ctx context.Context) {
 	userApi, err := GESLogin(a.user.Username, a.user.Password)
 
 	if err != nil {
-		println("Impossible to initialize the API part")
+		Log.Error(fmt.Sprintf("Impossible to initialize the API part %v", err))
 		return
 	}
 
@@ -134,6 +137,7 @@ func (a *App) GetPageContent(page string) (string, error) {
 	page = strings.Split(page, ".html")[0]
 	content, err := os.ReadFile("frontend/" + page + ".html")
 	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible to get the content of the page %d : %v", page, err))
 		return "", err
 	}
 	return string(content), nil
