@@ -1,6 +1,7 @@
 package backend
 
 import (
+	. "MyGesClient/log"
 	"errors"
 	"fmt"
 	"time"
@@ -23,9 +24,11 @@ func checkDateFormat(date string) (string, error) {
 	// Analyser la chaîne de date
 	parsedTime, err := time.Parse(inputLayout, date)
 	if err != nil {
-		fmt.Println("Erreur lors de l'analyse de la date :", err)
-		return createErrorMessage("Impossible to parse the date"), errors.New("Impossible to parse the date")
+		return "", fmt.Errorf("impossible to parse the date: %v", err)
 	}
+
+	// Ajouter l'heure, les minutes, les secondes et définir le fuseau horaire UTC
+	parsedTime = time.Date(parsedTime.Year(), parsedTime.Month(), parsedTime.Day(), 0, 0, 0, 0, time.UTC)
 
 	formattedDate := parsedTime.Format(outputLayout)
 
@@ -34,62 +37,45 @@ func checkDateFormat(date string) (string, error) {
 
 // ------------------------------------------------ //
 
-func (a *App) GetProfile() (string, error) {
+/*
+ * Refresh the local DB by asking the MyGes DB, and store it inside the LocalDB
+ */
+func (a *App) GlobalRefresh(year string, start string, end string) (string, error) {
+	_, err := a.RefreshAgenda(&start, &end)
+	if err != nil {
+		return createErrorMessage("Impossible to refresh the schedule :/"), err
+	}
+	_, err = a.RefreshGrades(year)
+	if err != nil {
+		return createErrorMessage("Impossible to refresh grade :/"), err
+	}
+	_, err = a.RefreshProfile()
+	if err != nil {
+		return createErrorMessage("Impossible to refresh the profile :/"), err
+	}
+
+	return createErrorMessage("Refresh finished !"), nil
+}
+
+// ------------------------------------------------ //
+
+/*
+ * Refresh the Profile by asking the MyGes DB, and store it inside the LocalDB and send back the fresh datas
+ */
+func (a *App) RefreshProfile() (string, error) {
 	if FETCHINGPROFILE == 1 {
 		return createErrorMessage("Waiting for the previous profile fetch to end"), errors.New("Waiting for the previous profile fetch to end")
 	}
 	FETCHINGPROFILE = 1
+	defer func() { FETCHINGPROFILE = 0 }()
+	Log.Infos("Refreshing Profile")
 
 	api := a.api
-	println(api)
 	if api == nil {
-		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil") // Vérifiez si l'instance est valide
+		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil for RefreshProfile")
 	}
-	FETCHINGPROFILE = 0
+
 	return api.GetProfile() // Retourne le profil via GESapi
 }
 
-func (a *App) GetYears() (string, error) {
-	api := a.api
-	if api == nil {
-		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
-	}
-	return api.GetYears()
-}
-
-func (a *App) GetAgenda(start string, end string) (string, error) {
-
-	if FETCHINGSCHEDULE == 1 {
-		return createErrorMessage("Waiting for the previous schedule fetch to end"), errors.New("Waiting for the previous schedule fetch to end")
-	}
-	FETCHINGSCHEDULE = 1
-
-	start, startInt := checkDateFormat(start)
-	end, endInt := checkDateFormat(end)
-
-	if startInt != nil || endInt != nil {
-		return createErrorMessage("Impossible to parse date"), errors.New("Impossible to parse date")
-	}
-
-	api := a.api
-	if api == nil {
-		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
-	}
-	FETCHINGSCHEDULE = 0
-	return api.GetAgenda(start, end)
-}
-
-func (a *App) GetGrades(year string) (string, error) {
-
-	if FETCHINGGRADES == 1 {
-		return createErrorMessage("Waiting for the previous grades fetch to end"), errors.New("Waiting for the previous grades fetch to end")
-	}
-	FETCHINGGRADES = 1
-
-	api := a.api
-	if api == nil {
-		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
-	}
-	FETCHINGGRADES = 0
-	return api.GetGrades(year)
-}
+// ------------------------------------------------ //
