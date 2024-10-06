@@ -1,8 +1,10 @@
 package db
 
 import (
+	. "MyGesClient/log"
 	"database/sql"
 	"fmt"
+	"github.com/labstack/gommon/log"
 	_ "modernc.org/sqlite"
 	"os"
 )
@@ -34,10 +36,9 @@ const DISCIPLINES = `CREATE TABLE IF NOT EXISTS DISCIPLINES (
     discip_id INTEGER PRIMARY KEY,
     discip_name TEXT NOT NULL,
     teacher_id INTEGER NOT NULL,
-    coef REAL NOT NULL,
+    coef REAL,
     trimestre INTEGER NOT NULL,
-    teacher_id_1 INTEGER NOT NULL,
-    FOREIGN KEY (teacher_id_1) REFERENCES PROFS (teacher_id)
+    FOREIGN KEY (teacher_id) REFERENCES PROFS (teacher_id)
 );`
 
 const AGENDA = `CREATE TABLE IF NOT EXISTS AGENDA (
@@ -53,7 +54,7 @@ const AGENDA = `CREATE TABLE IF NOT EXISTS AGENDA (
     user_id INTEGER NOT NULL,
     FOREIGN KEY (room_id) REFERENCES SALLES (room_id),
     FOREIGN KEY (discip_id) REFERENCES DISCIPLINES (discip_id),
-    FOREIGN KEY (user_id) REFERENCES UTILISATEUR (user_id)
+    FOREIGN KEY (user_id) REFERENCES USER (user_id)
 );`
 
 func initDBTables() {
@@ -71,34 +72,34 @@ func initDBTables() {
 	}
 
 	if _, err := db.Exec(USER); err != nil {
-		fmt.Printf("Erreur lors de la création de la table users: %v\n", err)
+		Log.Error(fmt.Sprintf("Erreur lors de la création de la table users: %v\n", err))
 		return
 	}
-	fmt.Println("Table 'users' créée avec succès.")
+	Log.Infos("Table 'users' créée avec succès.")
 
 	if _, err := db.Exec(SALLES); err != nil {
-		fmt.Printf("Erreur lors de la création de la table users: %v\n", err)
+		Log.Error(fmt.Sprintf("Erreur lors de la création de la table salles: %v\n", err))
 		return
 	}
-	fmt.Println("Table 'users' créée avec succès.")
+	Log.Infos("Table 'Salles' créée avec succès.")
 
 	if _, err := db.Exec(PROFS); err != nil {
-		fmt.Printf("Erreur lors de la création de la table users: %v\n", err)
+		Log.Error(fmt.Sprintf("Erreur lors de la création de la table prof: %v\n", err))
 		return
 	}
-	fmt.Println("Table 'users' créée avec succès.")
+	Log.Infos("Table 'Prof' créée avec succès.")
 
 	if _, err := db.Exec(DISCIPLINES); err != nil {
-		fmt.Printf("Erreur lors de la création de la table users: %v\n", err)
+		log.Error(fmt.Sprintf("Erreur lors de la création de la table discipline: %v\n", err))
 		return
 	}
-	fmt.Println("Table 'users' créée avec succès.")
+	Log.Infos("Table 'Discipline' créée avec succès.")
 
 	if _, err := db.Exec(AGENDA); err != nil {
-		fmt.Printf("Erreur lors de la création de la table users: %v\n", err)
+		Log.Error(fmt.Sprintf("Erreur lors de la création de la table agenda: %v\n", err))
 		return
 	}
-	fmt.Println("Table 'users' créée avec succès.")
+	Log.Infos("Table 'Agenda' créée avec succès.")
 
 }
 
@@ -110,13 +111,13 @@ func createDB() error {
 		// Le fichier n'existe pas, donc on le crée
 		file, err := os.Create(dbFile)
 		if err != nil {
-			return fmt.Errorf("erreur lors de la création du fichier de base de données: %v", err)
+			Log.Error(fmt.Sprintf("erreur lors de la création du fichier de base de données: %v\", err"))
 		}
 		defer file.Close()
-		fmt.Println("Fichier db.sqlite créé.")
+		Log.Infos("Fichier sb.sqlite crée.")
 		initDBTables()
 	} else {
-		fmt.Println("Le fichier db.sqlite existe déjà.")
+		Log.Infos("Le fichier db.sqlite existe déjà.")
 	}
 
 	return nil
