@@ -1,6 +1,7 @@
 package api
 
 import (
+	. "MyGesClient/log"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
@@ -313,23 +314,45 @@ func (ges *GESapi) QuitProjectGroup(projectRcId int64, projectId int64, projectG
 // --------------------------------------------------------------------------------------- //
 
 func (ges *GESapi) get(url string) (map[string]interface{}, error) {
+	Log.Infos(fmt.Sprintf("INFOS : Requesting GET API for %s", url))
 	result, err := ges.request("GET", url, nil)
 	if err != nil {
 		fmt.Printf("Stack trace:\n%+v\n", err)
 	}
-	return result, err
+	Log.Infos(fmt.Sprintf("INFOS : %s finished", url))
+	return result, nil
 }
 
 func (ges *GESapi) post(url string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
-	return ges.request("POST", url, requestConfig)
+	Log.Infos(fmt.Sprintf("INFOS : Requesting POST API for %s", url))
+	result, err := ges.request("POST", url, requestConfig)
+	if err != nil {
+		fmt.Printf("Stack trace:\n%+v\n", err)
+	}
+	Log.Infos(fmt.Sprintf("INFOS : %s finished", url))
+	return result, nil //ges.request("POST", url, requestConfig)
 }
 
 func (ges *GESapi) put(url string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
-	return ges.request("PUT", url, requestConfig)
+	//return ges.request("PUT", url, requestConfig)
+	Log.Infos(fmt.Sprintf("INFOS : Requesting PUT API for %s", url))
+	result, err := ges.request("PUT", url, requestConfig)
+	if err != nil {
+		fmt.Printf("Stack trace:\n%+v\n", err)
+	}
+	Log.Infos(fmt.Sprintf("INFOS : %s finished", url))
+	return result, nil
 }
 
 func (ges *GESapi) delete(url string) (map[string]interface{}, error) {
-	return ges.request("DELETE", url, nil)
+	//return ges.request("DELETE", url, nil)
+	Log.Infos(fmt.Sprintf("INFOS : Requesting DELETE API for %s", url))
+	result, err := ges.request("DELETE", url, nil)
+	if err != nil {
+		fmt.Printf("Stack trace:\n%+v\n", err)
+	}
+	Log.Infos(fmt.Sprintf("INFOS : %s finished", url))
+	return result, nil
 }
 
 func (ges *GESapi) request(method, url string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
