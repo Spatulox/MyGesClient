@@ -5,6 +5,7 @@ import (
 	. "MyGesClient/db"
 	. "MyGesClient/log"
 	. "MyGesClient/structures"
+	. "MyGesClient/time"
 	"context"
 	"database/sql"
 	"fmt"
@@ -16,6 +17,8 @@ import (
 	"strings"
 	"time"
 )
+
+var STARTFINISH = 0
 
 // App struct
 type App struct {
@@ -60,11 +63,14 @@ func (a *App) Startup(ctx context.Context) {
 	a.db, err = InitDBConnexion()
 	if err != nil {
 		Log.Error(fmt.Sprintf("Failed to initialize DB : %s", err))
+		STARTFINISH = -1
 		return
 	}
+	Log.Infos("DB connection Initialized")
 
 	if err := a.db.Ping(); err != nil {
 		Log.Error(fmt.Sprintf("Failed to ping DB %v", err))
+		STARTFINISH = -1
 		return
 	}
 
@@ -72,25 +78,44 @@ func (a *App) Startup(ctx context.Context) {
 
 	if err != nil {
 		Log.Error(fmt.Sprintf("Impossible to initialize the user, the database is may be empty ? %v", err))
+		STARTFINISH = -1
 		return
 	}
 
 	a.user = userLocal
+	Log.Infos("User Initialized")
 
 	userApi, err := GESLogin(a.user.Username, a.user.Password)
 
 	if err != nil {
 		Log.Error(fmt.Sprintf("Impossible to initialize the API part %v", err))
+		STARTFINISH = -1
 		return
 	}
 
 	a.api = userApi
+	Log.Infos("API connection Initialized")
+	year := GetCurrentYear()
+	monday, saturday := GetWeekDates()
+
+	_, err = a.GlobalRefresh(fmt.Sprintf("%d", year), monday.Format("2006/01/02"), saturday.Format("2006/01/02"))
+	if err != nil {
+		Log.Error("Impossible to to a Global Refresh on Startup")
+		STARTFINISH = -1
+		return
+	}
+	Log.Infos("Global Refresh executed")
+	STARTFINISH = 1
 }
 
 func (a *App) Cleanup() {
 	if a.db != nil {
 		a.db.Close()
 	}
+}
+
+func GetStartStatus() int {
+	return STARTFINISH
 }
 
 // -------------------------------------------------------------------------- //
