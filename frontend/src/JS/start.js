@@ -44,12 +44,18 @@ export async function start(){
         const year = getYear().toString()
         const debut = getMonday().toISOString().split("T")[0]
         const end = getSaturday().toISOString().split("T")[0]
-        GlobalRefresh(year, debut, end)
+
+        let status = GetStartStatus()
+        while(status === 0){
+            wait(5)
+        }
+        if(status === -1){
+            stillPopup("Something went Wrong, plz restart")
+            return
+        }
     } catch (e) {
         popup("Erreur lors de la mise à jour des données utilisateur :" + e)
     }
-
-
 }
 
 async function connectDiscord(){
@@ -68,6 +74,9 @@ function updateActivity(state, details) {
 
 
 start()
+    .then(()=>{
+    console.log("Frontend Started")
+})
 
 
 
