@@ -118,3 +118,13 @@ export function getSaturday() {
 
     return today;
 }
+
+// ------------------------------------------------ //
+
+export function wait(seconds) {
+    const start = Date.now();
+    const milliseconds = seconds * 1000;
+    while (Date.now() - start < milliseconds) {
+        // Boucle active jusqu'à ce que le temps spécifié soit écoulé
+    }
+}
