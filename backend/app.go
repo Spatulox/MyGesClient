@@ -117,7 +117,7 @@ func (a *App) Cleanup() {
 	}
 }
 
-func GetStartStatus() int {
+func (a *App) GetStartStatus() int {
 	return STARTFINISH
 }
 
