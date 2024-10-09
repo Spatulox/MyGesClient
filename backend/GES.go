@@ -10,6 +10,7 @@ import (
 var FETCHINGSCHEDULE = 0
 var FETCHINGGRADES = 0
 var FETCHINGPROFILE = 0
+var FETCHINGABSENCES = 0
 
 func createErrorMessage(message string) string {
 	return fmt.Sprintf("{\"message\":\"%s\"}", message)
