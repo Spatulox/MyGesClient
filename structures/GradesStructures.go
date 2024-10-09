@@ -23,5 +23,5 @@ type LocalGrades struct {
 	Grades      []float64 `json:"grades"`
 	Trimester   int       `json:"trimester"`
 	Year        int       `json:"year"`
-	TeacherName string    `json:"teacher_civility"`
+	TeacherName string    `json:"teacher_name"`
 }
