@@ -57,8 +57,11 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		endDate, endInt = checkDateFormat(*end)
 
 		if startInt != nil || endInt != nil {
+			fmt.Printf("start : %s, end : %s\n", *start, *end)
+			fmt.Printf("erreur startInt %v\n erreur end int %v\n", startInt, endInt)
 			return nil, errors.New("Impossible to parse date (start or end date in RefreshAgenda in if)")
 		}
+
 	} else {
 		// Utiliser la semaine en cours si start ou end n'est pas fourni
 		now := time.Now()
@@ -106,7 +109,12 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		Log.Error("DELETE AGENDA : " + err.Error())
 		return nil, nil
 	}
-
+	// Valider la transaction
+	err = tx.Commit()
+	if err != nil {
+		Log.Error(err.Error())
+	}
+	
 	// ---- Add all data in AGENDA ---- //
 
 	SaveAgendaToDB(agenda, a.db)
