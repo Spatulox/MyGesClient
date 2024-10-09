@@ -1,6 +1,11 @@
-import { GetUserData, InitDiscordRPC, UpdateDiscordRPC, GlobalRefresh } from "../../wailsjs/go/backend/App";
+import {
+    GetUserData,
+    InitDiscordRPC,
+    UpdateDiscordRPC,
+    GetStartStatus
+} from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
-import {getMonday, getSaturday, getYear, todayDate} from "./functions";
+import {getMonday, getSaturday, getYear, wait} from "./functions";
 
 export async function start(){
 
@@ -44,15 +49,22 @@ export async function start(){
         const year = getYear().toString()
         const debut = getMonday().toISOString().split("T")[0]
         const end = getSaturday().toISOString().split("T")[0]
-
-        let status = GetStartStatus()
+        let count = 0
+        let status = await GetStartStatus()
         while(status === 0){
             wait(5)
+            status = await GetStartStatus()
+            if(count >= 50){
+                stillPopup("Something wen wrong in the backend, try to restart the app")
+                break
+            }
+            count ++
         }
         if(status === -1){
             stillPopup("Something went Wrong, plz restart")
             return
         }
+
     } catch (e) {
         popup("Erreur lors de la mise à jour des données utilisateur :" + e)
     }
