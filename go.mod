@@ -6,6 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/hugolgst/rich-go v0.0.0-20240715122152-74618cc1ace2
+	github.com/labstack/gommon v0.4.0
 	github.com/wailsapp/wails/v2 v2.9.2
 	modernc.org/sqlite v1.33.1
 )
@@ -19,7 +20,6 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/labstack/echo/v4 v4.10.2 // indirect
-	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.0 // indirect
 	github.com/leaanthony/gosod v1.0.3 // indirect
 	github.com/leaanthony/slicer v1.6.0 // indirect
