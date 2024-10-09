@@ -34,7 +34,11 @@ function createPopup(type, content) {
         }
     }
 
-    updatePopupPositions(type);
+    if (type === 'still' && popupStillCounter > 1) {
+        updatePopupPositions(type);
+    } else if(type === 'normal' && popupNormalCounter > 1) {
+        updatePopupPositions(type);
+    }
 
     newPopup.addEventListener('click', function() {
         newPopup.remove()
