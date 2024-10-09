@@ -30,7 +30,7 @@ func (a *App) RefreshGrades(year string) ([]LocalGrades, error) {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshGrades")
 	}
 
-	grades, err := api.GetGrades("2023")
+	grades, err := api.GetGrades(year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
 	}
