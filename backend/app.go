@@ -101,7 +101,8 @@ func (a *App) Startup(ctx context.Context) {
 	// Global refresh needs the date and the year
 	// Date are for the week to refresh the schedule
 	// Year is to refresh the grades
-	msg, err := a.GlobalRefresh(fmt.Sprintf("%d", year), monday.Format("2006/01/02"), saturday.Format("2006/01/02"))
+	msg, err := a.GlobalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+	//msg, err := a.GlobalRefresh("2024", "2024-09-23", "2024-09-28")
 	if err != nil {
 		Log.Error("Impossible to to a Global Refresh on Startup")
 		STARTFINISH = -1
