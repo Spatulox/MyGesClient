@@ -8,15 +8,14 @@ import (
 	"fmt"
 )
 
-func (a *App) GetGrades(year string) (string, error) {
-	return "coucou", nil
-	//return GetDBUserGrades(a.db)
+func (a *App) GetGrades(year string) ([]LocalGrades, error) {
+	return GetDBUserGrades(year, a.db)
 }
 
 /*
  * Refresh the Grades by asking the MyGes DB, and store it inside the LocalDB and sent back the fresh datas
  */
-func (a *App) RefreshGrades(year string) ([]Grades, error) {
+func (a *App) RefreshGrades(year string) ([]LocalGrades, error) {
 	if FETCHINGGRADES == 1 {
 		return nil, errors.New("Waiting for the previous grades fetch to end")
 	}
