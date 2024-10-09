@@ -86,7 +86,7 @@ type LocalRoom struct {
 type Discipline struct {
 	Teacher   Teacher
 	Coef      *float32 `json:"coef"`
-	Trimester int      `json:"trimester"`
+	Trimester string   `json:"trimester"`
 }
 
 func (t JSONTime) Format() string {
