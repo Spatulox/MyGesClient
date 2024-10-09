@@ -113,8 +113,10 @@ func deleteAgendaData(startDate string, endDate string, db *sql.DB) ([]LocalAgen
 		Log.Error(err.Error())
 	}
 
+	user, _ := GetUser(db)
+
 	stmtDeleteAgenda, err := tx.Prepare(`
-		DELETE FROM AGENDA WHERE start_date >= ? AND end_date <= ?
+		DELETE FROM AGENDA WHERE start_date >= ? AND end_date <= ? AND user_id = ?
 	`)
 	if err != nil {
 		tx.Rollback()
@@ -123,7 +125,7 @@ func deleteAgendaData(startDate string, endDate string, db *sql.DB) ([]LocalAgen
 	}
 	defer stmtDeleteAgenda.Close()
 
-	_, err = stmtDeleteAgenda.Exec(startDate, endDate)
+	_, err = stmtDeleteAgenda.Exec(startDate, endDate, user.ID)
 	if err != nil {
 		tx.Rollback()
 		Log.Error("DELETE AGENDA : " + err.Error())

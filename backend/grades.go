@@ -57,19 +57,21 @@ func DeleteGradesForYear(db *sql.DB, year string) error {
 	}
 	defer tx.Rollback() // En cas d'erreur, la transaction sera annulée
 
+	user, _ := GetUser(db)
+
 	// Supprimer d'abord les entrées dans GRADESVALUE
 	_, err = tx.Exec(`
         DELETE FROM GRADESVALUE
-        WHERE note_id IN (SELECT note_id FROM NOTES WHERE year = ?)
-    `, year)
+        WHERE note_id IN (SELECT note_id FROM NOTES WHERE year = ? AND user_id = ?)
+    `, year, user.ID)
 	if err != nil {
 		return fmt.Errorf("erreur lors de la suppression des GRADESVALUE : %v", err)
 	}
 
 	// Ensuite, supprimer les entrées dans NOTES
 	result, err := tx.Exec(`
-        DELETE FROM NOTES WHERE year = ?
-    `, year)
+        DELETE FROM NOTES WHERE year = ? AND user_id = ?
+    `, year, user.ID)
 	if err != nil {
 		Log.Infos(fmt.Sprintf("erreur lors de la suppression des NOTES : %v", err))
 	}
