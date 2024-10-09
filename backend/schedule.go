@@ -4,6 +4,7 @@ import (
 	. "MyGesClient/db"
 	. "MyGesClient/log"
 	. "MyGesClient/structures"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -88,7 +89,26 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 	}
 
 	// ---- Delete all data in AGENDA ---- //
-	tx, err := a.db.Begin()
+	_, err = deleteAgendaData(startDate, endDate, a.db)
+	if err != nil {
+		return nil, err
+	}
+
+	// ---- Add all data in AGENDA ---- //
+
+	SaveAgendaToDB(agenda, a.db)
+
+	// ---- Get all data in AGENDA ---- //
+
+	userAgenda, err := GetDBUserAgenda(a.db, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+	return userAgenda, nil
+}
+
+func deleteAgendaData(startDate string, endDate string, db *sql.DB) ([]LocalAgenda, error) {
+	tx, err := db.Begin()
 	if err != nil {
 		Log.Error(err.Error())
 	}
@@ -114,16 +134,6 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 	if err != nil {
 		Log.Error(err.Error())
 	}
-	
-	// ---- Add all data in AGENDA ---- //
 
-	SaveAgendaToDB(agenda, a.db)
-
-	// ---- Get all data in AGENDA ---- //
-
-	userAgenda, err := GetDBUserAgenda(a.db, startDate, endDate)
-	if err != nil {
-		return nil, err
-	}
-	return userAgenda, nil
+	return []LocalAgenda{}, nil
 }
