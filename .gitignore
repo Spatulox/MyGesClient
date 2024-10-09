@@ -6,5 +6,6 @@ frontend/wailsjs
 .idea
 .env
 config.json
+db.sqlite
 
 db.sqlite
