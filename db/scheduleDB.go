@@ -153,7 +153,9 @@ func SaveAgendaToDB(agenda string, db *sql.DB) {
 		Log.Error(err.Error())
 	}
 
-	Log.Infos("Données insérées avec succès")
+	if len(agendas) > 0 {
+		Log.Infos("Données insérées avec succès")
+	}
 }
 
 // ------------------------------------------------ //
