@@ -2,19 +2,25 @@ import {
     GetUserData,
     InitDiscordRPC,
     UpdateDiscordRPC,
-    GetStartStatus
+    GetGrades
 } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
 import {getMonday, getSaturday, getYear, wait} from "./functions";
 
 export async function start(){
 
+    // Check if :
+    // - The user exist
+    // - The user has accepted the EULA
+    // - Apply the Theme
+    const laStill = stillPopup("Login...")
     try {
         let user = await GetUserData();
         if (user === null || !user.Password) {
             buttonCancelConnection.style.visibility = "hidden"
             const connection = document.getElementById('connection')
             connection.classList.add('active')
+            stopStillPopup(laStill)
             return
         }
         // Check if the eula is accepted
@@ -43,31 +49,10 @@ export async function start(){
 
     } catch (error) {
         console.error("Erreur lors de la récupération des données utilisateur :", error);
+        stopStillPopup(laStill)
+        return
     }
-
-    try{
-        const year = getYear().toString()
-        const debut = getMonday().toISOString().split("T")[0]
-        const end = getSaturday().toISOString().split("T")[0]
-        let count = 0
-        let status = await GetStartStatus()
-        while(status === 0){
-            wait(5)
-            status = await GetStartStatus()
-            if(count >= 50){
-                stillPopup("Something wen wrong in the backend, try to restart the app")
-                break
-            }
-            count ++
-        }
-        if(status === -1){
-            stillPopup("Something went Wrong, plz restart")
-            return
-        }
-
-    } catch (e) {
-        popup("Erreur lors de la mise à jour des données utilisateur :" + e)
-    }
+    stopStillPopup(laStill)
 }
 
 async function connectDiscord(){
