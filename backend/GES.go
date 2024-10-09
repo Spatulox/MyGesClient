@@ -40,7 +40,7 @@ func checkDateFormat(date string) (string, error) {
 /*
  * Refresh the local DB by asking the MyGes DB, and store it inside the LocalDB
  */
-func (a *App) GlobalRefresh(year string, start string, end string) (string, error) {
+func (a *App) globalRefresh(year string, start string, end string) (string, error) {
 	_, err := a.RefreshAgenda(&start, &end)
 	if err != nil {
 		Log.Error(err.Error())
