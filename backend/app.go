@@ -104,7 +104,7 @@ func (a *App) Startup(ctx context.Context) {
 	msg, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
 	//msg, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
 	if err != nil {
-		Log.Error("Impossible to to a Global Refresh on Startup")
+		Log.Error(fmt.Sprintf("Impossible to to a Global Refresh on Startup : %v", err))
 		STARTFINISH = -1
 		return
 	}
