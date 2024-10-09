@@ -66,7 +66,9 @@ const NOTES = `CREATE TABLE IF NOT EXISTS NOTES (
     exam TEXT,
     trimestre INTEGER NOT NULL,
     year INTEGER NOT NULL,
-    teacher_name TEXT NOT NULL
+    teacher_name TEXT NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USER(user_id)
 );`
 
 const GRADESVALUE = `CREATE TABLE IF NOT EXISTS GRADESVALUE(

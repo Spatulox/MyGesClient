@@ -33,8 +33,8 @@ func SaveGradesToDB(grades string, db *sql.DB) {
 
 	// Préparer les requêtes
 	stmtNotes, err := tx.Prepare(`
-        INSERT INTO NOTES (bonus, coef, course_name, ects, exam, trimestre, year, teacher_name)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO NOTES (bonus, coef, course_name, ects, exam, trimestre, year, teacher_name, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
 	if err != nil {
 		Log.Error("Erreur lors de la préparation de la requête NOTES:", err)
@@ -42,8 +42,10 @@ func SaveGradesToDB(grades string, db *sql.DB) {
 	}
 	defer stmtNotes.Close()
 
+	user, _ := GetUser(db)
+
 	stmtGrades, err := tx.Prepare(`
-        INSERT INTO GRADESVALUE (note_id, grade_value)
+        INSERT OR REPLACE INTO GRADESVALUE (note_id, grade_value)
         VALUES (?, ?)
     `)
 	if err != nil {
@@ -69,6 +71,7 @@ func SaveGradesToDB(grades string, db *sql.DB) {
 			item.Trimester,
 			item.Year,
 			teacherName,
+			user.ID,
 		)
 		if err != nil {
 			Log.Error("Erreur lors de l'insertion dans NOTES:", err)
