@@ -4,6 +4,7 @@ import (
 	. "MyGesClient/api"
 	. "MyGesClient/log"
 	"database/sql"
+	"errors"
 	"fmt"
 )
 import . "MyGesClient/structures"
@@ -79,7 +80,19 @@ func (a *App) UpdateUserTheme(value string) (bool, error) {
 // ------------------------------------------------ //
 
 func (a *App) GetProfile() (string, error) {
-	return "coucku", nil
+	if FETCHINGPROFILE == 1 {
+		return createErrorMessage("Waiting for the previous profile fetch to end"), errors.New("Waiting for the previous profile fetch to end")
+	}
+	FETCHINGPROFILE = 1
+	defer func() { FETCHINGPROFILE = 0 }()
+	Log.Infos("Refreshing Profile")
+
+	api := a.api
+	if api == nil {
+		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil for RefreshProfile")
+	}
+
+	return api.GetProfile() // Retourne le profil via GESapi
 }
 
 func (a *App) GetYears() (string, error) {

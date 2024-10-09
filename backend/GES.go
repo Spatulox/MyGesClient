@@ -2,7 +2,6 @@ package backend
 
 import (
 	. "MyGesClient/log"
-	"errors"
 	"fmt"
 	"time"
 )
@@ -46,40 +45,19 @@ func (a *App) GlobalRefresh(year string, start string, end string) (string, erro
 	if err != nil {
 		Log.Error(err.Error())
 		return createErrorMessage("Impossible to refresh the schedule :/"), err
-	}
+	}*/
 	_, err := a.RefreshGrades(year)
 	if err != nil {
 		Log.Error(err.Error())
 		return createErrorMessage("Impossible to refresh grade :/"), err
 	}
-	_, err = a.RefreshAbsences()
+	/*_, err = a.RefreshAbsences()
 	if err != nil {
 		Log.Error(err.Error())
 		return createErrorMessage("Impossible to refresh the profile :/"), err
 	}*/
 
 	return createErrorMessage("Refresh finished !"), nil
-}
-
-// ------------------------------------------------ //
-
-/*
- * Refresh the Profile by asking the MyGes DB, and store it inside the LocalDB and send back the fresh datas
- */
-func (a *App) RefreshProfile() (string, error) {
-	if FETCHINGPROFILE == 1 {
-		return createErrorMessage("Waiting for the previous profile fetch to end"), errors.New("Waiting for the previous profile fetch to end")
-	}
-	FETCHINGPROFILE = 1
-	defer func() { FETCHINGPROFILE = 0 }()
-	Log.Infos("Refreshing Profile")
-
-	api := a.api
-	if api == nil {
-		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil for RefreshProfile")
-	}
-
-	return api.GetProfile() // Retourne le profil via GESapi
 }
 
 // ------------------------------------------------ //
