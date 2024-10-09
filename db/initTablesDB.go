@@ -66,8 +66,7 @@ const NOTES = `CREATE TABLE IF NOT EXISTS NOTES (
     exam TEXT,
     trimestre INTEGER NOT NULL,
     year INTEGER NOT NULL,
-    teacher_id INTEGER NOT NULL,
-    FOREIGN KEY (teacher_id) REFERENCES PROFS (teacher_id)
+    teacher_name TEXT NOT NULL
 );`
 
 const GRADESVALUE = `CREATE TABLE IF NOT EXISTS GRADESVALUE(
@@ -118,6 +117,7 @@ func initDBTables() {
 		Log.Error(fmt.Sprintf("Erreur lors de la création de la table agenda: %v\n", err))
 		return
 	}
+	Log.Infos("Table 'Notes' créée avec succès.")
 
 	if _, err := db.Exec(NOTES); err != nil {
 		Log.Error(fmt.Sprintf("Erreur lors de la création de la table notes: %v\n", err))
@@ -128,7 +128,7 @@ func initDBTables() {
 		Log.Error(fmt.Sprintf("Erreur lors de la création de la table gradesvalue: %v\n", err))
 		return
 	}
-	Log.Infos("Table 'Agenda' créée avec succès.")
+	Log.Infos("Table 'GradesValue' créée avec succès.")
 
 }
 
