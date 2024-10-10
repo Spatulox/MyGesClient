@@ -253,11 +253,11 @@
 }
 
 .main-content-dashboard .grades-header{
-    grid-template-columns: 2fr 1fr 2fr 1fr;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
 }
 .main-content-dashboard .grade-item {
     display: grid;
-    grid-template-columns: 2fr 1fr 2fr 1fr;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
     padding: 10px;
     align-items: center;
 }

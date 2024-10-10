@@ -72,12 +72,10 @@ async function recapGrades(gradesList, grades) {
 
             gradeElement.innerHTML = `
                 <span>${capitalizeFirstLetter(courseName)}</span>
-                <span>${grade.ects}</span>
                 <span>${grade.coef}</span>
                 <span>${grade.teacher_name}</span>
                 <span>${gradesHtml}</span>
                 <span>${examHtml}</span>
-                <span>${grade.bonus}</span>
             `;
 
             gradesList.appendChild(gradeElement);
