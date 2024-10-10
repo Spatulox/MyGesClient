@@ -367,6 +367,228 @@
 
 
 
-@media only screen and (max-width: 1500px) {
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.all-content{
+    width: 100%;
+}
+
+.container-dashboard {
+    display: flex;
+    min-height: 100vh;
+    position: relative; /* Permet aux éléments enfants d'utiliser un positionnement absolu par rapport à ce conteneur */
+}
+
+.main-content-dashboard {
+    flex-grow: 1;
+    display: flex; /* Utilisation de flexbox pour aligner les sections */
+    flex-direction: column; /* Colonne par défaut pour les petits écrans */
+}
+
+.main-content-dashboard .recapSection {
+    background-color: var(--card-bg);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.main-content-dashboard .recapSection > h2 {
+    margin-bottom: 9px;
+}
+
+.main-content-dashboard .schedule-section, .main-content-dashboard .summary-section {
+    width: inherit;
+    max-width: inherit;
+    margin: 10px;
+}
+
+.main-content-dashboard .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.main-content-dashboard .header > h2 {
+    margin: 0;
+}
+
+.main-content-dashboard h1,.main-content-dashboard h2 {
+    margin-top: 0;
+}
+
+.main-content-dashboard nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.main-content-dashboard nav button {
+    flex: 1;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    color: var(--text-color);
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.main-content-dashboard nav button:hover,
+.main-content-dashboard nav button.active {
+    background-color: var(--highlight-color);
+}
+
+/* Styles pour les sections de contenu */
+.main-content-dashboard #schedule-content,
+.main-content-dashboard #grades-content,
+.main-content-dashboard #absences-content {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.main-content-dashboard #schedule-content > h3 {
+    margin-top: 0;
+}
+
+.main-content-dashboard #scheduleParentBkgColor{
+    /*background-color: var(--card-bg);*/
+    background-color: var(--boxBackgroundColor);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.main-content-dashboard .course-item,
+.main-content-dashboard .grade-item,
+.main-content-dashboard .absence-item {
+    background-color: var(--bg-color);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.main-content-dashboard .course-item h3,
+.main-content-dashboard .grade-item h3,
+.main-content-dashboard .absence-item h3 {
+    margin-top: 0;
+    color: var(--highlight-color);
+}
+
+.main-content-dashboard .course-item p,
+.main-content-dashboard .grade-item p,
+.main-content-dashboard .absence-item p {
+    margin: 5px 0;
+}
+
+/* Styles pour les boutons de navigation de l'agenda */
+.main-content-dashboard .navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-left:auto; /* Aligne les boutons à droite */
+    width:auto; /* Ajuste la largeur automatiquement */
+    min-width: 104px;
+    height: 47px;
+}
+
+.main-content-dashboard .navigation-buttons button {
+    padding: 10px 17px;
+    background-color: var(--highlight-color);
+    border-radius: 5px;
+    border:none;
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+    font-size: 18px; /* Taille de la police pour les flèches */
+}
+
+.main-content-dashboard .navigation-buttons button:hover {
+    background-color:#4752c4; /* Couleur d'hover plus foncée */
+}
+
+.main-content-dashboard .navigation-buttons button.clicked {
+    animation: blob-animation 0.3s forwards; /* Animation lors du clic */
+}
+
+@keyframes blob-animation {
+    0% {
+        transform: scale(1); /* Taille normale */
+    }
+    50% {
+        transform: scale(0.9); /* Zoom */
+    }
+    100% {
+        transform: scale(1); /* Retour à la taille normale */
+    }
+}
+
+.news-banner {
+    height: 200px;
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 20px;
+    margin-bottom: 0;
+}
+
+
+/* Media Queries pour le responsive */
+@media screen and (min-width: 1000px) {
+    .container-dashboard {
+        flex-direction: row; /* Disposition en ligne sur les écrans plus larges */
+    }
+
+    .sidebar {
+        width: 250px; /* Largeur fixe pour la barre latérale */
+    }
+
+    .main-content-dashboard {
+        flex-direction: row; /* Reste en ligne sur les grands écrans */
+        align-items:flex-start; /* Aligne le contenu en haut des sections */
+    }
+
+    .main-content-dashboard .recapSection {
+        background-color: var(--boxBackgroundColor);
+        margin-bottom: 50px;
+    }
+
+    .main-content-dashboard .schedule-section {
+        width: 100%; /* Prend toute la largeur disponible */
+        max-width: 450px; /* Largeur maximale pour l'emploi du temps */
+        padding: 20px;
+    }
+
+    .main-content-dashboard .summary-section {
+        flex-grow: 1;
+        padding: 20px;
+    }
+
+    .main-content-dashboard .summary-section {
+        margin-left :20px ; /* Ajoute un espace entre l'emploi du temps et le résumé sur grand écran */
+    }
 }
