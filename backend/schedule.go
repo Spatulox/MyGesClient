@@ -14,29 +14,32 @@ import (
  * Public function to Get the Local Agenda
  */
 func (a *App) GetAgenda(start *string, end *string) ([]LocalAgenda, error) {
-
-	var startDate, endDate string
-	var startInt, endInt error
+	var startDate, endDate time.Time
+	var err error
 
 	if start != nil && end != nil {
-		startDate, startInt = checkDateFormat(*start)
-		endDate, endInt = checkDateFormat(*end)
-
-		if startInt != nil || endInt != nil {
-			return []LocalAgenda{}, errors.New("Impossible to parse date (start or end date in GetAgenda)")
+		startDate, err = parseAndAdjustDate(*start, true) // true pour début de journée
+		if err != nil {
+			return []LocalAgenda{}, fmt.Errorf("Impossible to parse start date: %v", err)
+		}
+		endDate, err = parseAndAdjustDate(*end, false) // false pour fin de journée
+		if err != nil {
+			return []LocalAgenda{}, fmt.Errorf("Impossible to parse end date: %v", err)
 		}
 	} else {
 		// Utiliser la semaine en cours si start ou end n'est pas fourni
 		now := time.Now()
-		monday := now.AddDate(0, 0, -int(now.Weekday())+1)
-		saturday := monday.AddDate(0, 0, 5)
-
-		startDate = monday.Format("2006-01-02T15:04:05.000Z")
-		endDate = saturday.Format("2006-01-02T15:04:05.000Z")
+		startDate = now.AddDate(0, 0, -int(now.Weekday())+1) // Lundi de la semaine courante
+		startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.Local)
+		endDate = startDate.AddDate(0, 0, 5) // Samedi
+		endDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 0, 0, 0, time.Local)
 	}
 
-	println(startDate, endDate)
-	return GetDBUserAgenda(a.db, startDate, endDate)
+	startDateStr := startDate.Format("2006-01-02T15:04:05.000Z")
+	endDateStr := endDate.Format("2006-01-02T15:04:05.000Z")
+
+	//println(startDateStr, endDateStr)
+	return GetDBUserAgenda(a.db, startDateStr, endDateStr)
 }
 
 /*
@@ -138,4 +141,34 @@ func deleteAgendaData(startDate string, endDate string, db *sql.DB) ([]LocalAgen
 	}
 
 	return []LocalAgenda{}, nil
+}
+
+func parseAndAdjustDate(dateStr string, isStart bool) (time.Time, error) {
+	// Essayer de parser la date dans différents formats
+	layouts := []string{
+		"2006-01-02T15:04:05.000Z",
+		"2006-01-02",
+		"2006-01-02T15:04:05Z",
+		// Ajoutez d'autres formats si nécessaire
+	}
+
+	var parsedTime time.Time
+	var err error
+
+	for _, layout := range layouts {
+		parsedTime, err = time.Parse(layout, dateStr)
+		if err == nil {
+			break
+		}
+	}
+
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	// Ajuster l'heure selon qu'il s'agit de la date de début ou de fin
+	if isStart {
+		return time.Date(parsedTime.Year(), parsedTime.Month(), parsedTime.Day(), 0, 0, 0, 0, time.Local), nil
+	}
+	return time.Date(parsedTime.Year(), parsedTime.Month(), parsedTime.Day(), 23, 0, 0, 0, time.Local), nil
 }
