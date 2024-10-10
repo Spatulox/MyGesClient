@@ -10,7 +10,6 @@ import (
 )
 
 func (a *App) GetGrades(year string) ([]LocalGrades, error) {
-	Log.Infos(fmt.Sprintf("%s", year))
 	return GetDBUserGrades(year, a.db)
 }
 
