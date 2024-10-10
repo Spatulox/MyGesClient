@@ -3,6 +3,7 @@
     --mainPartWidth: 85%;
     --mainPartHeight: 90vh;
     --headerPartHeight: 10vh;
+    --bg-color: #36393f;
 }
 
 .light{
@@ -11,11 +12,17 @@
 	--colorMain: #9F9E9E;
     --policeColor : white;
     --mainPoliceColor : black;
-    /* --popupColor : rgb(168, 168, 168);
-    --boxBackgroundColor : #a8a8a8; */
-    
+
     --popupColor : #364156;
     --boxBackgroundColor : #536483;
+
+    /*Même couleur que Dark, mais ca doit changer*/
+    --sidebar-color: #2f3136;
+    --text-color: #dcddde;
+    --highlight-color: #396aa1;
+    --card-bg: #40444b;
+    --hover-bg: #454950;
+    /*Fin des même couleur*/
 
     transition: all ease-in-out 0.5s;
 
@@ -27,13 +34,15 @@
 	--colorMain: #1D1D1D;
     --policeColor : white;
     --mainPoliceColor : white;
+
     --popupColor : grey;
     --boxBackgroundColor : rgb(104, 104, 104);
 
-
-    /* --rightPartColor: #2d3943;
-    --popupColor : #2d3943;
-    --boxBackgroundColor : rgb(81, 104, 122); */
+    --sidebar-color: #2f3136;
+    --text-color: #dcddde;
+    --highlight-color: #396aa1;
+    --card-bg: #40444b;
+    --hover-bg: #454950;
 
     transition: all ease-in-out 0.5s;
 }
