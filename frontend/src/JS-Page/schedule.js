@@ -1,5 +1,5 @@
 import { CheckXTimeInternetConnection, GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
-import {capitalizeFirstLetter, log} from "../JS/functions";
+import {capitalizeFirstLetter, getMonday, getSaturday, log} from "../JS/functions";
 
 
 function printReservations(reservations) {
@@ -40,28 +40,21 @@ function printReservations(reservations) {
 
 
 export async  function schedule(){
-    const laStillPopup =  stillPopup('Connecting to myGes api')
-
-    try{
-        if(!(await CheckXTimeInternetConnection(5))){
-            log('Definitely no Internet connection')
-            popup('No internet connection')
-            stopStillPopup(laStillPopup)
-        }
-    } catch (e) {
-        popup(e)
-        stopStillPopup(laStillPopup)
-        return
-    }
-
-    editStillPopup(laStillPopup, 'Refreshing Schedule')
 
     // Get the full week schedule
+    const monday = getMonday()
+    const saturday = getSaturday()
+    const agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+    const calendarGrid = document.getElementById("calendar-grid")
+
+    if(agenda){
+        printSchedule(agenda, calendarGrid)
+    }
+
 
     try{
         const agendaBeta = await GetAgenda("2024-09-23", "2024-09-28")
-        console.log(agendaBeta)
-        //printReservations(agendaBeta)
+        printSchedule(agendaBeta, calendarGrid)
     } catch (e) {
         popup(e)
         stopStillPopup(laStillPopup)
@@ -71,19 +64,63 @@ export async  function schedule(){
     stopStillPopup(laStillPopup)
 }
 
+
+async function printSchedule(agenda, calendarGrid) {
+    // Trier l'agenda par date de début
+    agenda.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+
+    // Grouper les événements par jour
+    const groupedAgenda = agenda.reduce((acc, event) => {
+        const date = new Date(event.start_date).toDateString();
+        if (!acc[date]) {
+            acc[date] = [];
+        }
+        acc[date].push(event);
+        return acc;
+    }, {});
+
+    // Vider le contenu existant
+    calendarGrid.innerHTML = '';
+
+    // Créer un élément pour chaque jour et le remplir
+    for (const [date, events] of Object.entries(groupedAgenda)) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'day-column';
+
+        // Créer un en-tête pour le jour
+        const dateObj = new Date(date);
+        const dateHeader = document.createElement('h2');
+        dateHeader.textContent = capitalizeFirstLetter(dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
+        dayElement.appendChild(dateHeader);
+
+        // Créer un conteneur pour les événements du jour
+        const eventsContainer = document.createElement('div');
+        //eventsContainer.className = 'course-card';
+
+        // Utiliser updateSchedule pour remplir les événements du jour
+        await updateSchedule(events, eventsContainer, false);
+
+        dayElement.appendChild(eventsContainer);
+        calendarGrid.appendChild(dayElement);
+    }
+}
+
+
 /*
     Is used to fill the schedule in dashboard.html and schedule.html
  */
-export async function updateSchedule(agenda, finalHtmlElement) {
+export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = true) {
     const now = new Date();
     const isAfter6PM = now.getHours() >= 18;
     const scheduleDate = isAfter6PM ? new Date(now.setDate(now.getDate() + 1)) : now;
 
-    finalHtmlElement.innerHTML = `<h3>${capitalizeFirstLetter(scheduleDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
+    if(printCurrDate){
+        finalHtmlElement.innerHTML = `<h3>${capitalizeFirstLetter(scheduleDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
+    }
 
     agenda.forEach(course => {
         const courseElement = document.createElement('div');
-        courseElement.className = 'course-item';
+        courseElement.className = 'course-card';
         let courseName = course.agenda_name.includes("S1") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 -") ? course.agenda_name.split("S2 - ") : course.agenda_name)
         courseName = capitalizeFirstLetter(courseName)
         courseElement.innerHTML = `
