@@ -23,7 +23,7 @@
     margin: 5% 10%;
     background-color: rgb(15, 102, 102);
     background-color: var(--boxBackgroundColor);
-    border-radius: 20px 20px 20px 20px;
+    border-radius: 5px;
     transition: all ease-in-out, 0.5s;
 }
 
@@ -86,7 +86,7 @@
 
     margin: 10px 0px;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 5px;
     max-height: 125px;
     overflow: hidden;
 
@@ -104,7 +104,7 @@
     max-height: 60px;
     overflow: hidden;
 
-    border-radius: 10px;
+    border-radius: 5px;
 
     transition: all ease-in-out, 0.5s;
 }
@@ -233,6 +233,10 @@
 
 .padding10{
     padding: 10px;
+}
+
+.paddingTop70{
+    padding-top: 70px;
 }
 
 .pointer{
