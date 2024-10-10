@@ -252,6 +252,10 @@
     transition: all ease-in-out 0.3s;
 }
 
+#firstTime{
+    margin-top: 0;
+}
+
 #normalpopup > div{
     position: absolute;
     z-index: 2409;
@@ -299,7 +303,8 @@
 }
 
 #replace{
-    min-height: 100%;
+    /*min-height: 100%;*/
+    height: calc(100% - 70px)
 }
 
 #semester1 h1, #semester2 h1{
