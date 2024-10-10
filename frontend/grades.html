@@ -8,8 +8,13 @@
             <button>Absences</button>
         </nav>
     </div> -->
+
     <div class="main-content-grades">
         <h2>Mes Notes</h2>
+        <div class="semester-tabs">
+            <button class="tab-button active" data-semester="1">Semestre 1</button>
+            <button class="tab-button" data-semester="2">Semestre 2</button>
+        </div>
         <div class="grades-container">
             <div class="grades-header">
                 <span>Cours</span>
@@ -20,8 +25,11 @@
                 <span>Exam</span>
                 <span>Bonus</span>
             </div>
-            <div id="grades-list">
-                <!-- Les notes seront insérées ici -->
+            <div id="grades-list-semester-1" class="grades-list active">
+                <!-- Les notes du premier semestre seront insérées ici -->
+            </div>
+            <div id="grades-list-semester-2" class="grades-list">
+                <!-- Les notes du deuxième semestre seront insérées ici -->
             </div>
         </div>
     </div>
