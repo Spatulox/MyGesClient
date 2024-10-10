@@ -1,5 +1,5 @@
 import { CheckXTimeInternetConnection, GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
-import { log } from "../JS/functions";
+import {capitalizeFirstLetter, log} from "../JS/functions";
 
 
 function printReservations(reservations) {
@@ -56,15 +56,7 @@ export async  function schedule(){
 
     editStillPopup(laStillPopup, 'Refreshing Schedule')
 
-    /*try{
-        const agendaBeta = await RefreshAgenda("2024-09-23", "2024-09-28")
-        console.log(agendaBeta)
-        //printReservations(agendaBeta)
-    } catch (e) {
-        popup(e)
-        stopStillPopup(laStillPopup)
-        return
-    }*/
+    // Get the full week schedule
 
     try{
         const agendaBeta = await GetAgenda("2024-09-23", "2024-09-28")
@@ -77,8 +69,62 @@ export async  function schedule(){
     }
 
     stopStillPopup(laStillPopup)
-    /*const agenda = await GetAgenda("2024-10-21", "2024-10-25");
-    //console.log(agenda);
-    printReservations(agenda)
-    stopStillPopup(laStillPopup)*/
 }
+
+/*
+    Is used to fill the schedule in dashboard.html and schedule.html
+ */
+export async function updateSchedule(agenda, finalHtmlElement) {
+    const now = new Date();
+    const isAfter6PM = now.getHours() >= 18;
+    const scheduleDate = isAfter6PM ? new Date(now.setDate(now.getDate() + 1)) : now;
+
+    finalHtmlElement.innerHTML = `<h3>${capitalizeFirstLetter(scheduleDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
+
+    agenda.forEach(course => {
+        const courseElement = document.createElement('div');
+        courseElement.className = 'course-item';
+        let courseName = course.agenda_name.includes("S1") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 -") ? course.agenda_name.split("S2 - ") : course.agenda_name)
+        courseName = capitalizeFirstLetter(courseName)
+        courseElement.innerHTML = `
+            <h3>${courseName}</h3>
+            <p>${course.start_date.split('T')[1].substring(0, 5)} - ${course.end_date.split('T')[1].substring(0, 5)}</p>
+            <p>Prof: ${course.discipline.Teacher.teacher}</p>
+            <p>Salle: ${course.room.name} (${course.room.campus})</p>
+            <p>Type: ${course.type}</p>
+            <p>Modalité: ${course.modality}</p>
+        `;
+        finalHtmlElement.appendChild(courseElement);
+    });
+}
+
+/*export async function updateGrades(grades, finalHtmlElement) {
+    grades.forEach(grade => {
+        const gradeElement = document.createElement('div');
+        gradeElement.className = 'grade-item';
+        gradeElement.innerHTML = `
+            <h3>${grade.discipline.name}</h3>
+            <p>Note: ${grade.grade}/20</p>
+            <p>Coefficient: ${grade.discipline.coef || 'N/A'}</p>
+            <p>Professeur: ${grade.discipline.teacher.teacher_name}</p>
+        `;
+        finalHtmlElement.appendChild(gradeElement);
+    });
+}*/
+
+/*export async function updateAbsences(absences, finalHtmlElement) {
+    absences.forEach(absence => {
+        const absenceElement = document.createElement('div');
+        absenceElement.className = 'absence-item';
+        absenceElement.innerHTML = `
+            <h3>${absence.course_name}</h3>
+            <p>Date: ${new Date(absence.date).toLocaleDateString('fr-FR')}</p>
+            <p>Raison: ${absence.reason || 'Non spécifiée'}</p>
+        `;
+        finalHtmlElement.appendChild(absenceElement);
+    });
+}*/
+
+/*updateSchedule();
+updateGrades();
+updateAbsences();*/
