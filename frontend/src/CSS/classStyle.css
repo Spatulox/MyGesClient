@@ -397,12 +397,14 @@
     width: 100%;
 }
 
-.container-dashboard {
+.container-dashboard, .container-schedule {
     display: flex;
-    /*min-height: 100vh;*/
-    /*height: calc(100% - 70px);*/
     height: 90%;
     position: relative; /* Permet aux éléments enfants d'utiliser un positionnement absolu par rapport à ce conteneur */
+}
+
+.container-schedule, .main-content-schedule, .calendar-header{
+    width: 100%;
 }
 
 .main-content-dashboard {
@@ -541,6 +543,95 @@
 .main-content-dashboard .navigation-buttons button.clicked {
     animation: blob-animation 0.3s forwards; /* Animation lors du clic */
 }
+
+
+
+.main-content-schedule {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.main-content-schedule h1, .main-content-schedule, h2 {
+    margin-top: 0;
+}
+
+.main-content-schedule .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.main-content-schedule .calendar-header button {
+    background-color: var(--card-bg);
+    border: none;
+    color: var(--text-color);
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.main-content-schedule #calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.main-content-schedule .day-column {
+    background-color: var(--sidebar-color);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.main-content-schedule .day-header {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: var(--highlight-color);
+    border-radius: 5px;
+}
+
+.main-content-schedule .course-card {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.main-content-schedule .course-card h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: var(--highlight-color);
+}
+
+.main-content-schedule .course-card p {
+    margin: 2px 0;
+    font-size: 0.9em;
+}
+
+.main-content-schedule .course-type {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.main-content-schedule .upcoming-courses ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.main-content-schedule .upcoming-courses li {
+    background-color: var(--card-bg);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+
+
+
 
 @keyframes blob-animation {
     0% {

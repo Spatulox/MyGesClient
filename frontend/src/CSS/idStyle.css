@@ -171,15 +171,22 @@
 /*Others*/
 
 #allContainerDashboard{
-    /*height: var(--mainPartHeight);
-    height: 100%;*/
     box-sizing: border-box;
 }
 
-#allContainerAbsences{
+#allContainerAbsences, #allContainerSchedule{
     box-sizing: border-box;
     min-width: 80%;
     max-width: var(--mainPartWidth);
+    margin-top: 0;
+}
+
+#allContainerSchedule{
+    transform: translateY(-30px);
+    min-width: 98%;
+    max-width: var(--mainPartWidth);
+    margin: auto;
+    margin-bottom: 70px;
 }
 
 #allContainerAbsences div{
