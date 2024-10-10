@@ -222,7 +222,7 @@
     background-color: var(--card-bg);
     border-radius: 5px;
     display: flex;
-    height: 81%;
+    height: 80%;
     overflow: auto;
     flex-direction: column;
     max-height: 70vh;
