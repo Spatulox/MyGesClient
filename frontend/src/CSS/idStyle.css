@@ -171,8 +171,8 @@
 /*Others*/
 
 #allContainerDashboard{
-    height: var(--mainPartHeight);
-    height: 100%;
+    /*height: var(--mainPartHeight);
+    height: 100%;*/
     box-sizing: border-box;
 }
 
@@ -189,6 +189,78 @@
 #allContainerAbsences div div{
     max-width: 220px;
 }
+
+
+#allGradesContainer {
+    height: 90%;
+    display: flex;
+}
+
+#allGradesContainer h1, #allGradesContainer h2 {
+    margin-top: 0;
+}
+
+#allGradesContainer nav button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: transparent;
+    border: none;
+    color: var(--text-color);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#allGradesContainer nav button:hover, nav button.active {
+    background-color: var(--highlight-color);
+    border-radius: 5px;
+}
+
+#allGradesContainer .grades-container {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#allGradesContainer .grades-header, #allGradesContainer .grade-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 2fr 1fr 1fr 1fr;
+    padding: 10px;
+    align-items: center;
+}
+
+#allGradesContainer .grades-header {
+    font-weight: bold;
+    background-color: var(--highlight-color);
+}
+
+#allGradesContainer .grade-item{
+
+}
+
+#allGradesContainer .grade-item:last-child {
+    border-bottom: none;
+}
+
+#allGradesContainer .grade-item:hover {
+    background-color: var(--hover-bg);
+}
+
+#allGradesContainer .grade-item span {
+    padding: 5px;
+}
+
+#allGradesContainer .grade-notes {
+    display: flex;
+    flex-direction: column;
+}
+
+#allGradesContainer .grade-notes span {
+    margin-bottom: 2px;
+}
+
 
 #connection{
     z-index: 2407;
