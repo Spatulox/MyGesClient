@@ -41,6 +41,9 @@ function printReservations(reservations) {
 
 export async  function schedule(){
 
+    const replace = document.getElementById("replace")
+    replace.style.height = "auto"
+
     // Get the full week schedule
     const monday = getMonday()
     const saturday = getSaturday()

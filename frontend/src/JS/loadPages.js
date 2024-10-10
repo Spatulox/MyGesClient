@@ -17,6 +17,10 @@ export async function loadPageGo(string, event = null){
     const mainPart = document.getElementById("replace")
     const headerTitle = document.getElementById("headerTitle")
 
+    // Remove all hard style applyied in functions corresponding to files
+    const replace = document.getElementById("replace")
+    replace.style = ""
+
     try {
         mainPart.innerHTML = await GetPageContent(string)
         updatePages(string.split(".html")[0])

@@ -45,7 +45,7 @@
 }
 
 #plusAddEvent{
-    background-color: var(--mainPartColor);
+    background-color: var(--colorMain);
     color: var(--mainPoliceColor);
     width: 80px;
     height: 80px;
@@ -186,7 +186,6 @@
     min-width: 98%;
     max-width: var(--mainPartWidth);
     margin: auto;
-    margin-bottom: 70px;
 }
 
 #allContainerAbsences div{
