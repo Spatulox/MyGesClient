@@ -1,9 +1,44 @@
-<h1 class="box width80" id="firstTime">Is this your first time connecting with this client? Please wait while we retrieve your information.</h1>
-<div id="allContainerDashboard" class="flex flexCenter wrap marginTop10 marginBottom10">
-    <div id="currAgenda" class="flex flexCenter box noMargin">What a strange place... But it might load</div>
-    <div id="containerAbsencesGrades" class="flex flexStart wrap">
-        <div id="recapEvent" class="box width100">Mmmmmh'</div>
-        <div id="recapAbsences" class="box width100">Seem's something has broke ? Or nothing into the database...</div>
-        <div id="recapGrades" class="box width100">Hopefully it's just the loading page wich take time....  Or nothing into the database... or no database... Who knows ¯\_(ツ)_/¯</div>
+<div class="container-dashboard">
+    <div class="all-content">
+        <!--<div class="news-banner">
+            &lt;!&ndash; Les nouvelles seront insérées ici &ndash;&gt;
+            <p>Bienvenue sur votre dashboard étudiant ! N'oubliez pas de vérifier vos notes et absences.</p>
+        </div>-->
+
+        <div class="main-content-dashboard">
+            <div class="schedule-section">
+                <div id="scheduleParentBkgColor">
+                    <div class="header">
+                        <h2>Emploi du temps du jour</h2>
+                        <div class="navigation-buttons">
+                            <button id="backward-button">&#9664;</button> <!-- Flèche gauche -->
+                            <button id="forward-button">&#9654;</button>  <!-- Flèche droite -->
+                        </div>
+                    </div>
+                    <div id="schedule-content"></div>
+                </div>
+            </div>
+            <div class="summary-section">
+                <div class="recapSection">
+                    <h2>Récapitulatif des notes</h2>
+                    <div class="grades-container">
+                        <div class="grades-header">
+                            <span>Cours</span>
+                            <span>Coef</span>
+                            <span>Professeur</span>
+                            <span>Notes</span>
+                            <span>Bonus</span>
+                        </div>
+                        <div id="grades-content"></div>
+                    </div>
+                </div>
+
+                <div class="recapSection">
+                    <h2>Récapitulatif des absences</h2>
+                    <div id="absences-content"></div>
+                </div>
+
+            </div>
+        </div>
     </div>
 </div>
