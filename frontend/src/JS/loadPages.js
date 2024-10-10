@@ -8,6 +8,7 @@ import {GetPageContent, UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
 // They are used
 import {dashboard} from "../JS-Page/dashbord.js";
 import {schedule} from "../JS-Page/schedule";
+import {grades} from "../JS-Page/grades";
 
 export async function loadPageGo(string, event = null){
 
@@ -47,6 +48,9 @@ function updatePages(pages){
             break
         case 'schedule':
             schedule()
+            break
+        case 'grades':
+            grades()
             break
     }
 

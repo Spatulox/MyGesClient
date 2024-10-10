@@ -4,6 +4,7 @@ import (
 	. "MyGesClient/db"
 	. "MyGesClient/log"
 	. "MyGesClient/structures"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -57,8 +58,11 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		endDate, endInt = checkDateFormat(*end)
 
 		if startInt != nil || endInt != nil {
+			fmt.Printf("start : %s, end : %s\n", *start, *end)
+			fmt.Printf("erreur startInt %v\n erreur end int %v\n", startInt, endInt)
 			return nil, errors.New("Impossible to parse date (start or end date in RefreshAgenda in if)")
 		}
+
 	} else {
 		// Utiliser la semaine en cours si start ou end n'est pas fourni
 		now := time.Now()
@@ -85,26 +89,9 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 	}
 
 	// ---- Delete all data in AGENDA ---- //
-	tx, err := a.db.Begin()
+	_, err = deleteAgendaData(startDate, endDate, a.db)
 	if err != nil {
-		Log.Error(err.Error())
-	}
-
-	stmtDeleteAgenda, err := tx.Prepare(`
-		DELETE FROM AGENDA WHERE start_date >= ? AND end_date <= ?
-	`)
-	if err != nil {
-		tx.Rollback()
-		Log.Error(err.Error())
-		return nil, nil
-	}
-	defer stmtDeleteAgenda.Close()
-
-	_, err = stmtDeleteAgenda.Exec(startDate, endDate)
-	if err != nil {
-		tx.Rollback()
-		Log.Error("DELETE AGENDA : " + err.Error())
-		return nil, nil
+		return nil, err
 	}
 
 	// ---- Add all data in AGENDA ---- //
@@ -118,4 +105,37 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		return nil, err
 	}
 	return userAgenda, nil
+}
+
+func deleteAgendaData(startDate string, endDate string, db *sql.DB) ([]LocalAgenda, error) {
+	tx, err := db.Begin()
+	if err != nil {
+		Log.Error(err.Error())
+	}
+
+	user, _ := GetUser(db)
+
+	stmtDeleteAgenda, err := tx.Prepare(`
+		DELETE FROM AGENDA WHERE start_date >= ? AND end_date <= ? AND user_id = ?
+	`)
+	if err != nil {
+		tx.Rollback()
+		Log.Error(err.Error())
+		return nil, nil
+	}
+	defer stmtDeleteAgenda.Close()
+
+	_, err = stmtDeleteAgenda.Exec(startDate, endDate, user.ID)
+	if err != nil {
+		tx.Rollback()
+		Log.Error("DELETE AGENDA : " + err.Error())
+		return nil, nil
+	}
+	// Valider la transaction
+	err = tx.Commit()
+	if err != nil {
+		Log.Error(err.Error())
+	}
+
+	return []LocalAgenda{}, nil
 }

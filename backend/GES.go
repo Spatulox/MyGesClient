@@ -40,22 +40,22 @@ func checkDateFormat(date string) (string, error) {
 /*
  * Refresh the local DB by asking the MyGes DB, and store it inside the LocalDB
  */
-func (a *App) GlobalRefresh(year string, start string, end string) (string, error) {
-	/*_, err := a.RefreshAgenda(&start, &end)
+func (a *App) globalRefresh(year string, start string, end string) (string, error) {
+	_, err := a.RefreshAgenda(&start, &end)
 	if err != nil {
 		Log.Error(err.Error())
 		return createErrorMessage("Impossible to refresh the schedule :/"), err
-	}*/
-	_, err := a.RefreshGrades(year)
+	}
+	_, err = a.RefreshGrades(year)
 	if err != nil {
 		Log.Error(err.Error())
 		return createErrorMessage("Impossible to refresh grade :/"), err
 	}
-	/*_, err = a.RefreshAbsences()
+	_, err = a.RefreshAbsences(year)
 	if err != nil {
 		Log.Error(err.Error())
 		return createErrorMessage("Impossible to refresh the profile :/"), err
-	}*/
+	}
 
 	return createErrorMessage("Refresh finished !"), nil
 }

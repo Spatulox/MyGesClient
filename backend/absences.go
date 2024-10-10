@@ -26,7 +26,7 @@ func (a *App) RefreshAbsences(year string) ([]Absences, error) {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshGrades")
 	}
 
-	grades, err := api.GetGrades(year)
+	grades, err := api.GetAbsences(year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
 	}

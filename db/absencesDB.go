@@ -5,7 +5,7 @@ import . "MyGesClient/structures"
 import . "MyGesClient/log"
 
 func SaveAbsencesToDB(grades string, db *sql.DB) {
-	print("Saving Absences to DB")
+	Log.Infos("Saving Absences to DB")
 }
 
 func GetDBUserAbsences(year string, db *sql.DB) ([]Absences, error) {

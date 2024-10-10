@@ -3,6 +3,7 @@ package backend
 import (
 	. "MyGesClient/api"
 	. "MyGesClient/log"
+	. "MyGesClient/time"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -44,6 +45,17 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 	}
 	a.user = userLocal
 	Log.Infos("Your datas have beed correctely saved")
+
+	// Doing a GlobalRefresh to hav data stored
+	year := GetCurrentYear()
+	monday, saturday := GetWeekDates()
+	refresh, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+	//refresh, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
+	if err != nil {
+		return createErrorMessage("Error when fetching your datas :/"), err
+	}
+	println(refresh)
+
 	return createErrorMessage("Your datas have been correctely saved"), nil
 }
 

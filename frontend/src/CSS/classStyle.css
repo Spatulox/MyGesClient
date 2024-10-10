@@ -23,7 +23,7 @@
     margin: 5% 10%;
     background-color: rgb(15, 102, 102);
     background-color: var(--boxBackgroundColor);
-    border-radius: 20px 20px 20px 20px;
+    border-radius: 5px;
     transition: all ease-in-out, 0.5s;
 }
 
@@ -72,13 +72,21 @@
     align-items: center;
 }
 
+.grades-list {
+    display: none;
+}
+
+.grades-list.active {
+    display: block;
+}
+
 .lesson{
     background-color: white;
     color: black;
 
     margin: 10px 0px;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 5px;
     max-height: 125px;
     overflow: hidden;
 
@@ -96,7 +104,7 @@
     max-height: 60px;
     overflow: hidden;
 
-    border-radius: 10px;
+    border-radius: 5px;
 
     transition: all ease-in-out, 0.5s;
 }
@@ -173,6 +181,12 @@
     padding-left: 0px;
 }
 
+.main-content-grades {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
 .marginAuto{
     margin: auto;
 }
@@ -221,6 +235,10 @@
     padding: 10px;
 }
 
+.paddingTop70{
+    padding-top: 70px;
+}
+
 .pointer{
     cursor: pointer;
 }
@@ -233,7 +251,7 @@
 
     box-shadow: -2px 2px 5px #000000;
 
-    border-radius: 10px;    
+    border-radius: 5px;
     padding: 10px;
     background-color: var(--popupColor);
     color : var(--policeColor);
@@ -241,6 +259,43 @@
     animation: popupSlideDown 0.3s ease-out forwards;
 }
 
+.semester-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-color);
+    padding: 20px;
+}
+
+
+.tab-button {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    background-color: #2f3136;
+    color: #dcddde;
+}
+
+.tab-button:hover {
+    background-color: #36393f;
+}
+
+.tab-button.active {
+    background-color: var(--highlight-color);
+    color: #ffffff;
+}
+
+.tab-button.active:hover {
+    background-color: #4752c4;
+}
 
 .textCenter{
     text-align: center;
