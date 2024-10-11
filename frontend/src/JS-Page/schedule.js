@@ -1,5 +1,5 @@
-import { CheckXTimeInternetConnection, GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
-import {capitalizeFirstLetter, getMonday, getSaturday, log} from "../JS/functions";
+import { GetAgenda, SaveEvents } from "../../wailsjs/go/backend/App";
+import {capitalizeFirstLetter, getDateInfo, getMonday, getSaturday, log} from "../JS/functions";
 
 let addButton
 
@@ -9,6 +9,9 @@ async function initCreateEvent(){
     const createEventBtn = document.getElementById('create-btn');
     const eventForm = document.getElementById('event-form');
     const overlay = document.getElementById('overlay');
+
+    const prevWeek = document.getElementById("prev-week")
+    const nextWeek = document.getElementById("next-week")
 
     addButton.addEventListener('click', () => {
         addButton.classList.remove("initial")
@@ -21,9 +24,67 @@ async function initCreateEvent(){
         closeModal();
     });
 
-    createEventBtn.addEventListener('click', (e) => {
+    createEventBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         // Handle event creation here
+        let eventName = document.getElementById("event-name")
+        let eventDescription = document.getElementById("event-description")
+        let eventStart = document.getElementById("event-start")
+        let eventEnd = document.getElementById("event-end")
+        let eventColor = document.getElementById("event-color")
+
+        if(!eventName?.value.trim()){
+            popup("Vous devez spécifier un nom pour l'évènement")
+            return
+        }
+
+        if(!eventStart?.value){
+            popup("Vous devez spécifier une date de début pour l'évènement")
+            return
+        }
+
+        if(!eventEnd?.value){
+            popup("Vous devez spécifier une date de fin pour l'évènement")
+            return
+        }
+
+        if(!eventColor?.value){
+            popup("Vous devez spécifier une couleur pour l'évènement")
+            return
+        }
+
+        const today = new Date();
+        const startDate = new Date(eventStart.value);
+        const endDate = new Date(eventEnd.value);
+
+        if( startDate <= today){
+            popup("La date de début doit se situer dans le futur")
+            return
+        }
+
+        if( endDate <= startDate ){
+            popup("La date de fin doit se situer dans le futur")
+            return
+        }
+
+        if( endDate <= startDate ){
+            popup("La date de fin doit être après la date de début")
+            return
+        }
+
+        if( endDate === startDate ){
+            popup("La date de début et de fin doivent être différente")
+            return
+        }
+
+        try{
+            await SaveEvents(eventName.value.trim(), eventDescription?.value, startDate.toISOString(), endDate.toISOString(), eventColor.value)
+        } catch (e) {
+            popup(e)
+            return
+        }
+
+        popup("Évènement sauvegardé avec succès")
 
         // If event successfully created
         closeModal();
@@ -45,6 +106,13 @@ async function initCreateEvent(){
             closeModal();
         }
     });
+
+    prevWeek.addEventListener("click", ()=>{
+        popup("Not Bound")
+    })
+    nextWeek.addEventListener("click", ()=>{
+        popup("Not Bound")
+    })
 }
 
 function closeModal() {
@@ -68,16 +136,33 @@ export async  function schedule(){
 
     initCreateEvent()
 
-    // Get the full week schedule
-    const monday = getMonday()
-    const saturday = getSaturday()
-    const agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
-    const calendarGrid = document.getElementById("calendar-grid")
-
-
     try{
-        const agendaBeta = await GetAgenda("2024-09-23", "2024-09-28")
-        printSchedule(agendaBeta, calendarGrid)
+        // Get the full week schedule
+        const monday = getMonday()
+        const saturday = getSaturday()
+        const agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+        const calendarGrid = document.getElementById("calendar-grid")
+        const currentWeek = document.getElementById("current-week")
+
+        // Créer un formateur de date pour le jour de la semaine
+        const weekdayFormatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'long' });
+
+        // Créer un formateur de date pour le jour et le mois
+        const dateFormatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' });
+
+        // Formater les dates
+        const mondayFormatted = `${weekdayFormatter.format(monday)} ${dateFormatter.format(monday)}`;
+        const saturdayFormatted = `${weekdayFormatter.format(saturday)} ${dateFormatter.format(saturday)}`;
+
+        // Mettre à jour le texte
+        currentWeek.textContent = `${capitalizeFirstLetter(mondayFormatted)} --- ${capitalizeFirstLetter(saturdayFormatted)}`;
+
+        //const agendaBeta = await GetAgenda("2024-09-23", "2024-09-28")
+        if(agenda){
+            printSchedule(agenda, calendarGrid)
+        } else {
+            calendarGrid.innerHTML = "<div class='day-column'>Nothing to show</div>"
+        }
     } catch (e) {
         popup(e)
     }
