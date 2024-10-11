@@ -32,6 +32,57 @@
     position: absolute;
 }
 
+.events-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.event-card {
+    background-color: #2f3136;
+    border-radius: 8px;
+    padding: 16px;
+    /*width: 300px;*/
+    /*width: 287px;*/
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-left: 4px solid;
+    width: 40%;
+    max-width: 287px;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.event-name {
+    color: #ffffff;
+    font-size: 18px;
+    margin: 0;
+}
+
+.event-date {
+    color: #b9bbbe;
+    font-size: 14px;
+}
+
+.event-description {
+    color: #dcddde;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.event-time {
+    color: #b9bbbe;
+    font-size: 14px;
+}
+
+.event-time i {
+    margin-right: 4px;
+}
+
 .lessonClosePNG{
     transform: translateX(190px);
 }
@@ -365,34 +416,6 @@
     flex-wrap: wrap;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .all-content{
     width: 100%;
 }
@@ -415,7 +438,7 @@
 }
 
 .main-content-dashboard .recapSection {
-    background-color: var(--card-bg);
+    background-color: var(--boxBackgroundColor);
     margin-bottom: 10px;
     padding: 10px;
     border-radius: 5px;
@@ -426,7 +449,7 @@
 }
 
 .main-content-dashboard .schedule-section, .main-content-dashboard .summary-section {
-    width: inherit;
+    /*width: inherit;*/
     max-width: inherit;
     margin: 10px;
 }
@@ -617,23 +640,6 @@
     text-transform: uppercase;
 }
 
-/*
-.main-content-schedule .upcoming-courses ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.main-content-schedule .upcoming-courses li {
-    background-color: var(--card-bg);
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-}
-*/
-
-
-
-
 @keyframes blob-animation {
     0% {
         transform: scale(1); /* Taille normale */
@@ -690,5 +696,12 @@
 
     .main-content-dashboard .summary-section {
         margin-left :20px ; /* Ajoute un espace entre l'emploi du temps et le résumé sur grand écran */
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .event-card{
+        width: 90%;
+        max-width: inherit;
     }
 }
