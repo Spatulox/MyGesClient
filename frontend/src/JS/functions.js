@@ -128,3 +128,74 @@ export function wait(seconds) {
         // Boucle active jusqu'à ce que le temps spécifié soit écoulé
     }
 }
+
+// ------------------------------------------------ //
+
+export function dayjs(date) {
+    const d = date ? new Date(date) : new Date();
+
+    return {
+        _date: d,
+
+        format(formatStr) {
+            const pad = (num) => String(num).padStart(2, '0');
+
+            const formats = {
+                YYYY: d.getFullYear(),
+                MM: pad(d.getMonth() + 1),
+                DD: pad(d.getDate()),
+                HH: pad(d.getHours()),
+                mm: pad(d.getMinutes()),
+                ss: pad(d.getSeconds())
+            };
+
+            return formatStr.replace(/YYYY|MM|DD|HH|mm|ss/g, match => formats[match]);
+        },
+
+        add(value, unit) {
+            const newDate = new Date(this._date);
+            switch (unit) {
+                case 'day':
+                    newDate.setDate(newDate.getDate() + value);
+                    break;
+                case 'month':
+                    newDate.setMonth(newDate.getMonth() + value);
+                    break;
+                case 'year':
+                    newDate.setFullYear(newDate.getFullYear() + value);
+                    break;
+            }
+            return dayjs(newDate);
+        },
+
+        subtract(value, unit) {
+            return this.add(-value, unit);
+        },
+
+        isValid() {
+            return !isNaN(this._date.getTime());
+        }
+    };
+}
+
+export function formatDateWithDay(dateString) {
+    const date = new Date(dateString);
+    const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+    const dayName = days[date.getDay()];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    return `${dayName} ${day} ${month} ${hours}:${minutes}`;
+}
+
+export function formatDate(dateString) {
+    return dayjs(dateString).format('DD MMM');
+}
+
+export function formatTime(dateString) {
+    return dayjs(dateString).format('HH:mm');
+}

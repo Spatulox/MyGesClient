@@ -2,10 +2,8 @@ import {
     GetUserData,
     InitDiscordRPC,
     UpdateDiscordRPC,
-    GetGrades
 } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
-import {getMonday, getSaturday, getYear, wait} from "./functions";
 
 export async function start(){
 

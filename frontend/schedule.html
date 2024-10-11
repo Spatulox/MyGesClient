@@ -1,70 +1,50 @@
 <!--<script type="text/javascript" src="./js/schedule.js"></script>-->
-<div id="allContainerAbsences" class="flex flexAround wrap box">
-        <div id="Lundi">
-            <h2>Lundi</h2>
+<link rel="stylesheet" href="./src/CSS/addEvent.css">
+<div id="allContainerSchedule" class="flex flexAround wrap box">
+    <div class="container-schedule">
+        <div class="main-content-schedule">
+            <div class="calendar-header">
+                <button id="prev-week">&lt;</button>
+                <h2 id="current-week"></h2>
+                <button id="next-week">&gt;</button>
+            </div>
+            <div id="calendar-grid"></div>
         </div>
-        <div id="Mardi">
-            <h2>Mardi</h2>
-        </div>
-        <div id="Mercredi">
-            <h2>Mercredi</h2>
-        </div>
-        <div id="Jeudi">
-            <h2>Jeudi</h2>
-        </div>
-        <div id="Vendredi">
-            <h2>Vendredi</h2>
-        </div>
-        <div id="Samedi">
-            <h2>Samedi</h2>
-        </div>
-</div>
-<div id="plusAddEvent" class="">
-    <div class="flex flexCenter wrap">
-        <h1 class="width100 textCenter bold underline">Ajouter un évènement</h1>
-        
-        <label for="date" class="underline width80">Date</label>
-        <input type="date" id="date" name="date" class="width80 marginTop10">
-
-        <div class="width80 marginTop10">
-            <label for="hour" class="underline marginTop10 widthAuto">Heure</label>
-            <input type="hour" id="hour" name="hour" class="marginTop10 width20" list="hour-list" step="900"> :
-            <input type="minutes" id="minutes" name="minutes" class="marginTop10 width20" list="minutes-list" step="900">
-            
-            <datalist id="hour-list">
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-                <option value="13">13</option>
-                <option value="14">14</option>
-                <option value="15">15</option>
-                <option value="16">16</option>
-                <option value="17">17</option>
-                <option value="18">18</option>
-                <option value="19">19</option>
-                <option value="20">20</option>
-                <option value="21">21</option>
-            </datalist>
-    
-            <datalist id="minutes-list">
-                <option value="00">00</option>
-                <option value="15">15</option>
-                <option value="30">30</option>
-                <option value="45">45</option>
-            </datalist>
-
-        </div>
-        
-        <label for="color" class="underline marginTop10 width80">Couleur</label>
-        <input type="color" id="color" name="color" class="marginTop10 width80"> 
-
-        <label for="date" class="underline marginTop10 width80">Description</label>
-        <textarea name="description" id="eventDescription" cols="30" rows="10" class="width80 marginTop10"></textarea>
-        
-        <input type="button" value="Valider" id="validerEvent" class="width50 marginTop10" onclick="RePrintSchedule()">
     </div>
-    <img src="./src/assets/images/plus_logo_noir.png" id="plusAddEventImg" alt="plus logo">
 </div>
+
+<div id="open-modal" class="add-button initial">
+    <span class="plus">+</span>
+    <div class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Create Event</h2>
+            <form id="event-form">
+                <div class="form-group">
+                    <label for="event-name">Event Name</label>
+                    <input type="text" id="event-name" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-description">Description</label>
+                    <textarea id="event-description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="event-start">Start Date</label>
+                    <input type="datetime-local" id="event-start" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-end">End Date</label>
+                    <input type="datetime-local" id="event-end" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-color">Color</label>
+                    <input type="color" id="event-color" value="#396aa1">
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn btn-cancel" id="close-modal">Cancel</button>
+                    <button type="button" class="btn btn-create" id="create-btn">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="overlay"></div>

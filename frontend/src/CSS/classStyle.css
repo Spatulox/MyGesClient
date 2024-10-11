@@ -32,6 +32,57 @@
     position: absolute;
 }
 
+.events-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.event-card {
+    background-color: #2f3136;
+    border-radius: 8px;
+    padding: 16px;
+    /*width: 300px;*/
+    /*width: 287px;*/
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-left: 4px solid;
+    width: 40%;
+    max-width: 287px;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.event-name {
+    color: #ffffff;
+    font-size: 18px;
+    margin: 0;
+}
+
+.event-date {
+    color: #b9bbbe;
+    font-size: 14px;
+}
+
+.event-description {
+    color: #dcddde;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.event-time {
+    color: #b9bbbe;
+    font-size: 14px;
+}
+
+.event-time i {
+    margin-right: 4px;
+}
+
 .lessonClosePNG{
     transform: translateX(190px);
 }
@@ -365,44 +416,18 @@
     flex-wrap: wrap;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .all-content{
     width: 100%;
 }
 
-.container-dashboard {
+.container-dashboard, .container-schedule {
     display: flex;
-    /*min-height: 100vh;*/
-    /*height: calc(100% - 70px);*/
     height: 90%;
     position: relative; /* Permet aux éléments enfants d'utiliser un positionnement absolu par rapport à ce conteneur */
+}
+
+.container-schedule, .main-content-schedule, .calendar-header{
+    width: 100%;
 }
 
 .main-content-dashboard {
@@ -413,7 +438,7 @@
 }
 
 .main-content-dashboard .recapSection {
-    background-color: var(--card-bg);
+    background-color: var(--boxBackgroundColor);
     margin-bottom: 10px;
     padding: 10px;
     border-radius: 5px;
@@ -424,7 +449,7 @@
 }
 
 .main-content-dashboard .schedule-section, .main-content-dashboard .summary-section {
-    width: inherit;
+    /*width: inherit;*/
     max-width: inherit;
     margin: 10px;
 }
@@ -468,9 +493,9 @@
 }
 
 /* Styles pour les sections de contenu */
-.main-content-dashboard #schedule-content,
+/*.main-content-dashboard #schedule-content,*/
 .main-content-dashboard #grades-content,
-.main-content-dashboard #absences-content {
+.main-content-dashboard #event-content {
     background-color: var(--card-bg);
     border-radius: 5px;
     padding: 15px;
@@ -542,6 +567,79 @@
     animation: blob-animation 0.3s forwards; /* Animation lors du clic */
 }
 
+
+
+.main-content-schedule {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.main-content-schedule h1, .main-content-schedule, h2 {
+    margin-top: 0;
+}
+
+.main-content-schedule .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.main-content-schedule .calendar-header button {
+    background-color: var(--card-bg);
+    border: none;
+    color: var(--text-color);
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.main-content-schedule #calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.main-content-schedule .day-column, .main-content-dashboard .day-column {
+    background-color: var(--sidebar-color);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.main-content-schedule .day-header {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: var(--highlight-color);
+    border-radius: 5px;
+}
+
+.main-content-schedule .course-card, .main-content-dashboard .course-card {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.main-content-schedule .course-card h3, .main-content-dashboard .course-card h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: var(--highlight-color);
+}
+
+.main-content-schedule .course-card p, .main-content-dashboard .course-card p {
+    margin: 2px 0;
+    font-size: 0.9em;
+}
+
+.main-content-schedule .course-type, .main-content-dashboard .course-type {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
 @keyframes blob-animation {
     0% {
         transform: scale(1); /* Taille normale */
@@ -598,5 +696,12 @@
 
     .main-content-dashboard .summary-section {
         margin-left :20px ; /* Ajoute un espace entre l'emploi du temps et le résumé sur grand écran */
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .event-card{
+        width: 90%;
+        max-width: inherit;
     }
 }
