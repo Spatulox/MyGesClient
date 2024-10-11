@@ -1,5 +1,5 @@
-import {GetAgenda, GetGrades} from "../../wailsjs/go/backend/App";
-import {getYear, capitalizeFirstLetter} from "../JS/functions";
+import {GetAgenda, GetEvents, GetGrades} from "../../wailsjs/go/backend/App";
+import {getYear, capitalizeFirstLetter, formatTime, formatDate, formatDateWithDay} from "../JS/functions";
 import {updateSchedule} from "./schedule";
 
 export async function dashboard(){
@@ -12,24 +12,49 @@ export async function dashboard(){
     // Créer une date pour aujourd'hui à 23:00 UTC
     const todayNight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23));
 
-    //const agenda = await GetAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
-    const agenda = await GetAgenda("2024-09-23", "2024-09-23")
+    let agenda = null
     const htmlElement = document.getElementById("schedule-content")
+    try{
+        agenda = await GetAgenda("2024-09-23", "2024-09-23")
+        //agenda = await GetAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
+    } catch (e) {
+        console.log(e)
+    }
 
-    const grades = await GetGrades(getYear().toString())
+    let grades = null
     const htmlGradeElement = document.getElementById("grades-content")
+    try{
+        grades = await GetGrades(getYear().toString())
+    } catch (e) {
+        console.log(e)
+    }
+
+    let events = null
+    const htmlElementEvent = document.getElementById("event-content")
+    try{
+        events = await GetEvents()
+    } catch (e) {
+        console.log(e)
+    }
 
     if(agenda){
-        await updateSchedule(agenda, htmlElement)
+        updateSchedule(agenda, htmlElement)
     } else {
         htmlElement.innerHTML = "Nothing to show"
         document.getElementsByClassName("schedule-section")[0].style.transform = "inherit"
     }
 
     if(grades){
-        await recapGrades(htmlGradeElement, grades)
+        recapGrades(htmlGradeElement, grades)
     } else {
         document.getElementById("grades-content").innerHTML = "<div class='grade-item'>Nothing to show</div>"
+    }
+
+    if(events){
+
+        recapEvents(events)
+    } else {
+        document.getElementById("event-content").innerHTML = "Nothing to show"
     }
 
     /* Animate buttons */
@@ -54,6 +79,7 @@ export async function dashboard(){
             document.getElementById("forward-button").classList.remove('clicked');
         }, 600); // Durée de l'animation en millisecondes
     })
+
 }
 
 
@@ -100,6 +126,38 @@ async function recapGrades(gradesList, grades) {
     // Afficher les notes initiales
     displayGrades();
 
-    // Mettre à jour les notes toutes les 6 secondes
+    // Mettre à jour les notes toutes les 10 secondes
     setInterval(displayGrades, 10000);
 }
+
+function createEventCard(event) {
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    card.style.borderLeftColor = event.color;
+
+    const startFormatted = formatDateWithDay(event.start_date);
+    const endFormatted = formatDateWithDay(event.end_date);
+
+    card.innerHTML = `
+        <div class="event-header">
+            <h3 class="event-name">${event.name}</h3>
+        </div>
+        <p class="event-description">${event.description}</p>
+        <div class="event-time">
+            <i class="far fa-clock"></i> ${startFormatted} - ${endFormatted}
+        </div>
+    `;
+
+    return card;
+}
+
+function recapEvents(events) {
+    const container = document.getElementById('events-container');
+    container.innerHTML = ""
+    events.forEach(event => {
+        const card = createEventCard(event);
+        console.log(event)
+        container.appendChild(card);
+    });
+}
+
