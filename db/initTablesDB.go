@@ -82,7 +82,9 @@ const EVENTS = `CREATE TABLE IF NOT EXISTS EVENTS(
     event_description TEXT,
     start_date TEXT NOT NULL,
     end_date TEXT NOT NULL,
-    color TEXT NOT NULL
+    color TEXT NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USER(user_id)
 );`
 
 func initDBTables() {
