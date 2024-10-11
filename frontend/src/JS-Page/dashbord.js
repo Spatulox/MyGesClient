@@ -11,7 +11,6 @@ export async function dashboard(){
 
     // Créer une date pour aujourd'hui à 23:00 UTC
     const todayNight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23));
-    console.log(today.toISOString(), todayNight.toISOString());
 
     //const agenda = await GetAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
     const agenda = await GetAgenda("2024-09-23", "2024-09-23")
@@ -22,23 +21,39 @@ export async function dashboard(){
 
     if(agenda){
         await updateSchedule(agenda, htmlElement)
+    } else {
+        htmlElement.innerHTML = "Nothing to show"
+        document.getElementsByClassName("schedule-section")[0].style.transform = "inherit"
+    }
+
+    if(grades){
         await recapGrades(htmlGradeElement, grades)
     } else {
-        alert("Pas d'agenda")
+        document.getElementById("grades-content").innerHTML = "<div class='grade-item'>Nothing to show</div>"
     }
 
     /* Animate buttons */
-    document.querySelectorAll('.navigation-buttons button').forEach(button => {
-        button.addEventListener('click', function() {
-            // Ajoute la classe 'clicked' pour déclencher l'animation
-            this.classList.add('clicked');
+    document.getElementById("backward-button").addEventListener("click", ()=>{
+        // Ajoute la classe 'clicked' pour déclencher l'animation
+        document.getElementById("backward-button").classList.add('clicked');
+        popup("Not bound")
 
-            // Retire la classe après l'animation pour permettre une nouvelle animation
-            setTimeout(() => {
-                this.classList.remove('clicked');
-            }, 600); // Durée de l'animation en millisecondes
-        });
-    });
+        // Retire la classe après l'animation pour permettre une nouvelle animation
+        setTimeout(() => {
+            document.getElementById("backward-button").classList.remove('clicked');
+        }, 600); // Durée de l'animation en millisecondes
+    })
+
+    document.getElementById("forward-button").addEventListener( "click", ()=>{
+        // Ajoute la classe 'clicked' pour déclencher l'animation
+        document.getElementById("forward-button").classList.add('clicked');
+        popup("Not bound")
+
+        // Retire la classe après l'animation pour permettre une nouvelle animation
+        setTimeout(() => {
+            document.getElementById("forward-button").classList.remove('clicked');
+        }, 600); // Durée de l'animation en millisecondes
+    })
 }
 
 
