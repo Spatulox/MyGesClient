@@ -20,6 +20,11 @@ func (a *App) SaveEvents(name string, description *string, startDate string, end
 
 // Only get the events for the 7 next following dates
 func (a *App) GetEvents() ([]Event, error) {
-	Log.Infos("Get events")
+	Log.Infos("Get events (7+)")
 	return GetEventDB(a.db)
+}
+
+func (a *App) GetAllEvents() ([]Event, error) {
+	Log.Infos("Get all events")
+	return GetAllEventDB(a.db)
 }
