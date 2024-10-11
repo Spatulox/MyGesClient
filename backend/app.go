@@ -52,6 +52,26 @@ func (a *App) CheckOpenDb() bool {
 	return true
 }
 
+// -------------------------------------------------------------------------- //
+
+func (a *App) runEveryXMinutes(ctx context.Context, x time.Duration, f func()) {
+	ticker := time.NewTicker(x * time.Minute)
+	defer ticker.Stop()
+
+	f() // Exécuter immédiatement
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			f()
+		}
+	}
+}
+
+// -------------------------------------------------------------------------- //
+
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 
@@ -101,22 +121,40 @@ func (a *App) Startup(ctx context.Context) {
 	// Global refresh needs the date and the year
 	// Date are for the week to refresh the schedule
 	// Year is to refresh the grades
-	msg, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
-	//msg, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
-	if err != nil {
-		Log.Error(fmt.Sprintf("Impossible to to a Global Refresh on Startup : %v", err))
-		STARTFINISH = -1
-		return
-	}
-	Log.Infos(msg)
 	STARTFINISH = 1
+
+	Log.Infos("Launching go routines")
+	go a.runEveryXMinutes(ctx, 60, func() {
+		// Votre tâche périodique ici
+		msg, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+		//msg, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
+		if err != nil {
+			Log.Error(fmt.Sprintf("Impossible to to a Global Refresh on Startup : %v", err))
+			STARTFINISH = -1
+			return
+		}
+		Log.Infos(msg)
+	})
+
+	go a.runEveryXMinutes(ctx, 7, func() {
+		monday2 := monday.Format("2006-01-02")
+		saturday2 := saturday.Format("2006-01-02")
+		_, err := a.RefreshAgenda(&monday2, &saturday2)
+		if err != nil {
+			return
+		}
+	})
 }
+
+// -------------------------------------------------------------------------- //
 
 func (a *App) Cleanup() {
 	if a.db != nil {
 		a.db.Close()
 	}
 }
+
+// -------------------------------------------------------------------------- //
 
 func (a *App) GetStartStatus() int {
 	return STARTFINISH
@@ -162,6 +200,8 @@ func (a *App) WriteLogFile(filePath string, content string) error {
 	return nil
 }
 
+// -------------------------------------------------------------------------- //
+
 func (a *App) GetPageContent(page string) (string, error) {
 	page = strings.Split(page, ".html")[0]
 	content, err := os.ReadFile("frontend/" + page + ".html")
@@ -195,6 +235,8 @@ func (a *App) InitDiscordRPC() error {
 	return err
 }
 
+// -------------------------------------------------------------------------- //
+
 func (a *App) UpdateDiscordRPC(details string, state string) error {
 	return client.SetActivity(client.Activity{
 		Details:    details,
@@ -222,6 +264,8 @@ func (a *App) CheckInternetConnection() bool {
 	// Vérifier le statut de la réponse
 	return resp.StatusCode == http.StatusOK
 }
+
+// -------------------------------------------------------------------------- //
 
 func (a *App) CheckXTimeInternetConnection(attempts int) bool {
 	// Définir un délai d'attente pour la requête
