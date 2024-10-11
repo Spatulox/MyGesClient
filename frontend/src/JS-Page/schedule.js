@@ -1,41 +1,63 @@
 import { CheckXTimeInternetConnection, GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
 import {capitalizeFirstLetter, getMonday, getSaturday, log} from "../JS/functions";
 
+let addButton
 
-function printReservations(reservations) {
+async function initCreateEvent(){
+    addButton = document.getElementById('open-modal');
+    const closeModalBtn = document.getElementById('close-modal');
+    const createEventBtn = document.getElementById('create-btn');
+    const eventForm = document.getElementById('event-form');
+    const overlay = document.getElementById('overlay');
 
-    reservations = JSON.parse(reservations)
-    // Parcourir chaque réservation
-    reservations.forEach(reservation => {
-        console.log(`Reservation ID: ${reservation.reservation_id}`);
-        console.log(`Type: ${reservation.type}`);
-        console.log(`Modality: ${reservation.modality || 'N/A'}`);
-        console.log(`Author ID: ${reservation.author}`);
-        console.log(`Start Date: ${new Date(reservation.start_date).toLocaleString()}`);
-        console.log(`End Date: ${new Date(reservation.end_date).toLocaleString()}`);
-        console.log(`State: ${reservation.state}`);
-        console.log(`Comment: ${reservation.comment || 'N/A'}`);
-        console.log(`Name: ${reservation.name}`);
+    addButton.addEventListener('click', () => {
+        addButton.classList.remove("initial")
+        addButton.classList.add('active');
+        overlay.style.display = 'block';
+    });
 
-        // Afficher les informations sur les salles
-        reservation.rooms.forEach(room => {
-            console.log(`  Room ID: ${room.room_id}`);
-            console.log(`  Room Name: ${room.name}`);
-            console.log(`  Floor: ${room.floor}`);
-            console.log(`  Campus: ${room.campus}`);
-            console.log(`  Color: ${room.color}`);
-            console.log(`  Latitude: ${room.latitude}`);
-            console.log(`  Longitude: ${room.longitude}`);
-        });
+    closeModalBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeModal();
+    });
 
-        // Afficher les informations sur la discipline
-        if (reservation.discipline) {
-            console.log(`Discipline Name: ${reservation.discipline.name || 'N/A'}`);
-            console.log(`Teacher: ${reservation.teacher || 'N/A'}`);
-            console.log(`Number of Students: ${reservation.discipline.nb_students || 'N/A'}`);
-            console.log('-----------------------------------------');
+    createEventBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Handle event creation here
+
+        // If event successfully created
+        closeModal();
+        clearForm();
+    });
+
+    eventForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+    });
+
+    // Prevent closing when clicking inside the modal
+    addButton.querySelector('.modal').addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    document.addEventListener('click', (e) => {
+        // Vérifier si le clic est en dehors de addButton
+        if (!addButton.contains(e.target) && addButton.classList.contains('active')) {
+            closeModal();
         }
     });
+}
+
+function closeModal() {
+    addButton.classList.remove('active');
+    overlay.style.display = 'none';
+}
+
+function clearForm() {
+    document.getElementById('event-name').value = '';
+    document.getElementById('event-description').value = '';
+    document.getElementById('event-start').value = '';
+    document.getElementById('event-end').value = '';
+    document.getElementById('event-color').value = '#5865f2';
 }
 
 
@@ -44,15 +66,13 @@ export async  function schedule(){
     const replace = document.getElementById("replace")
     replace.style.height = "auto"
 
+    initCreateEvent()
+
     // Get the full week schedule
     const monday = getMonday()
     const saturday = getSaturday()
     const agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
     const calendarGrid = document.getElementById("calendar-grid")
-
-    if(agenda){
-        printSchedule(agenda, calendarGrid)
-    }
 
 
     try{
@@ -60,11 +80,7 @@ export async  function schedule(){
         printSchedule(agendaBeta, calendarGrid)
     } catch (e) {
         popup(e)
-        stopStillPopup(laStillPopup)
-        return
     }
-
-    stopStillPopup(laStillPopup)
 }
 
 
@@ -116,7 +132,6 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
     const now = new Date();
     const isAfter6PM = now.getHours() >= 18;
     const scheduleDate = isAfter6PM ? new Date(now.setDate(now.getDate() + 1)) : now;
-
     if(printCurrDate){
         finalHtmlElement.innerHTML = `<h3>${capitalizeFirstLetter(scheduleDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
     }
@@ -168,3 +183,127 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
 /*updateSchedule();
 updateGrades();
 updateAbsences();*/
+
+
+/*
+document.addEventListener('click', function(e) {
+    const lessons = document.querySelectorAll('.lesson');
+    const lessonsArray = Array.from(lessons);
+    const plusAddEvent = document.getElementById('plusAddEvent')
+    const plusAddEventImg = document.getElementById('plusAddEventImg')
+    const isClickInsideLesson = lessonsArray.some(lesson => lesson.contains(e.target));
+
+    const validerEvent = document.getElementById('validerEvent')
+
+
+    // Create an event
+    if(e.target.id === validerEvent.id){
+        const inputs = document.querySelectorAll('#plusAddEvent input');
+        const textDesc = document.getElementsByTagName('textarea')[0];
+
+        let inputDic = {}
+        inputs.forEach((input, index) => {
+            if (index < inputs.length - 1) {
+                inputDic[input.name] = input.value
+            }
+        });
+
+        inputDic["description"] = textDesc.value
+
+        // Check info format
+        if(isNaN(new Date (inputDic.date))){
+            popup("Il faut mettre une date valide")
+            log("Wrong date format")
+            return
+        }
+
+        if (new Date (inputDic.date) < new Date().setUTCDate(0,0,0,0)){
+            popup('Impossible de créer un évènement avant aujourd\'hui')
+            return
+        }
+
+        if(isNaN(parseInt(inputDic.hour)) || isNaN(parseInt(inputDic.minutes))){
+            popup("Il faut mettre des nombres pour les heures et les minutes")
+            log("Wrong hour and/or minutes format")
+            return
+        }
+
+        if(parseInt(inputDic.hour) < 0 || parseInt(inputDic.hour) > 24){
+            popup("Il faut spécifier les heures entre 0 et 24")
+            log("Wrong hour int")
+            return
+        }
+
+        if(parseInt(inputDic.minutes) < 0 || parseInt(inputDic.minutes) > 59){
+            popup("Il faut spécifier les minutes entre 0 et 59")
+            log("Wrong hour int")
+            return
+        }
+
+        if(inputDic.description === ""){
+            popup("Veuiller entrer une description")
+            log("No description entered")
+            return
+        }
+
+        // Refactor informations
+        let tmp = inputDic.date.split('-')
+        inputDic.date = tmp[2]+"/"+tmp[1]+"/"+tmp[0]
+        let hour = inputDic.hour + ":" + inputDic.minutes + ":00"
+        let color = inputDic.color
+        let description = inputDic.description
+
+        const template = {
+            date: {
+                [hour]: {
+                    color: color,
+                    description: description
+                }
+            }
+        };
+
+        //--------------------------------//
+        // CALL THE BACKEND TO SAVE EVENT //
+        //--------------------------------//
+
+        popup('Rappel enregistré !')
+
+        // Close the popup to create event
+        plusAddEvent.classList.remove('active')
+        plusAddEventImg.src = "./src/assets/images/plus_logo_noir.png"
+
+        // Remove informations
+        inputs.forEach((input, index) => {
+            if (index < inputs.length - 1) {
+                input.value = ""
+            }
+        });
+        textDesc.value = ""
+
+        return
+
+    }
+
+    if (!isClickInsideLesson) {
+        lessonsArray.forEach(lesson => {
+            lesson.classList.remove('bigAgenda');
+        });
+    }
+
+    try{
+        if (e.target.closest('#plusAddEvent')) {
+            // L'élément ou l'un de ses parents a l'id "plusAddEvent"
+            plusAddEvent.classList.add('active')
+            plusAddEventImg.src = "./src/assets/images/GES_logo.png"
+        } else {
+            plusAddEvent.classList.remove('active')
+            plusAddEventImg.src = "./src/assets/images/plus_logo_noir.png"
+            // L'élément n'a pas l'id "plusAddEvent" et n'a pas d'ancêtres avec cet id
+        }
+    }
+    catch{
+        console.log("No plusAddEvent tag")
+    }
+
+});
+*/
