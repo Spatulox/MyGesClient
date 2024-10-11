@@ -77,6 +77,14 @@ const GRADESVALUE = `CREATE TABLE IF NOT EXISTS GRADESVALUE(
     FOREIGN KEY (note_id) REFERENCES NOTES (note_id)
 );`
 
+const EVENTS = `CREATE TABLE IF NOT EXISTS EVENTS(
+    event_name TEXT NOT NULL,
+    event_description TEXT,
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    color TEXT NOT NULL
+);`
+
 func initDBTables() {
 	db, err := sql.Open("sqlite", "./db.sqlite")
 	if err != nil {
@@ -119,18 +127,25 @@ func initDBTables() {
 		Log.Error(fmt.Sprintf("Erreur lors de la création de la table agenda: %v\n", err))
 		return
 	}
-	Log.Infos("Table 'Notes' créée avec succès.")
+	Log.Infos("Table 'Agenda' créée avec succès.")
 
 	if _, err := db.Exec(NOTES); err != nil {
 		Log.Error(fmt.Sprintf("Erreur lors de la création de la table notes: %v\n", err))
 		return
 	}
+	Log.Infos("Table 'Notes' créée avec succès.")
 
 	if _, err := db.Exec(GRADESVALUE); err != nil {
 		Log.Error(fmt.Sprintf("Erreur lors de la création de la table gradesvalue: %v\n", err))
 		return
 	}
 	Log.Infos("Table 'GradesValue' créée avec succès.")
+
+	if _, err := db.Exec(EVENTS); err != nil {
+		Log.Error(fmt.Sprintf("Erreur lors de la création de la table events: %v\n", err))
+		return
+	}
+	Log.Infos("Table 'Events' créée avec succès.")
 
 }
 
