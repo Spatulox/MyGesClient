@@ -1,8 +1,11 @@
 let popupStillCounter = 0;
 let popupNormalCounter = 0;
 const MAX_POPUPS = 5;
+let COUNT = 0
 
 function createPopup(type, content) {
+    console.log(COUNT)
+    COUNT++
     const popupContainer = document.querySelector(`#${type}popup`);
     const newPopup = document.createElement('div');
 
