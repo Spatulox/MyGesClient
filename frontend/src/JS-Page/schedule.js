@@ -1,10 +1,23 @@
 import { GetAgenda, SaveEvents } from "../../wailsjs/go/backend/App";
 import {capitalizeFirstLetter, getMonday, getSaturday} from "../JS/functions";
 
-export async  function schedule(){
+let scheduleTimeoutId = []
+let setSchedule = 0
 
+export async  function schedule(){
+    console.log("schedule")
     const replace = document.getElementById("replace")
     replace.style.height = "auto"
+
+    const prevWeek = document.getElementById("prev-week")
+    const nextWeek = document.getElementById("next-week")
+
+    prevWeek.addEventListener("click", ()=>{
+        popup("Not Bound")
+    })
+    nextWeek.addEventListener("click", ()=>{
+        popup("Not Bound")
+    })
 
     try{
         // Get the full week schedule
@@ -36,6 +49,21 @@ export async  function schedule(){
     } catch (e) {
         popup(e)
     }
+
+    if (setSchedule === 0) {
+        scheduleTimeoutId.push(setTimeout(schedule, 5000));
+        setSchedule = 1;
+    }
+
+}
+
+// Fonction pour arrêter le setTimeout
+export function stopSchedule() {
+    while (scheduleTimeoutId.length > 0) {
+        const timeoutId = scheduleTimeoutId.pop(); // Retirer le dernier identifiant du tableau
+        clearTimeout(timeoutId); // Arrêter le timeout
+    }
+    setSchedule = 0; // Réinitialiser la variable
 }
 
 

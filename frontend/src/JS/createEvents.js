@@ -6,9 +6,6 @@ export async function initCreateEvent(){
     const eventForm = document.getElementById('event-form');
     const overlay = document.getElementById('overlay');
 
-    const prevWeek = document.getElementById("prev-week")
-    const nextWeek = document.getElementById("next-week")
-
     addButton.addEventListener('click', () => {
         addButton.classList.remove("initial")
         addButton.classList.add('active');
@@ -102,13 +99,6 @@ export async function initCreateEvent(){
             closeModal();
         }
     });
-
-    prevWeek.addEventListener("click", ()=>{
-        popup("Not Bound")
-    })
-    nextWeek.addEventListener("click", ()=>{
-        popup("Not Bound")
-    })
 
     function closeModal() {
         addButton.classList.remove('active');
