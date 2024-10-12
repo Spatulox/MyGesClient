@@ -796,14 +796,7 @@
     margin: 10px 0;
     color: var(--text-color);
     border-color: var(--highlight-color);
-}
-
-.main-content-schedule .course-card, .main-content-dashboard .course-card {
     background-color: var(--card-bg);
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .main-content-schedule .course-card h3, .main-content-dashboard .course-card h3 {
