@@ -120,7 +120,7 @@ func GetAllEventDB(db *sql.DB) ([]Event, error) {
 	query := `
         SELECT event_name, event_description, start_date, end_date, color
         FROM EVENTS
-        WHERE start_date BETWEEN datetime('now') AND user_id = ?
+        WHERE start_date >= datetime('now') AND user_id = ?
         ORDER BY start_date ASC
     `
 
