@@ -44,6 +44,24 @@
     transition: all ease-in-out, 0.5s;
 }
 
+.calendar-container {
+    background-color: #36393f;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: var(--text-color);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.calendar-title {
+    color: #ffffff;
+    font-size: 20px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--card-bg);
+}
+
 .credits-container {
     display: flex;
     justify-content: space-around;
@@ -118,6 +136,49 @@
 .closePNG{
     width: 30px;
     position: absolute;
+}
+
+.event-list {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.event-item {
+    background-color: var(--discord-dark);
+    border-radius: 4px;
+    padding: 12px;
+    border-left: 4px solid;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.event-name {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.event-date {
+    font-size: 0.9em;
+    color: #b9bbbe;
+}
+
+.event-description {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+}
+
+.event-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+    color: #b9bbbe;
 }
 
 .events-container {
