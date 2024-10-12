@@ -5,6 +5,7 @@ let UpdateUserEula
 let UpdateUserTheme
 let CreateUser
 let VerifyUser
+let SaveEvents
 
 import('./loadPages.js')
     .then(module => {
@@ -24,5 +25,6 @@ import('../../wailsjs/go/backend/App')
         UpdateUserTheme = module.UpdateUserTheme
         CreateUser = module.CreateUser
         VerifyUser = module.VerifyUser
+        SaveEvents = module.SaveEvents
     })
     .catch(err => console.error('Erreur de chargement du module:', err));
