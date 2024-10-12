@@ -290,6 +290,9 @@
     margin-bottom: 2px;
 }
 
+#buttonEula{
+    width: 100% !important;
+}
 
 #connection{
     z-index: 2407;
