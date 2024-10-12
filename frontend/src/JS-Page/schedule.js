@@ -1,111 +1,14 @@
 import { GetAgenda, SaveEvents } from "../../wailsjs/go/backend/App";
-import {capitalizeFirstLetter, getDateInfo, getMonday, getSaturday, log} from "../JS/functions";
+import {capitalizeFirstLetter, getMonday, getSaturday} from "../JS/functions";
 
-let addButton
+let scheduleTimeoutId = []
 
-async function initCreateEvent(){
-    addButton = document.getElementById('open-modal');
-    const closeModalBtn = document.getElementById('close-modal');
-    const createEventBtn = document.getElementById('create-btn');
-    const eventForm = document.getElementById('event-form');
-    const overlay = document.getElementById('overlay');
+export async  function schedule(){
+    const replace = document.getElementById("replace")
+    replace.style.height = "auto"
 
     const prevWeek = document.getElementById("prev-week")
     const nextWeek = document.getElementById("next-week")
-
-    addButton.addEventListener('click', () => {
-        addButton.classList.remove("initial")
-        addButton.classList.add('active');
-        overlay.style.display = 'block';
-    });
-
-    closeModalBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeModal();
-    });
-
-    createEventBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        // Handle event creation here
-        let eventName = document.getElementById("event-name")
-        let eventDescription = document.getElementById("event-description")
-        let eventStart = document.getElementById("event-start")
-        let eventEnd = document.getElementById("event-end")
-        let eventColor = document.getElementById("event-color")
-
-        if(!eventName?.value.trim()){
-            popup("Vous devez spécifier un nom pour l'évènement")
-            return
-        }
-
-        if(!eventStart?.value){
-            popup("Vous devez spécifier une date de début pour l'évènement")
-            return
-        }
-
-        if(!eventEnd?.value){
-            popup("Vous devez spécifier une date de fin pour l'évènement")
-            return
-        }
-
-        if(!eventColor?.value){
-            popup("Vous devez spécifier une couleur pour l'évènement")
-            return
-        }
-
-        const today = new Date();
-        const startDate = new Date(eventStart.value);
-        const endDate = new Date(eventEnd.value);
-
-        if( startDate <= today){
-            popup("La date de début doit se situer dans le futur")
-            return
-        }
-
-        if( endDate <= startDate ){
-            popup("La date de fin doit se situer dans le futur")
-            return
-        }
-
-        if( endDate <= startDate ){
-            popup("La date de fin doit être après la date de début")
-            return
-        }
-
-        if( endDate === startDate ){
-            popup("La date de début et de fin doivent être différente")
-            return
-        }
-
-        try{
-            await SaveEvents(eventName.value.trim(), eventDescription?.value, startDate.toISOString(), endDate.toISOString(), eventColor.value)
-        } catch (e) {
-            popup(e)
-            return
-        }
-
-        popup("Évènement sauvegardé avec succès")
-
-        // If event successfully created
-        closeModal();
-        clearForm();
-    });
-
-    eventForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-    });
-
-    // Prevent closing when clicking inside the modal
-    addButton.querySelector('.modal').addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-
-    document.addEventListener('click', (e) => {
-        // Vérifier si le clic est en dehors de addButton
-        if (!addButton.contains(e.target) && addButton.classList.contains('active')) {
-            closeModal();
-        }
-    });
 
     prevWeek.addEventListener("click", ()=>{
         popup("Not Bound")
@@ -113,34 +16,12 @@ async function initCreateEvent(){
     nextWeek.addEventListener("click", ()=>{
         popup("Not Bound")
     })
-}
-
-function closeModal() {
-    addButton.classList.remove('active');
-    overlay.style.display = 'none';
-}
-
-function clearForm() {
-    document.getElementById('event-name').value = '';
-    document.getElementById('event-description').value = '';
-    document.getElementById('event-start').value = '';
-    document.getElementById('event-end').value = '';
-    document.getElementById('event-color').value = '#5865f2';
-}
-
-
-export async  function schedule(){
-
-    const replace = document.getElementById("replace")
-    replace.style.height = "auto"
-
-    initCreateEvent()
 
     try{
         // Get the full week schedule
         const monday = getMonday()
         const saturday = getSaturday()
-        const agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+        //const agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
         const calendarGrid = document.getElementById("calendar-grid")
         const currentWeek = document.getElementById("current-week")
 
@@ -157,7 +38,7 @@ export async  function schedule(){
         // Mettre à jour le texte
         currentWeek.textContent = `${capitalizeFirstLetter(mondayFormatted)} --- ${capitalizeFirstLetter(saturdayFormatted)}`;
 
-        //const agendaBeta = await GetAgenda("2024-09-23", "2024-09-28")
+        const agenda = await GetAgenda("2024-09-23", "2024-09-28")
         if(agenda){
             printSchedule(agenda, calendarGrid)
         } else {
@@ -165,6 +46,19 @@ export async  function schedule(){
         }
     } catch (e) {
         popup(e)
+    }
+
+    if (scheduleTimeoutId.length === 0) {
+        scheduleTimeoutId.push(setInterval(schedule, 5000));
+    }
+
+}
+
+// Fonction pour arrêter le setTimeout
+export function stopSchedule() {
+    while (scheduleTimeoutId.length > 0) {
+        const timeoutId = scheduleTimeoutId.pop(); // Retirer le dernier identifiant du tableau
+        clearTimeout(timeoutId); // Arrêter le timeout
     }
 }
 
@@ -185,6 +79,20 @@ async function printSchedule(agenda, calendarGrid) {
 
     // Vider le contenu existant
     calendarGrid.innerHTML = '';
+
+    // Count the number of days inside the schedule to assign correct grid to the parent
+    let groupedAgendaLength = Object.keys(groupedAgenda).length
+
+    if(groupedAgendaLength === 4){
+        calendarGrid.classList.add('four-columns');
+    } else if(groupedAgendaLength === 3){
+        calendarGrid.classList.add('three-columns');
+    } else if(groupedAgendaLength === 2){
+        calendarGrid.classList.add('two-columns');
+    } else if(groupedAgendaLength === 1){
+        calendarGrid.classList.add('one-columns');
+    }
+
 
     // Créer un élément pour chaque jour et le remplir
     for (const [date, events] of Object.entries(groupedAgenda)) {
@@ -212,6 +120,7 @@ async function printSchedule(agenda, calendarGrid) {
 
 /*
     Is used to fill the schedule in dashboard.html and schedule.html
+    Only create a schedule for one day
  */
 export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = true) {
     const now = new Date();
@@ -268,127 +177,3 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
 /*updateSchedule();
 updateGrades();
 updateAbsences();*/
-
-
-/*
-document.addEventListener('click', function(e) {
-    const lessons = document.querySelectorAll('.lesson');
-    const lessonsArray = Array.from(lessons);
-    const plusAddEvent = document.getElementById('plusAddEvent')
-    const plusAddEventImg = document.getElementById('plusAddEventImg')
-    const isClickInsideLesson = lessonsArray.some(lesson => lesson.contains(e.target));
-
-    const validerEvent = document.getElementById('validerEvent')
-
-
-    // Create an event
-    if(e.target.id === validerEvent.id){
-        const inputs = document.querySelectorAll('#plusAddEvent input');
-        const textDesc = document.getElementsByTagName('textarea')[0];
-
-        let inputDic = {}
-        inputs.forEach((input, index) => {
-            if (index < inputs.length - 1) {
-                inputDic[input.name] = input.value
-            }
-        });
-
-        inputDic["description"] = textDesc.value
-
-        // Check info format
-        if(isNaN(new Date (inputDic.date))){
-            popup("Il faut mettre une date valide")
-            log("Wrong date format")
-            return
-        }
-
-        if (new Date (inputDic.date) < new Date().setUTCDate(0,0,0,0)){
-            popup('Impossible de créer un évènement avant aujourd\'hui')
-            return
-        }
-
-        if(isNaN(parseInt(inputDic.hour)) || isNaN(parseInt(inputDic.minutes))){
-            popup("Il faut mettre des nombres pour les heures et les minutes")
-            log("Wrong hour and/or minutes format")
-            return
-        }
-
-        if(parseInt(inputDic.hour) < 0 || parseInt(inputDic.hour) > 24){
-            popup("Il faut spécifier les heures entre 0 et 24")
-            log("Wrong hour int")
-            return
-        }
-
-        if(parseInt(inputDic.minutes) < 0 || parseInt(inputDic.minutes) > 59){
-            popup("Il faut spécifier les minutes entre 0 et 59")
-            log("Wrong hour int")
-            return
-        }
-
-        if(inputDic.description === ""){
-            popup("Veuiller entrer une description")
-            log("No description entered")
-            return
-        }
-
-        // Refactor informations
-        let tmp = inputDic.date.split('-')
-        inputDic.date = tmp[2]+"/"+tmp[1]+"/"+tmp[0]
-        let hour = inputDic.hour + ":" + inputDic.minutes + ":00"
-        let color = inputDic.color
-        let description = inputDic.description
-
-        const template = {
-            date: {
-                [hour]: {
-                    color: color,
-                    description: description
-                }
-            }
-        };
-
-        //--------------------------------//
-        // CALL THE BACKEND TO SAVE EVENT //
-        //--------------------------------//
-
-        popup('Rappel enregistré !')
-
-        // Close the popup to create event
-        plusAddEvent.classList.remove('active')
-        plusAddEventImg.src = "./src/assets/images/plus_logo_noir.png"
-
-        // Remove informations
-        inputs.forEach((input, index) => {
-            if (index < inputs.length - 1) {
-                input.value = ""
-            }
-        });
-        textDesc.value = ""
-
-        return
-
-    }
-
-    if (!isClickInsideLesson) {
-        lessonsArray.forEach(lesson => {
-            lesson.classList.remove('bigAgenda');
-        });
-    }
-
-    try{
-        if (e.target.closest('#plusAddEvent')) {
-            // L'élément ou l'un de ses parents a l'id "plusAddEvent"
-            plusAddEvent.classList.add('active')
-            plusAddEventImg.src = "./src/assets/images/GES_logo.png"
-        } else {
-            plusAddEvent.classList.remove('active')
-            plusAddEventImg.src = "./src/assets/images/plus_logo_noir.png"
-            // L'élément n'a pas l'id "plusAddEvent" et n'a pas d'ancêtres avec cet id
-        }
-    }
-    catch{
-        console.log("No plusAddEvent tag")
-    }
-
-});
-*/

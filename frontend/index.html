@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="src/CSS/tagsStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/idStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/classStyle.css">
+    <link rel="stylesheet" href="./src/CSS/addEvent.css">
 
     <script type="application/javascript" src="./src/JS/popups.js" defer></script>
 
@@ -17,6 +18,7 @@
 
     <!--Interact with html element, impossible to be modules-->
     <script type="application/javascript" src="./src/JS/loadingGoFuncOutsideModule.js" defer></script>
+    <!--<script type="application/javascript" src="./src/JS/createEvents.js" defer></script>-->
     <script type="application/javascript" src="./src/JS/index_events.js" defer></script>
 
 </head>
@@ -25,18 +27,19 @@
     <div id="utilities">
         <div id="eula">
             <div class="box maxHeight40Pourcent">
-                <h1 class="textCenter">User agreements</h1>
+                <h1 class="textCenter">Informations</h1>
                 <hr>
-                <span class="underline">By using this software, you agree to :</span>
+                <span class="underline">En utilisant ce logiciel, voici ce que vous devez savoir :</span>
                 <ul>
-                    <li>Let this software retrieve informations from your myGes account</li>
-                    <li>Store your myGes data account (username & password) into a local database</li>
-                    <li>Store your myGes data (Grades, Absences, Schedule, etc...) a local database</li>
-                    <li>Neither sold nor making money nor inject malicious code inside the software</li>
-                    <li>This yerk software is designed to work with a 1920x1080 screen (but have responsive design)</li>
-                    <li>This is an open source project, but good luck to take back the dev of this software (。﹏。)</li>
+                    <li>Ce logiciel récupère vos informations MyGes depuis votre compte.</li>
+                    <li>Il enregistre vos données sensibles de compte MyGes (nom d'utilisateur, mot de passe, etc.) dans une base de données locale.</li>
+                    <li>Il stocke vos données MyGes (notes, absences, emploi du temps, etc.) dans une base de données locale.</li>
+                    <li>Ce logiciel est sous licence GNU GPL v3.</li>
+                    <li>Ce logiciel est conçu pour fonctionner sur un écran de 1920x1080 pixels (mais il dispose d'un design réactif).</li>
+                    <li>C'est un projet open source.</li>
+                    <li>Les développeurs du logiciel ne sont en aucun cas responsable des fuites de données possibles</li>
                 </ul>
-                <input id="buttonEula" class="marginTop10" type="button" value="Agree">
+                <input id="buttonEula" class="marginTop10" type="button" value="Ok">
             </div>
         </div>
 
@@ -87,6 +90,9 @@
                     <li onclick="loadPage('grades', event)">
                         Notes
                     </li>
+                    <li onclick="loadPage('events', event)">
+                        Évènements
+                    </li>
                     <li onclick="loadPage('absences', event)">
                         Absences
                     </li>
@@ -120,17 +126,50 @@
 
             <div id="replace" class="paddingTop70">
                 <div class="flex flexCenter">
-                    <div class="box flex flexCenter" style="width: inherit"><p>You're in a strange place... Here's a tacos : 🌮</p></div>
+                    <div class="box flex flexCenter" style="width: inherit"><p>Quel endroit bizarre... Tiens, le tacos que Poulpax m'a gentiment donné : 🌮</p></div>
                 </div>
             </div>
+
+            <div id="open-modal" class="add-button initial">
+                <span class="plus">+</span>
+                <div class="modal">
+                    <div class="modal-content">
+                        <h2 class="modal-title">Créer un évènement</h2>
+                        <form id="event-form">
+                            <div class="form-group">
+                                <label for="event-name">Nom</label>
+                                <input type="text" id="event-name" autocomplete="off" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-description">Description</label>
+                                <textarea id="event-description" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-start">Date de début</label>
+                                <input type="datetime-local" id="event-start" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-end">Date de fin</label>
+                                <input type="datetime-local" id="event-end" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-color">Couleur</label>
+                                <input type="color" id="event-color" value="#396aa1">
+                            </div>
+                            <div class="button-group">
+                                <button type="button" class="btn btn-cancel" id="close-modal">Annuler</button>
+                                <button type="button" class="btn btn-create" id="create-btn">Créer l'évènement</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="overlay"></div>
             
         </div>
-
-
     </main>
 
     <footer>
     </footer>
-
 </body>
 </html>

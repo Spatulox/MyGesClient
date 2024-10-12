@@ -4,8 +4,11 @@ import {
     UpdateDiscordRPC,
 } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
+import {initCreateEvent} from "./createEvents";
 
 export async function start(){
+
+    initCreateEvent()
 
     // Check if :
     // - The user exist

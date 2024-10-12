@@ -1,6 +1,10 @@
 import {GetAgenda, GetEvents, GetGrades} from "../../wailsjs/go/backend/App";
 import {getYear, capitalizeFirstLetter, formatTime, formatDate, formatDateWithDay} from "../JS/functions";
 import {updateSchedule} from "./schedule";
+import {initGradesDisplay} from "./grades";
+
+let displayGradeId = []
+let displayEventsId = []
 
 export async function dashboard(){
 
@@ -30,7 +34,7 @@ export async function dashboard(){
     }
 
     let events = null
-    const htmlElementEvent = document.getElementById("event-content")
+    //const htmlElementEvent = document.getElementById("event-content")
     try{
         events = await GetEvents()
     } catch (e) {
@@ -102,14 +106,8 @@ async function recapGrades(gradesList, grades) {
         const selectedGrades = getRandomElements(grades, 3);
 
         selectedGrades.forEach(grade => {
-            const gradeElement = document.createElement('div');
-            gradeElement.className = 'grade-item';
+            let {gradeElement, courseName, gradesHtml, examHtml} = initGradesDisplay(grade)
 
-            const gradesHtml = grade.grades != null ? grade.grades.join(', ') : "";
-            const examHtml = grade.exam != null ? grade.exam.join(', ') : "";
-
-            // Enlever le préfixe "S1 -" ou "S2 -" du nom du cours
-            const courseName = grade.course.replace(/^S[12] - /, '');
 
             gradeElement.innerHTML = `
                 <span>${capitalizeFirstLetter(courseName)}</span>
@@ -127,7 +125,9 @@ async function recapGrades(gradesList, grades) {
     displayGrades();
 
     // Mettre à jour les notes toutes les 10 secondes
-    setInterval(displayGrades, 10000);
+    if (displayGradeId.length === 0) {
+        displayGradeId.push(setInterval(displayGrades, 10000));
+    }
 }
 
 function createEventCard(event) {
@@ -156,8 +156,33 @@ function recapEvents(events) {
     container.innerHTML = ""
     events.forEach(event => {
         const card = createEventCard(event);
-        console.log(event)
         container.appendChild(card);
     });
+
+    if(displayEventsId.length === 0){
+        const intervalId = setInterval(() => recapEvents(events), 5000);
+        displayEventsId.push(intervalId);
+    }
 }
 
+
+export function stopAutomaticEventsInDashboard(){
+    stopRecapEvents()
+    stopDisplayingGrades()
+}
+
+// Fonction pour arrêter tous les intervalles
+function stopRecapEvents() {
+    while (displayEventsId.length > 0) {
+        const intervalId = displayEventsId.pop();
+        clearInterval(intervalId);
+    }
+}
+
+// Fonction pour arrêter le setTimeout
+function stopDisplayingGrades() {
+    while (displayGradeId.length > 0) {
+        const timeoutId = displayGradeId.pop();
+        clearTimeout(timeoutId);
+    }
+}

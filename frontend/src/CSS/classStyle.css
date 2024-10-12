@@ -13,6 +13,23 @@
     transition: all ease-in-out, 0.5s;
 }
 
+.action-list li {
+    cursor: pointer;
+    padding: 8px 0;
+    transition: all 0.2s;
+}
+
+.action-list li:hover {
+    background-color: var(--card-bg);
+    border-radius: 3px;
+    padding-left: 5px;
+    transition: color 0.2s, padding-left 0.2s;
+}
+
+.bottom-sections .credits-section {
+    width: 100%;
+}
+
 .bold{
     font-weight: 800;
 }
@@ -27,9 +44,134 @@
     transition: all ease-in-out, 0.5s;
 }
 
+.calendar-container {
+    background-color: #36393f;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: var(--text-color);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.calendar-title {
+    color: #ffffff;
+    font-size: 20px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--card-bg);
+}
+
+.credits-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.credits-section {
+    background-color: var(--discord-dark);
+    border-radius: 5px;
+    padding: 20px;
+    width: 45%;
+    margin-bottom: 20px;
+}
+
+.credits-section .link-list {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+
+.credits-section .link-list::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: #7289da; /* Couleur Discord bleu */
+}
+
+.credits-section .link-list li {
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+.credits-section .link-list a {
+    display: inline-block;
+    color: #00b0f4;
+    text-decoration: none;
+    transition: color 0.2s, padding-left 0.2s;
+}
+
+.credits-section .link-list a:hover {
+    color: #ffffff;
+    padding-left: 5px;
+}
+
+.credits-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.credits-container li {
+    margin-bottom: 10px;
+}
+
+.credits-container a {
+    color: #00b0f4;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.credits-container a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
 .closePNG{
     width: 30px;
     position: absolute;
+}
+
+.event-list {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.event-name {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.event-date {
+    font-size: 0.9em;
+    color: #b9bbbe;
+}
+
+.event-description {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+}
+
+.event-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+    color: #b9bbbe;
 }
 
 .events-container {
@@ -38,14 +180,15 @@
     gap: 16px;
 }
 
-.event-card {
-    background-color: #2f3136;
+.event-item, .event-card, .course-card {
+    background-color: var(--discord-dark);
     border-radius: 8px;
     padding: 16px;
-    /*width: 300px;*/
-    /*width: 287px;*/
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     border-left: 4px solid;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.event-card {
     width: 40%;
     max-width: 287px;
 }
@@ -69,7 +212,7 @@
 }
 
 .event-description {
-    color: #dcddde;
+    color: var(--text-color);
     font-size: 14px;
     margin-bottom: 12px;
 }
@@ -310,6 +453,21 @@
     animation: popupSlideDown 0.3s ease-out forwards;
 }
 
+.section-title {
+    color: #ffffff;
+    font-size: 24px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--card-bg);
+    padding-bottom: 10px;
+}
+
+.subsection-title {
+    color: #ffffff;
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
 .semester-tabs {
     display: flex;
     gap: 10px;
@@ -331,8 +489,8 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    background-color: #2f3136;
-    color: #dcddde;
+    background-color: var(--discord-dark);
+    color: var(--text-color);
 }
 
 .tab-button:hover {
@@ -496,6 +654,8 @@
 /*.main-content-dashboard #schedule-content,*/
 .main-content-dashboard #grades-content,
 .main-content-dashboard #event-content {
+    max-height: 280px;
+    overflow: auto;
     background-color: var(--card-bg);
     border-radius: 5px;
     padding: 15px;
@@ -601,6 +761,22 @@
     gap: 10px;
 }
 
+.main-content-schedule #calendar-grid.four-columns {
+    grid-template-columns: repeat(4, 1fr); /* Si besoin, 4 colonnes */
+}
+
+.main-content-schedule #calendar-grid.three-columns {
+    grid-template-columns: repeat(3, 1fr); /* Si besoin, 4 colonnes */
+}
+
+.main-content-schedule #calendar-grid.two-columns {
+    grid-template-columns: repeat(2, 1fr); /* Si besoin, 4 colonnes */
+}
+
+.main-content-schedule #calendar-grid.one-columns {
+    grid-template-columns: repeat(1, 1fr); /* Si besoin, 4 colonnes */
+}
+
 .main-content-schedule .day-column, .main-content-dashboard .day-column {
     background-color: var(--sidebar-color);
     border-radius: 5px;
@@ -616,18 +792,18 @@
     border-radius: 5px;
 }
 
-.main-content-schedule .course-card, .main-content-dashboard .course-card {
+.course-card {
+    margin: 10px 0;
+    color: var(--text-color);
+    border-color: var(--highlight-color);
     background-color: var(--card-bg);
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .main-content-schedule .course-card h3, .main-content-dashboard .course-card h3 {
     margin-top: 0;
     margin-bottom: 5px;
-    color: var(--highlight-color);
+    font-weight: bold;
+    text-decoration: underline;
 }
 
 .main-content-schedule .course-card p, .main-content-dashboard .course-card p {
@@ -703,5 +879,9 @@
     .event-card{
         width: 90%;
         max-width: inherit;
+    }
+
+    .credits-section{
+        width: 80%;
     }
 }

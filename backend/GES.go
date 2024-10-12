@@ -45,18 +45,21 @@ func (a *App) globalRefresh(year string, start string, end string) (string, erro
 	end2 := "2024-09-28"*/
 	_, err := a.RefreshAgenda(&start, &end)
 	if err != nil {
+		Log.Error("Impossible to refresh the schedule")
 		Log.Error(err.Error())
-		return createErrorMessage("Impossible to refresh the schedule :/"), err
+		//return createErrorMessage("Impossible to refresh the schedule :/"), err
 	}
 	_, err = a.RefreshGrades(year)
 	if err != nil {
+		Log.Error("Impossible to refresh grades")
 		Log.Error(err.Error())
-		return createErrorMessage("Impossible to refresh grade :/"), err
+		//return createErrorMessage("Impossible to refresh grade :/"), err
 	}
 	_, err = a.RefreshAbsences(year)
 	if err != nil {
+		Log.Error("Impossible to refresh absences")
 		Log.Error(err.Error())
-		return createErrorMessage("Impossible to refresh the profile :/"), err
+		//return createErrorMessage("Impossible to refresh the profile :/"), err
 	}
 
 	return createErrorMessage("Refresh finished !"), nil

@@ -28,6 +28,7 @@
     --highlight-color: #396aa1;
     --card-bg: #40444b;
     --hover-bg: #454950;
+    --discord-dark: #2f3136;
     /*Fin des même couleur*/
 
     transition: all ease-in-out 0.5s;
@@ -49,6 +50,10 @@
     --highlight-color: #396aa1;
     --card-bg: #40444b;
     --hover-bg: #454950;
+
+    --discord-dark: #2f3136;
+    --discord-light: #40444b;
+    --discord-lightlight: #56585c;
 
     transition: all ease-in-out 0.5s;
 }
