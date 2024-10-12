@@ -24,6 +24,11 @@ func (a *App) GetEvents() ([]Event, error) {
 	return GetEventDB(a.db)
 }
 
+func (a *App) GetEventsLike(eventName string) ([]Event, error) {
+	Log.Infos("Get events by name")
+	return GetEventByNameDB(a.db, eventName)
+}
+
 func (a *App) GetAllEvents() ([]Event, error) {
 	Log.Infos("Get all events")
 	return GetAllEventDB(a.db)
