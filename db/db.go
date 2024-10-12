@@ -113,7 +113,3 @@ func UpdateUserTheme(db *sql.DB, value string) (bool, error) {
 
 	return true, nil
 }
-
-/*func GetDBUserGrades(db *sql.DB) (string, error) {
-	return grades, nil
-}*/
