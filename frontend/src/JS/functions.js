@@ -5,7 +5,6 @@ import {GetParentDir, WriteLogFile} from "../../wailsjs/go/backend/App";
 export function log(str) {
 
     GetParentDir().then((parentDir) => {
-        console.log("Parent directory:", parentDir);
         const logDir = parentDir.split('\\src')[0] + "\\log"; // Utilisation de / au lieu de \\ pour la compatibilité multiplateforme
         const filePath = logDir + '\\log.txt';
 
