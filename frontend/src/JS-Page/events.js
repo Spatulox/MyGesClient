@@ -1,13 +1,16 @@
-import {GetEvents, GetEventsLike, SaveEvents} from "../../wailsjs/go/backend/App";
+import {GetAllEvents, GetEvents, GetEventsLike, SaveEvents} from "../../wailsjs/go/backend/App";
 import {formatDateWithDay} from "../JS/functions";
 let personnalEvents
 
 export async function events(){
 
+    const replace = document.getElementById("replace")
+    replace.style.height = "auto"
+
     const searchBar = document.getElementById("searchBar")
 
     try{
-        personnalEvents = await GetEvents()
+        personnalEvents = await GetAllEvents()
     } catch (e) {
         console.log(e)
         return
