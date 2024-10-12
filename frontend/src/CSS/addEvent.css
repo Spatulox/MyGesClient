@@ -34,7 +34,7 @@
     width: 400px;
     height: 560px;
     font-size: inherit;
-    background-color: #2f3136;
+    background-color: var(--discord-dark);
     animation: expandButton 0.8s forwards;
 
 }
@@ -62,7 +62,7 @@
     transform: scale(0);
     position: fixed;
     background-color: rgba(0, 0, 0, 0.85);
-    display: flex;
+    /*display: flex;*/
     justify-content: center;
     align-items: center;
     opacity: 0;
@@ -73,7 +73,7 @@
 }
 
 .modal {
-    display: none;
+    /*display: none;*/
     position: absolute;
     width: 100%;
     height: 100%;
@@ -93,7 +93,7 @@
     padding: 20px;
 
     opacity: 0;
-    color: #dcddde;
+    color: var(--text-color);
 
     box-sizing: border-box;
     overflow-y: auto;
@@ -116,7 +116,7 @@
 }
 
 .modal-overlay.active .modal {
-    background-color: #2f3136;
+    background-color: var(--discord-dark);
 }
 
 .modal-overlay.active .modal-content {
@@ -146,15 +146,34 @@
     text-align: left;
 }
 
-.modal input[type="text"],
-.modal input[type="datetime-local"],
-.modal textarea {
+/*.modal*/ input[type="text"],
+           input[type="password"],
+           input[type="button"],
+/*.modal*/ input[type="datetime-local"],
+/*.modal*/ textarea {
     width: 96%;
     padding: 8px;
     border: none;
-    background-color: #40444b;
-    color: #dcddde;
+    background-color: var(--discord-light);
+    color: var(--text-color);
     border-radius: 5px;
+}
+
+/*.modal*/ input[type="text"]:hover,
+           input[type="password"]:hover,
+           input[type="button"]:hover,
+   /*.modal*/ input[type="datetime-local"]:hover,
+   /*.modal*/ textarea:hover {
+   width: 96%;
+   padding: 8px;
+   border: none;
+   background-color: var(--discord-lightlight);
+   color: var(--text-color);
+   border-radius: 5px;
+}
+
+input[type="button"]:hover{
+    cursor: pointer;
 }
 
 .modal textarea {
@@ -166,7 +185,7 @@
     width: 100%;
     height: 40px;
     border: none;
-    background-color: #40444b;
+    background-color: var(--card-bg);
     border-radius: 5px;
 }
 
@@ -192,7 +211,7 @@
 }
 
 .btn-cancel:hover {
-    background-color: #68727f;
+    background-color: var(--discord-lightlight);
 }
 
 .btn-create {
@@ -227,7 +246,7 @@
         width: 400px;
         height: 560px;
         font-size: inherit;
-        background-color: #2f3136;
+        background-color: var(--discord-dark);
         bottom: 50%;
         right: 50%;
         transform: scale(1) translate(50%, 50%);

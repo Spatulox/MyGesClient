@@ -20,7 +20,7 @@
 }
 
 .action-list li:hover {
-    background-color: #40444b;
+    background-color: var(--card-bg);
     border-radius: 3px;
     padding-left: 5px;
     transition: color 0.2s, padding-left 0.2s;
@@ -55,7 +55,7 @@
 }
 
 .credits-section {
-    background-color: #2f3136;
+    background-color: var(--discord-dark);
     border-radius: 5px;
     padding: 20px;
     width: 45%;
@@ -127,7 +127,7 @@
 }
 
 .event-card {
-    background-color: #2f3136;
+    background-color: var(--discord-dark);
     border-radius: 8px;
     padding: 16px;
     /*width: 300px;*/
@@ -157,7 +157,7 @@
 }
 
 .event-description {
-    color: #dcddde;
+    color: var(--text-color);
     font-size: 14px;
     margin-bottom: 12px;
 }
@@ -402,7 +402,7 @@
     color: #ffffff;
     font-size: 24px;
     margin-bottom: 20px;
-    border-bottom: 1px solid #40444b;
+    border-bottom: 1px solid var(--card-bg);
     padding-bottom: 10px;
 }
 
@@ -434,8 +434,8 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    background-color: #2f3136;
-    color: #dcddde;
+    background-color: var(--discord-dark);
+    color: var(--text-color);
 }
 
 .tab-button:hover {
