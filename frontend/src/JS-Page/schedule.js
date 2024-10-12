@@ -2,7 +2,6 @@ import { GetAgenda, SaveEvents } from "../../wailsjs/go/backend/App";
 import {capitalizeFirstLetter, getMonday, getSaturday} from "../JS/functions";
 
 let scheduleTimeoutId = []
-let setSchedule = 0
 
 export async  function schedule(){
     console.log("schedule")
@@ -50,9 +49,8 @@ export async  function schedule(){
         popup(e)
     }
 
-    if (setSchedule === 0) {
-        scheduleTimeoutId.push(setTimeout(schedule, 5000));
-        setSchedule = 1;
+    if (scheduleTimeoutId.length === 0) {
+        scheduleTimeoutId.push(setInterval(schedule, 5000));
     }
 
 }
@@ -63,7 +61,6 @@ export function stopSchedule() {
         const timeoutId = scheduleTimeoutId.pop(); // Retirer le dernier identifiant du tableau
         clearTimeout(timeoutId); // Arrêter le timeout
     }
-    setSchedule = 0; // Réinitialiser la variable
 }
 
 
@@ -110,6 +107,7 @@ async function printSchedule(agenda, calendarGrid) {
 
 /*
     Is used to fill the schedule in dashboard.html and schedule.html
+    Only create a schedule for one day
  */
 export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = true) {
     const now = new Date();
@@ -166,127 +164,3 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
 /*updateSchedule();
 updateGrades();
 updateAbsences();*/
-
-
-/*
-document.addEventListener('click', function(e) {
-    const lessons = document.querySelectorAll('.lesson');
-    const lessonsArray = Array.from(lessons);
-    const plusAddEvent = document.getElementById('plusAddEvent')
-    const plusAddEventImg = document.getElementById('plusAddEventImg')
-    const isClickInsideLesson = lessonsArray.some(lesson => lesson.contains(e.target));
-
-    const validerEvent = document.getElementById('validerEvent')
-
-
-    // Create an event
-    if(e.target.id === validerEvent.id){
-        const inputs = document.querySelectorAll('#plusAddEvent input');
-        const textDesc = document.getElementsByTagName('textarea')[0];
-
-        let inputDic = {}
-        inputs.forEach((input, index) => {
-            if (index < inputs.length - 1) {
-                inputDic[input.name] = input.value
-            }
-        });
-
-        inputDic["description"] = textDesc.value
-
-        // Check info format
-        if(isNaN(new Date (inputDic.date))){
-            popup("Il faut mettre une date valide")
-            log("Wrong date format")
-            return
-        }
-
-        if (new Date (inputDic.date) < new Date().setUTCDate(0,0,0,0)){
-            popup('Impossible de créer un évènement avant aujourd\'hui')
-            return
-        }
-
-        if(isNaN(parseInt(inputDic.hour)) || isNaN(parseInt(inputDic.minutes))){
-            popup("Il faut mettre des nombres pour les heures et les minutes")
-            log("Wrong hour and/or minutes format")
-            return
-        }
-
-        if(parseInt(inputDic.hour) < 0 || parseInt(inputDic.hour) > 24){
-            popup("Il faut spécifier les heures entre 0 et 24")
-            log("Wrong hour int")
-            return
-        }
-
-        if(parseInt(inputDic.minutes) < 0 || parseInt(inputDic.minutes) > 59){
-            popup("Il faut spécifier les minutes entre 0 et 59")
-            log("Wrong hour int")
-            return
-        }
-
-        if(inputDic.description === ""){
-            popup("Veuiller entrer une description")
-            log("No description entered")
-            return
-        }
-
-        // Refactor informations
-        let tmp = inputDic.date.split('-')
-        inputDic.date = tmp[2]+"/"+tmp[1]+"/"+tmp[0]
-        let hour = inputDic.hour + ":" + inputDic.minutes + ":00"
-        let color = inputDic.color
-        let description = inputDic.description
-
-        const template = {
-            date: {
-                [hour]: {
-                    color: color,
-                    description: description
-                }
-            }
-        };
-
-        //--------------------------------//
-        // CALL THE BACKEND TO SAVE EVENT //
-        //--------------------------------//
-
-        popup('Rappel enregistré !')
-
-        // Close the popup to create event
-        plusAddEvent.classList.remove('active')
-        plusAddEventImg.src = "./src/assets/images/plus_logo_noir.png"
-
-        // Remove informations
-        inputs.forEach((input, index) => {
-            if (index < inputs.length - 1) {
-                input.value = ""
-            }
-        });
-        textDesc.value = ""
-
-        return
-
-    }
-
-    if (!isClickInsideLesson) {
-        lessonsArray.forEach(lesson => {
-            lesson.classList.remove('bigAgenda');
-        });
-    }
-
-    try{
-        if (e.target.closest('#plusAddEvent')) {
-            // L'élément ou l'un de ses parents a l'id "plusAddEvent"
-            plusAddEvent.classList.add('active')
-            plusAddEventImg.src = "./src/assets/images/GES_logo.png"
-        } else {
-            plusAddEvent.classList.remove('active')
-            plusAddEventImg.src = "./src/assets/images/plus_logo_noir.png"
-            // L'élément n'a pas l'id "plusAddEvent" et n'a pas d'ancêtres avec cet id
-        }
-    }
-    catch{
-        console.log("No plusAddEvent tag")
-    }
-
-});
-*/
