@@ -16,7 +16,7 @@
 .action-list li {
     cursor: pointer;
     padding: 8px 0;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
 }
 
 .action-list li:hover {
