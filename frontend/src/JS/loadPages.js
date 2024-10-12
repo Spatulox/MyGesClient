@@ -30,6 +30,7 @@ export async function loadPageGo(string, event = null){
     try {
         mainPart.innerHTML = await GetPageContent(string)
         updatePages(string.split(".html")[0])
+        headerTitle.innerText = event.srcElement.innerText ? event.srcElement.innerText : "Accueil"
 
     } catch(err){
         log("ERROR : An error occured in the loadPage function : "+err)

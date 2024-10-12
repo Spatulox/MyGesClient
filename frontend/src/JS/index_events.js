@@ -2,8 +2,8 @@
 // ------------------------------------------------------------------ //
 // Functions
 
-function loadPage(string){ // Used in index.html
-    loadPageGo(string)
+function loadPage(string, event){ // Used in index.html
+    loadPageGo(string, event)
 }
 
 // ------------------------------------------------------------------ //
