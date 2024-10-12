@@ -4,7 +4,6 @@ import {capitalizeFirstLetter, getMonday, getSaturday} from "../JS/functions";
 let scheduleTimeoutId = []
 
 export async  function schedule(){
-    console.log("schedule")
     const replace = document.getElementById("replace")
     replace.style.height = "auto"
 
@@ -80,6 +79,20 @@ async function printSchedule(agenda, calendarGrid) {
 
     // Vider le contenu existant
     calendarGrid.innerHTML = '';
+
+    // Count the number of days inside the schedule to assign correct grid to the parent
+    let groupedAgendaLength = Object.keys(groupedAgenda).length
+
+    if(groupedAgendaLength === 4){
+        calendarGrid.classList.add('four-columns');
+    } else if(groupedAgendaLength === 3){
+        calendarGrid.classList.add('three-columns');
+    } else if(groupedAgendaLength === 2){
+        calendarGrid.classList.add('two-columns');
+    } else if(groupedAgendaLength === 1){
+        calendarGrid.classList.add('one-columns');
+    }
+
 
     // Créer un élément pour chaque jour et le remplir
     for (const [date, events] of Object.entries(groupedAgenda)) {
