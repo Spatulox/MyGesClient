@@ -353,6 +353,10 @@
     transition: all ease-in-out 0.3s;
 }
 
+#event-manager{
+    margin-bottom: 70px;
+}
+
 #firstTime{
     margin-top: 0;
 }
@@ -417,6 +421,9 @@
 #replace{
     /*min-height: 100%;*/
     height: calc(100% - 70px)
+    /*Add height: auto; only if you want your page to scroll
+    Only add that with document.getElementById("replace").style.height with JS
+    The property will be deleted when switching page*/
 }
 
 #semester1 h1, #semester2 h1{

@@ -870,4 +870,8 @@
         width: 90%;
         max-width: inherit;
     }
+
+    .credits-section{
+        width: 80%;
+    }
 }
