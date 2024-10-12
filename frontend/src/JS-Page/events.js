@@ -1,7 +1,7 @@
 import {GetAllEvents, GetEvents, GetEventsLike, SaveEvents} from "../../wailsjs/go/backend/App";
 import {formatDateWithDay} from "../JS/functions";
 let personnalEvents
-
+let displayEventsId = []
 export async function events(){
 
     const replace = document.getElementById("replace")
@@ -24,6 +24,10 @@ export async function events(){
         console.log(searchBar.value)
         console.log(searchedEvents)
     })
+
+    if(displayEventsId.length === 0){
+        displayEventsId.push(setInterval(events, 5000))
+    }
 }
 
 function createEventElement(event) {
@@ -82,4 +86,13 @@ function populateCalendar(events) {
         const eventElement = createEventElement(event);
         eventList.appendChild(eventElement);
     });
+}
+
+
+// Fonction pour arrêter le setTimeout
+export function stopDisplayingEvents() {
+    while (displayEventsId.length > 0) {
+        const timeoutId = displayEventsId.pop();
+        clearTimeout(timeoutId);
+    }
 }
