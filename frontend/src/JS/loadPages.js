@@ -6,12 +6,17 @@ import {GetPageContent, UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
 
 // Page Functions
 // They are used
-import {dashboard} from "../JS-Page/dashbord.js";
-import {schedule} from "../JS-Page/schedule";
+import {dashboard, stopAutomaticEventsInDashboard} from "../JS-Page/dashbord.js";
+import {schedule, stopSchedule} from "../JS-Page/schedule";
 import {grades} from "../JS-Page/grades";
-import {events} from "../JS-Page/events";
+import {events, stopDisplayingEvents} from "../JS-Page/events";
 
 export async function loadPageGo(string, event = null){
+
+    // Stop all automatic refresh :
+    stopSchedule()
+    stopAutomaticEventsInDashboard()
+    stopDisplayingEvents()
 
     log(`Loading ${string} page`)
 
