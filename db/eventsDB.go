@@ -181,3 +181,83 @@ func GetAllEventDB(db *sql.DB) ([]Event, error) {
 
 	return events, nil
 }
+
+func GetEventByNameDB(db *sql.DB, eventName string) ([]Event, error) {
+	query := `
+        SELECT event_name, event_description, start_date, end_date, color
+		FROM EVENTS
+		WHERE start_date >= datetime('now')
+		  AND user_id = ?
+		  AND event_name LIKE '%' || ? || '%'
+		ORDER BY start_date ASC
+    `
+
+	user, err := GetUser(db)
+	if err != nil {
+		return nil, fmt.Errorf("Impossible to retrieve the user id when getting events")
+	}
+
+	// Exécuter la requête
+	rows, err := db.Query(query, user.ID, eventName)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de l'exécution de la requête : %v", err)
+	}
+	defer rows.Close()
+
+	events, err := parseEvents(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
+func parseEvents(rows *sql.Rows) ([]Event, error) {
+
+	// Slice pour stocker les événements
+	var events []Event
+	var err error
+
+	// Parcourir les résultats
+	for rows.Next() {
+		var event Event
+		var description sql.NullString
+		var startDateStr, endDateStr string
+
+		err := rows.Scan(
+			&event.Name,
+			&description,
+			&startDateStr,
+			&endDateStr,
+			&event.Color,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("erreur lors de la lecture d'un événement : %v", err)
+		}
+
+		// Convertir les dates de string à time.Time
+		event.StartDate, err = time.Parse("2006-01-02 15:04:05", startDateStr)
+		if err != nil {
+			return nil, fmt.Errorf("erreur lors de la conversion de la date de début : %v", err)
+		}
+		event.EndDate, err = time.Parse("2006-01-02 15:04:05", endDateStr)
+		if err != nil {
+			return nil, fmt.Errorf("erreur lors de la conversion de la date de fin : %v", err)
+		}
+
+		// Gérer la description qui peut être NULL
+		if description.Valid {
+			event.Description = description.String
+		}
+
+		events = append(events, event)
+	}
+
+	// Vérifier s'il y a eu des erreurs pendant l'itération
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("erreur lors du parcours des résultats : %v", err)
+	}
+
+	return events, nil
+
+}
