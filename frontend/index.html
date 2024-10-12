@@ -32,7 +32,7 @@
                 <span class="underline">En utilisant ce logiciel, voici ce que vous devez savoir :</span>
                 <ul>
                     <li>Ce logiciel récupère vos informations MyGes depuis votre compte.</li>
-                    <li>Il enregistre vos données sensibles de compte MyGes (nom d'utilisateur, mot de passe, etc.) dans une base de données locale.</li>
+                    <li>Il enregistre vos données sensibles de compte MyGes (nom d'utilisateur et mot de passe) dans une base de données locale.</li>
                     <li>Il stocke vos données MyGes (notes, absences, emploi du temps, etc.) dans une base de données locale.</li>
                     <li>Ce logiciel est sous licence GNU GPL v3.</li>
                     <li>Ce logiciel est conçu pour fonctionner sur un écran de 1920x1080 pixels (mais il dispose d'un design réactif).</li>
@@ -103,12 +103,12 @@
                         Projets de Groupes
                     </li>    
                     <li onclick="loadPage('account', event)">
-                        Mon Compte
+                        Compte MyGes
                     </li>
                 </ul>
             </nav>
 
-            <div class="ulBottom flex flexCenter"><a class="underlinePointer" onclick="loadPage('credits')">Credit</a> <a class="underlinePointer" onclick="loadPage('softwareAccount')">Mon compte</a></div>
+            <div class="ulBottom flex flexAround"><a class="underlinePointer" onclick="loadPage('credits', event)">Credit</a> <a class="underlinePointer" onclick="loadPage('softwareAccount', event)">Compte</a></div>
 
         </div>  <!--softwareAccount-->
 
