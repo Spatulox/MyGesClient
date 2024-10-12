@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="src/CSS/tagsStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/idStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/classStyle.css">
+    <link rel="stylesheet" href="./src/CSS/addEvent.css">
 
     <script type="application/javascript" src="./src/JS/popups.js" defer></script>
 
@@ -17,6 +18,7 @@
 
     <!--Interact with html element, impossible to be modules-->
     <script type="application/javascript" src="./src/JS/loadingGoFuncOutsideModule.js" defer></script>
+    <script type="application/javascript" src="./src/JS/createEvents.js" defer></script>
     <script type="application/javascript" src="./src/JS/index_events.js" defer></script>
 
 </head>
@@ -87,6 +89,9 @@
                     <li onclick="loadPage('grades', event)">
                         Notes
                     </li>
+                    <li onclick="loadPage('events', event)">
+                        Évènements
+                    </li>
                     <li onclick="loadPage('absences', event)">
                         Absences
                     </li>
@@ -123,6 +128,42 @@
                     <div class="box flex flexCenter" style="width: inherit"><p>Quel endroit bizarre... Tiens, le tacos que Poulpax m'a gentiment donné : 🌮</p></div>
                 </div>
             </div>
+
+            <div id="open-modal" class="add-button initial">
+                <span class="plus">+</span>
+                <div class="modal">
+                    <div class="modal-content">
+                        <h2 class="modal-title">Create Event</h2>
+                        <form id="event-form">
+                            <div class="form-group">
+                                <label for="event-name">Event Name</label>
+                                <input type="text" id="event-name" autocomplete="off" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-description">Description</label>
+                                <textarea id="event-description" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-start">Start Date</label>
+                                <input type="datetime-local" id="event-start" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-end">End Date</label>
+                                <input type="datetime-local" id="event-end" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-color">Color</label>
+                                <input type="color" id="event-color" value="#396aa1">
+                            </div>
+                            <div class="button-group">
+                                <button type="button" class="btn btn-cancel" id="close-modal">Cancel</button>
+                                <button type="button" class="btn btn-create" id="create-btn">Create Event</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="overlay"></div>
             
         </div>
 
