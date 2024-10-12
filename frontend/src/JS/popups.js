@@ -30,7 +30,20 @@ function createPopup(type, content) {
         // Supprimer la première popup (celle en haut)
         const firstPopup = popupContainer.querySelector('.popup');
         if (firstPopup) {
-            removePopup(firstPopup.id);
+            const popupTmp = document.getElementById(firstPopup.id);
+            if (popupTmp) {
+                const type = popupTmp.id.split('-')[1];
+                popupTmp.classList.remove('active');
+
+                // The normal function removePopup is to slow when the user is spamming :/
+                popupTmp.remove();
+                updatePopupPositions(type);
+                if (type === 'still') {
+                    popupStillCounter--;
+                } else {
+                    popupNormalCounter--;
+                }
+            }
         }
     }
 
@@ -98,3 +111,42 @@ function popup(string) {
         removePopup(popupId);
     }, 5000);
 }
+
+// Used to hard remove popups which stay still when "spamming"
+setInterval(()=>{
+    // Check the number of popup
+    const normalpopups = document.querySelectorAll(`#normalpopup .popup`);
+    const stillpopups = document.querySelectorAll(`#stillpopup .popup`);
+
+    popupNormalCounter = normalpopups.length
+    popupStillCounter = stillpopups.length
+    console.log(normalpopups)
+
+    // Compter les popups et gérer l'attribut count
+    normalpopups.forEach(popup => {
+        // Incrémenter ou initialiser le count
+        let count = parseInt(popup.getAttribute('count')) || 0;
+        count++;
+        popup.setAttribute('count', count);
+
+        // Vérifier si le count est supérieur à 2
+        if (count > 2) {
+            const popupId = popup.getAttribute('id'); // Récupérer l'ID de la popup
+            removePopup(popupId); // Exécuter la fonction removePopup
+        }
+    });
+
+    stillpopups.forEach(popup => {
+        // Incrémenter ou initialiser le count
+        let count = parseInt(popup.getAttribute('count')) || 0;
+        count++;
+        popup.setAttribute('count', count);
+
+        // Vérifier si le count est supérieur à 2
+        if (count >= 2) {
+            const popupId = popup.getAttribute('id'); // Récupérer l'ID de la popup
+            removePopup(popupId); // Exécuter la fonction removePopup
+        }
+    });
+
+}, 5000)
