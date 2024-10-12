@@ -599,6 +599,8 @@
 /*.main-content-dashboard #schedule-content,*/
 .main-content-dashboard #grades-content,
 .main-content-dashboard #event-content {
+    max-height: 280px;
+    overflow: auto;
     background-color: var(--card-bg);
     border-radius: 5px;
     padding: 15px;
