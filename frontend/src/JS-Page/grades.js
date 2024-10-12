@@ -13,14 +13,8 @@ export async function grades() {
     function populateGrades(gradesList, grades) {
         gradesList.innerHTML = ''; // Nettoyer la liste existante
         grades.forEach(grade => {
-            const gradeElement = document.createElement('div');
-            gradeElement.className = 'grade-item';
 
-            const gradesHtml = grade.grades != null ? grade.grades.join(', ') : "";
-            const examHtml = grade.exam != null ? grade.exam.join(', ') : "";
-
-            // Enlever le préfixe "S1 -" ou "S2 -" du nom du cours
-            const courseName = grade.course.replace(/^S[12] - /, '');
+            let {gradeElement, courseName, gradesHtml, examHtml} = initGradesDisplay(grade)
 
             gradeElement.innerHTML = `
                 <span>${capitalizeFirstLetter(courseName)}</span>
@@ -64,5 +58,18 @@ export async function grades() {
             document.getElementById(`grades-list-semester-${semester}`).classList.add('active');
         });
     });
+}
+
+
+export function initGradesDisplay(grade){
+    const gradeElement = document.createElement('div');
+    gradeElement.className = 'grade-item';
+
+    const gradesHtml = grade.grades != null ? grade.grades.join(', ') : "";
+    const examHtml = grade.exam != null ? grade.exam.join(', ') : "";
+
+    // Enlever le préfixe "S1 -" ou "S2 -" du nom du cours
+    const courseName = grade.course.replace(/^S[12] - /, '');
+    return {gradeElement, courseName, gradesHtml, examHtml}
 }
 
