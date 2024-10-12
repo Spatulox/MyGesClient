@@ -18,7 +18,7 @@
 
     <!--Interact with html element, impossible to be modules-->
     <script type="application/javascript" src="./src/JS/loadingGoFuncOutsideModule.js" defer></script>
-    <script type="application/javascript" src="./src/JS/createEvents.js" defer></script>
+    <!--<script type="application/javascript" src="./src/JS/createEvents.js" defer></script>-->
     <script type="application/javascript" src="./src/JS/index_events.js" defer></script>
 
 </head>
@@ -133,10 +133,10 @@
                 <span class="plus">+</span>
                 <div class="modal">
                     <div class="modal-content">
-                        <h2 class="modal-title">Create Event</h2>
+                        <h2 class="modal-title">Créer un évènement</h2>
                         <form id="event-form">
                             <div class="form-group">
-                                <label for="event-name">Event Name</label>
+                                <label for="event-name">Nom</label>
                                 <input type="text" id="event-name" autocomplete="off" required>
                             </div>
                             <div class="form-group">
@@ -144,20 +144,20 @@
                                 <textarea id="event-description" required></textarea>
                             </div>
                             <div class="form-group">
-                                <label for="event-start">Start Date</label>
+                                <label for="event-start">Date de début</label>
                                 <input type="datetime-local" id="event-start" required>
                             </div>
                             <div class="form-group">
-                                <label for="event-end">End Date</label>
+                                <label for="event-end">Date de fin</label>
                                 <input type="datetime-local" id="event-end" required>
                             </div>
                             <div class="form-group">
-                                <label for="event-color">Color</label>
+                                <label for="event-color">Couleur</label>
                                 <input type="color" id="event-color" value="#396aa1">
                             </div>
                             <div class="button-group">
-                                <button type="button" class="btn btn-cancel" id="close-modal">Cancel</button>
-                                <button type="button" class="btn btn-create" id="create-btn">Create Event</button>
+                                <button type="button" class="btn btn-cancel" id="close-modal">Annuler</button>
+                                <button type="button" class="btn btn-create" id="create-btn">Créer l'évènement</button>
                             </div>
                         </form>
                     </div>
@@ -166,12 +166,9 @@
             <div id="overlay"></div>
             
         </div>
-
-
     </main>
 
     <footer>
     </footer>
-
 </body>
 </html>
