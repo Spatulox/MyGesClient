@@ -128,6 +128,14 @@ func SaveAgendaToDB(agenda string, db *sql.DB) {
 			}
 		}
 
+		var roomID interface{}
+		// Vérifier si des salles sont disponibles
+		if len(agenda.Rooms) > 0 {
+			roomID = agenda.Rooms[0].RoomID
+		} else {
+			roomID = nil // Ou une autre valeur par défaut, comme sql.NullInt64{}
+		}
+
 		// Insérer l'agenda
 		_, err = stmtAgenda.Exec(
 			agenda.AgendaID,
@@ -137,7 +145,7 @@ func SaveAgendaToDB(agenda string, db *sql.DB) {
 			agenda.StartDate.Format(),
 			agenda.EndDate.Format(),
 			agenda.Comment,
-			agenda.Rooms[0].RoomID, // Utiliser la première salle pour l'exemple
+			roomID, // Utiliser la première salle pour l'exemple
 			agenda.Discipline.TeacherID,
 			userID.ID,
 		)
@@ -163,15 +171,39 @@ func SaveAgendaToDB(agenda string, db *sql.DB) {
 func GetDBUserAgenda(db *sql.DB, start string, end string) ([]LocalAgenda, error) {
 	var agendas []LocalAgenda
 
-	query := `
-		SELECT a.agenda_name, a.type, a.modality, a.start_date, a.end_date, a.comment,
-       		 s.room_name, s.campus, s.color, d.coef, d.trimestre, p.teacher_name
-		FROM AGENDA a
-			 JOIN SALLES s ON a.room_id = s.room_id
-			 JOIN DISCIPLINES d ON a.discip_id = d.discip_id
-			 JOIN PROFS p ON d.teacher_id = p.teacher_id
-		WHERE start_date >= ? AND end_date <= ?
-	`
+	/*query := `
+			SELECT a.agenda_name, a.type, a.modality, a.start_date, a.end_date, a.comment,
+	       		 s.room_name, s.campus, s.color, d.coef, d.trimestre, p.teacher_name
+			FROM AGENDA a
+				 LEFT JOIN SALLES s ON a.room_id = s.room_id OR a.room_id IS NULL
+				 JOIN DISCIPLINES d ON a.discip_id = d.discip_id
+				 JOIN PROFS p ON d.teacher_id = p.teacher_id
+			WHERE start_date >= ? AND end_date <= ? ORDER BY a.start_date ASC
+		`*/
+
+	/*query := `SELECT a.agenda_name, a.type, a.modality, a.start_date, a.end_date, a.comment,
+	       MAX(s.room_name) as room_name, MAX(s.campus) as campus, MAX(s.color) as color,
+	       d.coef, d.trimestre, p.teacher_name
+	FROM AGENDA a
+	     LEFT JOIN SALLES s ON a.room_id = s.room_id OR a.room_id IS NULL
+	     JOIN DISCIPLINES d ON a.discip_id = d.discip_id
+	     JOIN PROFS p ON d.teacher_id = p.teacher_id
+	WHERE start_date >= ? AND end_date <= ?
+	GROUP BY a.agenda_id, d.discip_id, p.teacher_id
+	ORDER BY a.start_date ASC
+				`*/
+
+	query := `SELECT a.agenda_name, a.type, a.modality, a.start_date, a.end_date, a.comment,
+       s.room_name, s.campus, s.color, 
+       d.coef, d.trimestre, p.teacher_name
+FROM AGENDA a
+     LEFT JOIN SALLES s ON a.room_id = s.room_id
+     JOIN DISCIPLINES d ON a.discip_id = d.discip_id
+     JOIN PROFS p ON d.teacher_id = p.teacher_id
+WHERE start_date >= ? AND end_date <= ? 
+GROUP BY a.agenda_id
+ORDER BY a.start_date ASC
+`
 
 	rows, err := db.Query(query, start, end)
 	if err != nil {

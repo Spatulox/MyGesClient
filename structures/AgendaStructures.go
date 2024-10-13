@@ -1,6 +1,9 @@
 package structures
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type JSONTime float64
 
@@ -77,10 +80,10 @@ type LocalAgenda struct {
 }
 
 type LocalRoom struct {
-	RoomID   int    `json:"room_id"`
-	RoomName string `json:"name"`
-	Campus   string `json:"campus"`
-	Color    string `json:"color,omitempty"`
+	RoomID   int            `json:"room_id"`
+	RoomName sql.NullString `json:"name"`
+	Campus   sql.NullString `json:"campus"`
+	Color    sql.NullString `json:"color,omitempty"`
 }
 
 type Discipline struct {

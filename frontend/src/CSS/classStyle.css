@@ -731,7 +731,7 @@
 
 .main-content-schedule {
     flex-grow: 1;
-    padding: 20px;
+    /*padding: 20px;*/
     overflow-y: auto;
 }
 
@@ -862,7 +862,8 @@
         width: 100%; /* Prend toute la largeur disponible */
         max-width: 450px; /* Largeur maximale pour l'emploi du temps */
         padding: 20px;
-        transform: translateY(-70px);
+        transition: all ease-in-out 0.5s;
+        /*transform: translateY(-70px);*/
     }
 
     .main-content-dashboard .summary-section {

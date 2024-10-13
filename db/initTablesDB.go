@@ -49,7 +49,7 @@ const AGENDA = `CREATE TABLE IF NOT EXISTS AGENDA (
     start_date TEXT NOT NULL,  -- Utilisation de TEXT pour les dates
     end_date TEXT NOT NULL,     -- Utilisation de TEXT pour les dates
     comment TEXT NOT NULL,
-    room_id INTEGER NOT NULL,
+    room_id INTEGER,
     discip_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     FOREIGN KEY (room_id) REFERENCES SALLES (room_id),

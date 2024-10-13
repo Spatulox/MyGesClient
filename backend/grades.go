@@ -9,6 +9,10 @@ import (
 	"fmt"
 )
 
+func (a *App) ReturnRefreshGradesState() int {
+	return FETCHINGGRADES
+}
+
 func (a *App) GetGrades(year string) ([]LocalGrades, error) {
 	return GetDBUserGrades(year, a.db)
 }

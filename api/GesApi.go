@@ -198,11 +198,13 @@ func (ges *GESapi) GetAgenda(start string, end string) (string, error) {
 	startTime, err := time.Parse(layout, start)
 	if err != nil {
 		log.Fatalf("Erreur lors du parsing de la date de début GetAgenda: %v", err)
+		return "", err
 	}
 
 	endTime, err := time.Parse(layout, end)
 	if err != nil {
 		log.Fatalf("Erreur lors du parsing de la date de fin GetAgenda: %v", err)
+		return "", err
 	}
 
 	// Convertir les time.Time en millisecondes Unix
@@ -215,8 +217,9 @@ func (ges *GESapi) GetAgenda(start string, end string) (string, error) {
 	if err != nil {
 		fmt.Printf("Stack trace:\n%+v\n", err)
 		//println("ERROR : Impossible to fetch agenda")
-		return errMessage, err
+		return "", err
 	}
+
 	// Convertir le résultat en []AgendaItem
 	var agendaItems []agendaItem
 	if items, ok := result["items"].([]interface{}); ok {
@@ -224,7 +227,7 @@ func (ges *GESapi) GetAgenda(start string, end string) (string, error) {
 			if agendaItemVar, ok := item.(map[string]interface{}); ok {
 				var ai agendaItem
 				if err := mapToStruct(agendaItemVar, &ai); err != nil {
-					return errMessage, fmt.Errorf("erreur lors de la conversion d'un élément de l'agenda: %w", err)
+					return "", fmt.Errorf("erreur lors de la conversion d'un élément de l'agenda: %w", err)
 				}
 				agendaItems = append(agendaItems, ai)
 			}
@@ -235,7 +238,7 @@ func (ges *GESapi) GetAgenda(start string, end string) (string, error) {
 	jsonData, err := json.Marshal(agendaItems)
 	if err != nil {
 		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, fmt.Errorf("erreur lors de la conversion des éléments d'agenda en JSON: %w", err)
+		return "", fmt.Errorf("erreur lors de la conversion des éléments d'agenda en JSON: %w", err)
 	}
 
 	return string(jsonData), nil
