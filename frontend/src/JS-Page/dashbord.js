@@ -38,6 +38,7 @@ async function handleButtonClick(direction) {
 
         if (agenda) {
             await updateSchedule(agenda, htmlElement);
+            document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)"
         } else {
             printDate(htmlElement);
         }
@@ -75,6 +76,7 @@ export async function dashboard(){
 
         if(agenda){
             updateSchedule(agenda, htmlElement)
+            document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)"
         } else {
             printDate(htmlElement)
         }
