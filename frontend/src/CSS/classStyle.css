@@ -48,7 +48,7 @@
     background-color: #36393f;
     border-radius: 8px;
     padding: 16px;
-    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    /*font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
     color: var(--text-color);
     max-width: 600px;
     margin: 0 auto;
@@ -69,7 +69,7 @@
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
-    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    /*font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
 }
 
 .credits-section {
