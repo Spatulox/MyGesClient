@@ -120,16 +120,14 @@ setInterval(()=>{
 
     popupNormalCounter = normalpopups.length
     popupStillCounter = stillpopups.length
-    console.log(normalpopups)
 
-    // Compter les popups et gérer l'attribut count
     normalpopups.forEach(popup => {
         // Incrémenter ou initialiser le count
         let count = parseInt(popup.getAttribute('count')) || 0;
         count++;
         popup.setAttribute('count', count);
 
-        // Vérifier si le count est supérieur à 2
+        //Take 10 seconds before hard delete
         if (count > 2) {
             const popupId = popup.getAttribute('id'); // Récupérer l'ID de la popup
             removePopup(popupId); // Exécuter la fonction removePopup
@@ -142,8 +140,8 @@ setInterval(()=>{
         count++;
         popup.setAttribute('count', count);
 
-        // Vérifier si le count est supérieur à 2
-        if (count >= 2) {
+        // Take 1 minute before hard delete
+        if (count >= 12) {
             const popupId = popup.getAttribute('id'); // Récupérer l'ID de la popup
             removePopup(popupId); // Exécuter la fonction removePopup
         }
