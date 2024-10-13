@@ -187,6 +187,7 @@ function recapEvents(events) {
 export function stopAutomaticEventsInDashboard(){
     stopRecapEvents()
     stopDisplayingGrades()
+    initialized = 0
 }
 
 // Fonction pour arrêter tous les intervalles
@@ -226,7 +227,7 @@ async function getTodayAgendaPlusDay(direction = null) {
 
     // Ajuster au lundi si c'est un dimanche
     if (today.getUTCDay() === 0) { // 0 représente dimanche
-        today.setUTCDate(today.getUTCDate() + 1);
+        today.setUTCDate(today.getUTCDate() + direction);
         userShowTomorrow += direction
     }
 
