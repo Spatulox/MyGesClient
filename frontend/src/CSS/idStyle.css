@@ -27,6 +27,7 @@
 
 
 #mainPart{
+    /*font-family: 'Helvetica Neue', Arial, sans-serif;*/
     z-index: 1;
     width: var(--mainPartWidth);
     background-color: var(--mainPartColor);
@@ -292,6 +293,12 @@
 
 #buttonEula{
     width: 100% !important;
+}
+
+#calendar-grid h2{
+    height: 50px;
+    overflow: hidden;
+    font-size: clamp(10px, 3vw, 21px);
 }
 
 #connection{
