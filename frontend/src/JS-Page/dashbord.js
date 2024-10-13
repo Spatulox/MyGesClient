@@ -3,8 +3,7 @@ import {getYear, capitalizeFirstLetter, formatDateWithDay, wait} from "../JS/fun
 import {updateSchedule} from "./schedule";
 import {initGradesDisplay} from "./grades";
 
-let displayGradeId = []
-let displayEventsId = []
+let displayDashboardId = []
 let prevNextCliked = false
 let initialized = 0
 let userShowTomorrow = 0
@@ -55,57 +54,69 @@ export async function dashboard(){
         return
     }
     prevNextCliked = true
+
     try{
         const htmlElement = document.getElementById("schedule-content")
-        let agenda = await getTodayAgendaPlusDay()
-
-        let grades = null
         const htmlGradeElement = document.getElementById("grades-content")
-        try{
-            grades = await GetGrades(getYear().toString())
-        } catch (e) {
-            console.log(e)
-        }
 
-        let events = null
-        try{
-            events = await GetEvents()
-        } catch (e) {
-            console.log(e)
-        }
+        Promise.all([
+            handleAgenda(htmlElement),
+            handleGrades(htmlGradeElement),
+            handleEvents()
+        ]).then(() => {
 
-        if(agenda){
-            updateSchedule(agenda, htmlElement)
-            document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)"
-        } else {
-            printDate(htmlElement)
-        }
+            prevNextCliked = false
 
-        if(grades){
-            recapGrades(htmlGradeElement, grades)
-        } else {
-            document.getElementById("grades-content").innerHTML = "<div class='grade-item'>Nothing to show</div>"
-        }
+            if(displayDashboardId.length === 0){
+                setInterval(dashboard, 10000)
+                initDashboard()
+            }
 
-        if(events){
-            recapEvents(events)
-        } else {
-            document.getElementById("event-content").innerHTML = "Nothing to show"
-        }
+        }).catch((error) => {
+            console.error("Une erreur s'est produite :", error);
+        });
+
     } catch (e) {
         console.log(e)
         popup("Impossible de mettre à jour l'accueil..")
     }
-
-
-    prevNextCliked = false
-
-    if(displayEventsId.length === 0){
-        initDashboard()
-    }
-
 }
 
+// --------------------------------------------------------------------------------------- //
+
+// Créez des fonctions pour chaque tâche
+function handleAgenda(htmlElement) {
+    return getTodayAgendaPlusDay().then((agenda) => {
+        if (agenda) {
+            updateSchedule(agenda, htmlElement);
+            document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)";
+        } else {
+            printDate(htmlElement);
+        }
+    });
+}
+
+function handleGrades(htmlGradeElement) {
+    return GetGrades(getYear().toString()).then((grades) => {
+        if (grades) {
+            recapGrades(htmlGradeElement, grades);
+        } else {
+            document.getElementById("grades-content").innerHTML = "<div class='grade-item'>Nothing to show</div>";
+        }
+    });
+}
+
+function handleEvents() {
+    return GetEvents().then((events) => {
+        if (events) {
+            recapEvents(events);
+        } else {
+            document.getElementById("event-content").innerHTML = "Nothing to show";
+        }
+    });
+}
+
+// --------------------------------------------------------------------------------------- //
 
 function recapGrades(gradesList, grades) {
     // Fonction pour obtenir 3 éléments aléatoires d'un tableau
@@ -143,11 +154,6 @@ function recapGrades(gradesList, grades) {
 
     // Afficher les notes initiales
     displayGrades();
-
-    // Mettre à jour les notes toutes les 10 secondes
-    if (displayGradeId.length === 0) {
-        displayGradeId.push(setInterval(displayGrades, 10000));
-    }
 }
 
 function createEventCard(event) {
@@ -178,34 +184,15 @@ function recapEvents(events) {
         const card = createEventCard(event);
         container.appendChild(card);
     });
-
-    if(displayEventsId.length === 0){
-        const intervalId = setInterval(() => recapEvents(events), 5000);
-        displayEventsId.push(intervalId);
-    }
-}
-
-
-export function stopAutomaticEventsInDashboard(){
-    stopRecapEvents()
-    stopDisplayingGrades()
-    initialized = 0
 }
 
 // Fonction pour arrêter tous les intervalles
-function stopRecapEvents() {
-    while (displayEventsId.length > 0) {
-        const intervalId = displayEventsId.pop();
+export function stopDashboardEvents() {
+    while (displayDashboardId.length > 0) {
+        const intervalId = displayDashboardId.pop();
         clearInterval(intervalId);
     }
-}
-
-// Fonction pour arrêter le setTimeout
-function stopDisplayingGrades() {
-    while (displayGradeId.length > 0) {
-        const timeoutId = displayGradeId.pop();
-        clearTimeout(timeoutId);
-    }
+    initialized = 0
 }
 
 async function getTodayAgendaPlusDay(direction = null) {
