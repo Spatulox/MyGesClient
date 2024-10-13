@@ -91,15 +91,19 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		return nil, err
 	}
 
-	// ---- Delete all data in AGENDA ---- //
-	_, err = deleteAgendaData(startDate, endDate, a.db)
-	if err != nil {
-		return nil, err
+	if agenda != "" {
+		// ---- Delete all data in AGENDA ---- //
+		_, err = deleteAgendaData(startDate, endDate, a.db)
+		if err != nil {
+			return nil, err
+		}
+
+		// ---- Add all data in AGENDA ---- //
+		SaveAgendaToDB(agenda, a.db)
+	} else {
+		Log.Error("Impossible to save Schedule to DB, nothing have been sent back")
+		return nil, fmt.Errorf("Impossible to save Schedule to DB, nothing have been sent back")
 	}
-
-	// ---- Add all data in AGENDA ---- //
-
-	SaveAgendaToDB(agenda, a.db)
 
 	// ---- Get all data in AGENDA ---- //
 
