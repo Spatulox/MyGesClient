@@ -8,6 +8,10 @@ import (
 	"fmt"
 )
 
+func (a *App) ReturnRefreshAbsencesState() int {
+	return FETCHINGABSENCES
+}
+
 func (a *App) GetAbsences(year string) (string, error) {
 	return "absence", nil
 	//return GetDBUserGrades(a.db)

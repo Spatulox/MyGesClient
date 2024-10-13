@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+func (a *App) ReturnRefreshScheduleState() int {
+	return FETCHINGSCHEDULE
+}
+
 /*
  * Public function to Get the Local Agenda
  */
