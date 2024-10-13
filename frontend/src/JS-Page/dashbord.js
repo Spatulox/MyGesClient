@@ -32,7 +32,7 @@ async function handleButtonClick(direction) {
         setTimeout(() => button.classList.remove('clicked'), 600);
 
         userShowTomorrow += direction === 'forward' ? 1 : -1;
-        const agenda = await getTodayAgendaPlusDay(direction === 'forward' ? 1 : -1);
+        const agenda = await getTodayAgendaPlusDay(direction === 'forward' ? 1 : -1, true);
         const htmlElement = document.getElementById("schedule-content");
 
         if (agenda) {
@@ -68,7 +68,7 @@ export async function dashboard(){
             prevNextCliked = false
 
             if(displayDashboardId.length === 0){
-                setInterval(dashboard, 10000)
+                displayDashboardId.push(setInterval(dashboard, 10000))
                 initDashboard()
             }
 
@@ -195,7 +195,7 @@ export function stopDashboardEvents() {
     initialized = 0
 }
 
-async function getTodayAgendaPlusDay(direction = null) {
+async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
 
     const now = new Date();
 
@@ -237,7 +237,9 @@ async function getTodayAgendaPlusDay(direction = null) {
                 count++
                 wait(1)
             }
-            theStill = stillPopup("Recherche de votre emploi du temps..")
+            if(showMessage){
+                theStill = stillPopup("Recherche de votre emploi du temps..")
+            }
             agenda = await RefreshAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
         }
 
