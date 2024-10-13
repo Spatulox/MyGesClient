@@ -2,26 +2,36 @@ import { GetAgenda, SaveEvents } from "../../wailsjs/go/backend/App";
 import {capitalizeFirstLetter, getMonday, getSaturday} from "../JS/functions";
 
 let scheduleTimeoutId = []
+let monday
+let saturday
+/*let prevWeek
+let nextWeek*/
+
+function initSchedule(){
+    const prevWeek = document.getElementById("prev-week")
+    const nextWeek = document.getElementById("next-week")
+
+    prevWeek.addEventListener("click", ()=>{
+        getPrevWeek()
+        popup("Not Bound")
+    })
+    nextWeek.addEventListener("click", ()=>{
+        getNextWeek()
+        popup("Not Bound")
+    })
+}
 
 export async  function schedule(){
     const replace = document.getElementById("replace")
     replace.style.height = "auto"
 
-    const prevWeek = document.getElementById("prev-week")
-    const nextWeek = document.getElementById("next-week")
 
-    prevWeek.addEventListener("click", ()=>{
-        popup("Not Bound")
-    })
-    nextWeek.addEventListener("click", ()=>{
-        popup("Not Bound")
-    })
 
     try{
         // Get the full week schedule
-        const monday = getMonday()
-        const saturday = getSaturday()
-        //const agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+        monday = getMonday()
+        saturday = getSaturday()
+        const agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
         const calendarGrid = document.getElementById("calendar-grid")
         const currentWeek = document.getElementById("current-week")
 
@@ -38,7 +48,7 @@ export async  function schedule(){
         // Mettre à jour le texte
         currentWeek.textContent = `${capitalizeFirstLetter(mondayFormatted)} --- ${capitalizeFirstLetter(saturdayFormatted)}`;
 
-        const agenda = await GetAgenda("2024-09-23", "2024-09-28")
+        //const agenda = await GetAgenda("2024-09-23", "2024-09-28")
         if(agenda){
             printSchedule(agenda, calendarGrid)
         } else {
@@ -48,7 +58,9 @@ export async  function schedule(){
         popup(e)
     }
 
+    // Is only execute one time
     if (scheduleTimeoutId.length === 0) {
+        initSchedule()
         scheduleTimeoutId.push(setInterval(schedule, 5000));
     }
 
@@ -123,11 +135,10 @@ async function printSchedule(agenda, calendarGrid) {
     Only create a schedule for one day
  */
 export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = true) {
-    const now = new Date();
-    const isAfter6PM = now.getHours() >= 18;
-    const scheduleDate = isAfter6PM ? new Date(now.setDate(now.getDate() + 1)) : now;
+    const agendaDate = new Date(agenda[0].start_date)
+    agendaDate.setUTCHours(0, 0, 0, 0)
     if(printCurrDate){
-        finalHtmlElement.innerHTML = `<h3>${capitalizeFirstLetter(scheduleDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
+        finalHtmlElement.innerHTML = `<h3>${capitalizeFirstLetter(agendaDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
     }
 
     agenda.forEach(course => {
@@ -177,3 +188,19 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
 /*updateSchedule();
 updateGrades();
 updateAbsences();*/
+
+
+
+function getNextWeek(){
+    monday.setDate(monday.getDate() + 7)
+    saturday.setDate(saturday.getDate() + 7)
+    console.log(monday, saturday)
+    schedule()
+}
+
+function getPrevWeek(){
+    monday.setDate(monday.getDate() - 7)
+    saturday.setDate(saturday.getDate() - 7)
+    console.log(monday, saturday)
+    schedule()
+}
