@@ -223,8 +223,20 @@ updateGrades();
 updateAbsences();*/
 
 
+function checkDiffTime(direction){
+    let currMonday = getMonday()
+
+    let diffTime = monday.getTime() - currMonday.getTime();
+
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+}
 
 function getNextWeek(){
+    console.log(checkDiffTime())
+    if(checkDiffTime() >= 30){
+        return
+    }
+
     monday.setDate(monday.getDate() + 7)
     saturday.setDate(saturday.getDate() + 7)
     console.log(monday, saturday)
@@ -232,6 +244,11 @@ function getNextWeek(){
 }
 
 function getPrevWeek(){
+    console.log(checkDiffTime())
+    if(checkDiffTime() <= -30){
+        return
+    }
+
     monday.setDate(monday.getDate() - 7)
     saturday.setDate(saturday.getDate() - 7)
     console.log(monday, saturday)
