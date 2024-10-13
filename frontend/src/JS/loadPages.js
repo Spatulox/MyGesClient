@@ -26,11 +26,12 @@ export async function loadPageGo(string, event = null){
     // Remove all hard style applyied in functions corresponding to files
     const replace = document.getElementById("replace")
     replace.style = ""
-
+    let currPage
     try {
         mainPart.innerHTML = await GetPageContent(string)
         updatePages(string.split(".html")[0])
-        headerTitle.innerText = event?.srcElement.innerText ? event.srcElement.innerText : "Accueil"
+        currPage = event?.srcElement.innerText ? event.srcElement.innerText : "Accueil"
+        headerTitle.innerText = currPage
 
     } catch(err){
         log("ERROR : An error occured in the loadPage function : "+err)
@@ -45,7 +46,7 @@ export async function loadPageGo(string, event = null){
         }
     }
 
-    UpdateDiscordRPC("Unofficial MyGes Client", capitalizeFirstLetter(string.split(".html")[0]))
+    UpdateDiscordRPC("Unofficial MyGes Client", capitalizeFirstLetter(currPage))
 }
 
 function updatePages(pages){
