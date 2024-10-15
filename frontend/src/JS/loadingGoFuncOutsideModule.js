@@ -10,6 +10,7 @@ let GetRegisteredUsers
 let UpdateUserPassword
 let GetUserData
 let ConnectUser
+let DeleteOldData
 
 import('./loadPages.js')
     .then(module => {
@@ -34,5 +35,6 @@ import('../../wailsjs/go/backend/App')
         UpdateUserPassword = module.UpdateUserPassword
         GetUserData = module.GetUserData
         ConnectUser = module.ConnectUser
+        DeleteOldData = module.DeleteOldData
     })
     .catch(err => console.error('Erreur de chargement du module:', err));

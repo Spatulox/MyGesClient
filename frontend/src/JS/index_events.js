@@ -173,7 +173,11 @@ async function deconnectionFromMyges(){
 }
 
 async function deleteOldData(){
-    popup("Under contruction")
+    if(await DeleteOldData()){
+        popup("Supression réussie !")
+        return
+    }
+    popup("Une erreur c'est produite. Certaines donnée on cependant peut être été bien supprimée")
 }
 
 function createSelectUserDeco(users){

@@ -1,11 +1,12 @@
 package db
 
 import (
+	. "MyGesClient/log"
 	. "MyGesClient/structures"
+	. "MyGesClient/time"
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/labstack/gommon/log"
 	_ "modernc.org/sqlite"
 	"os"
 )
@@ -135,7 +136,7 @@ func ConnectUser(db *sql.DB, username string, password string) bool {
 
 	_, err := db.Exec(updateQuery, username, password)
 	if err != nil {
-		log.Error(fmt.Sprintf("Error when connecting the user : %v", err))
+		Log.Error(fmt.Sprintf("Error when connecting the user : %v", err))
 		return false
 	}
 	return true
@@ -187,4 +188,64 @@ func UpdateUserTheme(db *sql.DB, value string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// ------------------------------------------------ //
+
+func DeleteOldData(db *sql.DB) bool {
+	user, err := GetUser(db)
+
+	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible de sélectionner l'utilisateur actuellement connecté : %v", err))
+		return false
+	}
+
+	Log.Infos(fmt.Sprintf("Deleting old data for user : %d", user.ID))
+
+	currDate := GetTodayDate()
+
+	// Delete Schedule
+	deleteQuery := `DELETE FROM AGENDA WHERE user_id = ? and start_date < ?`
+	_, err = db.Exec(deleteQuery, user.ID, currDate)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Erreur lors de la deletion de l'agenda : %w", err))
+		return false
+	}
+
+	// Delete Grades
+	selectGradeValueQuery := `SELECT note_id FROM NOTES WHERE year <= ? AND user_id = ?`
+	year := GetCurrentYear()
+	year -= 1
+
+	_, err = db.Exec(selectGradeValueQuery, year, user.ID)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Erreur lors de la selection de valeurs des notes : %w", err))
+		return false
+	}
+
+	deleteGradeValueQuery := `DELETE FROM GRADESVALUE WHERE note_id = ?`
+
+	_, err = db.Exec(deleteGradeValueQuery, user.ID)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Erreur lors de la deletion de valeurs des notes : %w", err))
+		return false
+	}
+
+	deleteGradeQuery := `DELETE FROM NOTES WHERE year = ?`
+
+	_, err = db.Exec(deleteGradeQuery, year)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Erreur lors de la deletion des notes : %w", err))
+		//return false
+	}
+
+	// Delete EVENTS
+	deleteEventQuery := `DELETE FROM EVENTS WHERE start_date < ?`
+	_, err = db.Exec(deleteEventQuery, currDate)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Erreur lors de la deletion des évènements : %w", err))
+		//return false
+	}
+
+	return true
 }

@@ -160,3 +160,8 @@ func (a *App) ConnectUser(username string, password string) (UserSettings, error
 	}
 	return UserSettings{}, fmt.Errorf("Une erreur s'est produite")
 }
+
+func (a *App) DeleteOldData() bool {
+	Log.Debug("Deleting !!!")
+	return DeleteOldData(a.db)
+}
