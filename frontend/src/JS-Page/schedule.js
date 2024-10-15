@@ -1,5 +1,5 @@
 import {GetAgenda, RefreshAgenda} from "../../wailsjs/go/backend/App";
-import {capitalizeFirstLetter, getMonday, getSaturday} from "../JS/functions";
+import {capitalizeFirstLetter, getMonday, getSaturday, todayDate} from "../JS/functions";
 
 let scheduleTimeoutId = []
 let monday = getMonday()
@@ -16,6 +16,7 @@ function initSchedule(){
         if(nextPrevActive){
             getPrevWeek()
             thisWeekAlreadyFetched = false
+            schedule()
         } else {
             popup("Plz wait")
         }
@@ -24,6 +25,7 @@ function initSchedule(){
         if(nextPrevActive) {
             getNextWeek()
             thisWeekAlreadyFetched = false
+            schedule()
         } else {
             popup("Plz wait")
         }
@@ -31,58 +33,62 @@ function initSchedule(){
 }
 
 export async  function schedule(){
+
+    // Avoid useless API request and html overwrite
+    if(thisWeekAlreadyFetched){
+        return
+    }
+
     const replace = document.getElementById("replace")
     replace.style.height = "auto"
     let stillPopupId
+    const today = new Date()
 
     try{
 
-        let agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
-        if(!agenda && thisWeekAlreadyFetched === false){
+        nextPrevActive = false
+
+        let agenda = null
+
+        const calendarGrid = document.getElementById("calendar-grid")
+        const currentWeek = document.getElementById("current-week")
+        printNothing(calendarGrid, currentWeek)
+
+        // If the today is in the requested week
+        if(monday<= today && today <= saturday){
+            agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+        } else {
+            agenda = null
+        }
+
+        // If the week requested doesn't not contains today
+        if(!agenda && !nextPrevActive){
             stillPopupId = stillPopup("Recherche de votre agenda depuis MyGes")
-            nextPrevActive = false
             agenda = await RefreshAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
             thisWeekAlreadyFetched = true
         }
         nextPrevActive = true
-
-        const calendarGrid = document.getElementById("calendar-grid")
-        const currentWeek = document.getElementById("current-week")
-
-        // Créer un formateur de date pour le jour de la semaine
-        const weekdayFormatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'long' });
-
-        // Créer un formateur de date pour le jour et le mois
-        const dateFormatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' });
-
-        // Formater les dates
-        const mondayFormatted = `${weekdayFormatter.format(monday)} ${dateFormatter.format(monday)}`;
-        const saturdayFormatted = `${weekdayFormatter.format(saturday)} ${dateFormatter.format(saturday)}`;
-
-        // Mettre à jour le texte
-        currentWeek.textContent = `🗓️ ${capitalizeFirstLetter(mondayFormatted)} au ${capitalizeFirstLetter(saturdayFormatted)} 🗓️`;
-
-        //const agenda = await GetAgenda("2024-09-23", "2024-09-28")
+        
         if(agenda){
             calendarGrid.classList.remove('one-columns');
             calendarGrid.classList.remove('two-columns');
             calendarGrid.classList.remove('three-columns');
             calendarGrid.classList.remove('four-columns');
-            printSchedule(agenda, calendarGrid)
+            await printSchedule(agenda, calendarGrid)
         } else {
-            calendarGrid.classList.add('one-columns');
-            calendarGrid.innerHTML = "<div class='day-column'>Nothing to show</div>"
+            printNothing(calendarGrid, currentWeek)
         }
     } catch (e) {
         console.log(e)
     }
 
     stopStillPopup(stillPopupId)
+    nextPrevActive = true
 
     // Is only execute one time
     if (scheduleTimeoutId.length === 0) {
         initSchedule()
-        scheduleTimeoutId.push(setInterval(schedule, 5000));
+        scheduleTimeoutId.push(setInterval(schedule, 10000));
     }
 
 }
@@ -95,6 +101,24 @@ export function stopSchedule() {
     }
 }
 
+function printNothing(calendarGrid, currentWeek){
+
+    // Créer un formateur de date pour le jour de la semaine
+    const weekdayFormatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'long' });
+
+    // Créer un formateur de date pour le jour et le mois
+    const dateFormatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' });
+
+    // Formater les dates
+    const mondayFormatted = `${weekdayFormatter.format(monday)} ${dateFormatter.format(monday)}`;
+    const saturdayFormatted = `${weekdayFormatter.format(saturday)} ${dateFormatter.format(saturday)}`;
+
+    // Mettre à jour le texte
+    currentWeek.textContent = `🗓️ ${capitalizeFirstLetter(mondayFormatted)} au ${capitalizeFirstLetter(saturdayFormatted)} 🗓️`;
+
+    calendarGrid.classList.add('one-columns');
+    calendarGrid.innerHTML = "<div class='day-column'>Nothing to show</div>"
+}
 
 async function printSchedule(agenda, calendarGrid) {
     // Trier l'agenda par date de début
@@ -167,7 +191,6 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
         courseElement.className = 'course-card';
         let courseName = course.agenda_name.includes("S1") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 -") ? course.agenda_name.split("S2 - ") : course.agenda_name)
         courseName = capitalizeFirstLetter(courseName)
-        console.log(course)
         courseElement.innerHTML = `
             <h3 style="color: ${course.room.color.Valid ? course.room.color.String : "#FFFFFF"}">${courseName}</h3>
             <p>${course.start_date.split('T')[1].substring(0, 5)} - ${course.end_date.split('T')[1].substring(0, 5)}</p>

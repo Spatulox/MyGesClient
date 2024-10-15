@@ -1,4 +1,5 @@
 import {
+    GetRegisteredUsers,
     GetUserData,
     InitDiscordRPC,
     UpdateDiscordRPC,
@@ -7,7 +8,6 @@ import { loadPageGo } from "./loadPages";
 import {initCreateEvent} from "./createEvents";
 
 export async function start(){
-
     initCreateEvent()
 
     // Check if :
@@ -21,6 +21,19 @@ export async function start(){
             buttonCancelConnection.style.visibility = "hidden"
             const connection = document.getElementById('connection')
             connection.classList.add('active')
+
+            try{
+                // If there already a user in the DB add the list
+                const users = await GetRegisteredUsers()
+                console.log(users)
+                if (users && users.length > 0) {
+                    createSelectUser(users)
+                }
+            } catch (e) {
+                console.log(e)
+            }
+
+
             stopStillPopup(laStill)
             return
         }
@@ -70,7 +83,6 @@ function updateActivity(state, details) {
         .catch(error => console.error("Failed to update Discord RPC activity:", error));
 }
 
-
 start()
     .then(()=>{
     console.log("Frontend Started")
@@ -78,3 +90,40 @@ start()
 
 
 
+function createSelectUser(users){
+    const connexionSelectField = document.getElementById("connexionSelect")
+    let select = document.getElementById("selectConnectionSelect")
+    if(!select){
+        select = document.createElement("select");
+    }
+    select.innerHTML = ""
+    select.id = "selectConnectionSelect"
+
+    // ODefault option
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "default";
+    defaultOpt.textContent = "Créer un compte";
+    defaultOpt.selected = true;
+    select.appendChild(defaultOpt);
+
+    // Add users
+    users.forEach(user => {
+        const option = document.createElement("option");
+        option.value = user.ID;
+        option.textContent = user.Username;
+        select.appendChild(option);
+    });
+
+    // Add select to document
+    connexionSelectField.appendChild(select);
+
+    select.addEventListener("change", ()=>{
+        if(select.selectedIndex > 0){
+            document.getElementById("username").style.display = "none"
+            document.getElementById('buttonConnection').value = "Connexion"
+        } else {
+            document.getElementById("username").style.display = "block"
+            document.getElementById('buttonConnection').value = "Créer un compte"
+        }
+    })
+}

@@ -1,5 +1,5 @@
 import {GetAgenda, GetEvents, GetGrades, RefreshAgenda, ReturnRefreshScheduleState} from "../../wailsjs/go/backend/App";
-import {getYear, capitalizeFirstLetter, formatDateWithDay, wait} from "../JS/functions";
+import {getYear, capitalizeFirstLetter, formatDateWithDay, wait, getMonday, getSaturday} from "../JS/functions";
 import {updateSchedule} from "./schedule";
 import {initGradesDisplay} from "./grades";
 
@@ -32,6 +32,7 @@ async function handleButtonClick(direction) {
         setTimeout(() => button.classList.remove('clicked'), 600);
 
         userShowTomorrow += direction === 'forward' ? 1 : -1;
+
         const agenda = await getTodayAgendaPlusDay(direction === 'forward' ? 1 : -1, true);
         const htmlElement = document.getElementById("schedule-content");
 
@@ -53,10 +54,11 @@ export async function dashboard(){
     if(prevNextCliked){
         return
     }
+    const htmlElement = document.getElementById("schedule-content")
+    printDate(htmlElement)
     prevNextCliked = true
 
     try{
-        const htmlElement = document.getElementById("schedule-content")
         const htmlGradeElement = document.getElementById("grades-content")
 
         Promise.all([
@@ -195,8 +197,8 @@ export function stopDashboardEvents() {
     initialized = 0
 }
 
-async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
 
+function getDayWithDecalage(direction){
     const now = new Date();
 
     const isAfter6PM = now.getHours() >= 18;
@@ -220,6 +222,13 @@ async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
         userShowTomorrow += direction
     }
 
+    return today
+}
+
+async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
+
+    const today = getDayWithDecalage(direction)
+
     // Créer une date pour aujourd'hui à 23:00 UTC
     const todayNight = new Date(today);
     todayNight.setUTCHours(20, 0, 0, 0);
@@ -228,8 +237,13 @@ async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
     let agenda = null
 
     try {
+        const monday = getMonday()
+        const saturday = getSaturday()
         // Local Search
-        agenda = await GetAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
+        if(monday<= today && today <= saturday) {
+            agenda = await GetAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
+        }
+
         if(!agenda){
             // Online Search
             let count = 0

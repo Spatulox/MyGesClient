@@ -3,9 +3,14 @@ let loadPageGo;
 let start
 let UpdateUserEula
 let UpdateUserTheme
-let CreateUser
 let VerifyUser
 let SaveEvents
+let DeconnectUser
+let GetRegisteredUsers
+let UpdateUserPassword
+let GetUserData
+let ConnectUser
+let DeleteOldData
 
 import('./loadPages.js')
     .then(module => {
@@ -23,8 +28,13 @@ import('../../wailsjs/go/backend/App')
     .then(module => {
         UpdateUserEula = module.UpdateUserEula
         UpdateUserTheme = module.UpdateUserTheme
-        CreateUser = module.CreateUser
         VerifyUser = module.VerifyUser
         SaveEvents = module.SaveEvents
+        DeconnectUser = module.DeconnectUser
+        GetRegisteredUsers = module.GetRegisteredUsers
+        UpdateUserPassword = module.UpdateUserPassword
+        GetUserData = module.GetUserData
+        ConnectUser = module.ConnectUser
+        DeleteOldData = module.DeleteOldData
     })
     .catch(err => console.error('Erreur de chargement du module:', err));

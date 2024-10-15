@@ -8,6 +8,12 @@ func GetCurrentYear() int {
 	return time.Now().Year()
 }
 
+func GetTodayDate() time.Time {
+	now := time.Now()
+	now.Format("2006-01-02T15:04:05.000Z")
+	return now
+}
+
 func GetWeekDates() (time.Time, time.Time) {
 	now := time.Now()
 	weekday := now.Weekday()
