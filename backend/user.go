@@ -31,6 +31,16 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 
 	// If correct infos
 	// Create the local user
+
+	res, err := CheckUserExist(a.db, username)
+	if err != nil {
+		Log.Error("User already exist")
+		return "", err
+	}
+	if res {
+		return "", fmt.Errorf("L'utilisateur existe déjà, impossible de créer un compte")
+	}
+
 	user, err := CreateUser(a.db, username, password)
 	if !user {
 		Log.Error(fmt.Sprintf("Impossible to save your info in local DB : %v", err))
@@ -113,4 +123,40 @@ func (a *App) GetYears() (string, error) {
 		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
 	}
 	return api.GetYears()
+}
+
+func (a *App) DeconnectUser() error {
+	return DeconnectUser(a.db)
+}
+
+func (a *App) UpdateUserPassword(username string, password string) (bool, error) {
+
+	// Check the api if this is the right informations
+	userApi, err := GESLogin(username, password)
+
+	if err != nil {
+		Log.Error("Impossible to connect to Myges")
+		return false, fmt.Errorf("Impossible to connect to MyGes, bad username or password")
+	}
+
+	a.api = userApi
+
+	return UpdateUserPassword(a.db, username, password)
+}
+
+func (a *App) GetRegisteredUsers() ([]UserSettings, error) {
+	return GetRegisteredUsers(a.db)
+}
+
+func (a *App) ConnectUser(username string, password string) (UserSettings, error) {
+	if ConnectUser(a.db, username, password) {
+		user, err := GetUser(a.db)
+		if err != nil {
+			Log.Error(fmt.Sprintf("Impossible to select the user : %v", err))
+			return UserSettings{}, fmt.Errorf("This user don't exist : %v", err)
+		}
+		a.user = user
+		return user, nil
+	}
+	return UserSettings{}, fmt.Errorf("Une erreur s'est produite")
 }
