@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -288,4 +289,20 @@ func (a *App) CheckXTimeInternetConnection(attempts int) bool {
 	}
 
 	return false // Retourne false si aucune connexion n'est établie après les tentatives
+}
+
+// -------------------------------------------------------------------------- //
+
+func (a *App) GetCourses(year string) (string, error) {
+	matched, err := regexp.MatchString(`^20\d{2}$`, year)
+	if err != nil {
+		Log.Error(fmt.Sprintf("erreur lors de la vérification du format de l'année: %v", err))
+		return "", fmt.Errorf("erreur lors de la vérification du format de l'année: %v", err)
+	}
+	if !matched {
+		Log.Error(fmt.Sprintf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year))
+		return "", fmt.Errorf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year)
+	}
+
+	return a.api.GetCourses(year)
 }
