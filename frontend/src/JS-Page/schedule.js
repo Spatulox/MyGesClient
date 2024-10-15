@@ -1,5 +1,5 @@
 import {GetAgenda, RefreshAgenda} from "../../wailsjs/go/backend/App";
-import {capitalizeFirstLetter, getMonday, getSaturday} from "../JS/functions";
+import {capitalizeFirstLetter, getMonday, getSaturday, todayDate} from "../JS/functions";
 
 let scheduleTimeoutId = []
 let monday = getMonday()
@@ -16,6 +16,7 @@ function initSchedule(){
         if(nextPrevActive){
             getPrevWeek()
             thisWeekAlreadyFetched = false
+            schedule()
         } else {
             popup("Plz wait")
         }
@@ -24,6 +25,7 @@ function initSchedule(){
         if(nextPrevActive) {
             getNextWeek()
             thisWeekAlreadyFetched = false
+            schedule()
         } else {
             popup("Plz wait")
         }
@@ -31,16 +33,35 @@ function initSchedule(){
 }
 
 export async  function schedule(){
+
+    // Avoid useless API request and html overwrite
+    if(thisWeekAlreadyFetched){
+        return
+    }
+
     const replace = document.getElementById("replace")
     replace.style.height = "auto"
     let stillPopupId
+    const today = new Date()
 
     try{
 
-        let agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
-        if(!agenda && thisWeekAlreadyFetched === false){
+        nextPrevActive = false
+
+        let agenda = null
+
+        // If the today is in the requested week
+        if(monday<= today && today <= saturday){
+            console.log("today")
+            agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+        } else {
+            agenda = null
+        }
+
+        // If the week requested doesn't not contains today
+        if(!agenda && !nextPrevActive){
+            console.log("internet")
             stillPopupId = stillPopup("Recherche de votre agenda depuis MyGes")
-            nextPrevActive = false
             agenda = await RefreshAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
             thisWeekAlreadyFetched = true
         }
@@ -61,14 +82,13 @@ export async  function schedule(){
 
         // Mettre à jour le texte
         currentWeek.textContent = `🗓️ ${capitalizeFirstLetter(mondayFormatted)} au ${capitalizeFirstLetter(saturdayFormatted)} 🗓️`;
-
-        //const agenda = await GetAgenda("2024-09-23", "2024-09-28")
+        
         if(agenda){
             calendarGrid.classList.remove('one-columns');
             calendarGrid.classList.remove('two-columns');
             calendarGrid.classList.remove('three-columns');
             calendarGrid.classList.remove('four-columns');
-            printSchedule(agenda, calendarGrid)
+            await printSchedule(agenda, calendarGrid)
         } else {
             calendarGrid.classList.add('one-columns');
             calendarGrid.innerHTML = "<div class='day-column'>Nothing to show</div>"
@@ -78,11 +98,12 @@ export async  function schedule(){
     }
 
     stopStillPopup(stillPopupId)
+    nextPrevActive = true
 
     // Is only execute one time
     if (scheduleTimeoutId.length === 0) {
         initSchedule()
-        scheduleTimeoutId.push(setInterval(schedule, 5000));
+        scheduleTimeoutId.push(setInterval(schedule, 10000));
     }
 
 }
@@ -167,7 +188,6 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
         courseElement.className = 'course-card';
         let courseName = course.agenda_name.includes("S1") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 -") ? course.agenda_name.split("S2 - ") : course.agenda_name)
         courseName = capitalizeFirstLetter(courseName)
-        console.log(course)
         courseElement.innerHTML = `
             <h3 style="color: ${course.room.color.Valid ? course.room.color.String : "#FFFFFF"}">${courseName}</h3>
             <p>${course.start_date.split('T')[1].substring(0, 5)} - ${course.end_date.split('T')[1].substring(0, 5)}</p>
