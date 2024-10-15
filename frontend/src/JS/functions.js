@@ -198,3 +198,9 @@ export function formatDate(dateString) {
 export function formatTime(dateString) {
     return dayjs(dateString).format('HH:mm');
 }
+
+export function scrollMainPart(){
+    console.log("scroll part")
+    const replace = document.getElementById("replace")
+    replace.style.height = "auto"
+}
