@@ -50,9 +50,12 @@ export async  function schedule(){
 
         let agenda = null
 
+        const calendarGrid = document.getElementById("calendar-grid")
+        const currentWeek = document.getElementById("current-week")
+        printNothing(calendarGrid, currentWeek)
+
         // If the today is in the requested week
         if(monday<= today && today <= saturday){
-            console.log("today")
             agenda = await GetAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
         } else {
             agenda = null
@@ -60,28 +63,11 @@ export async  function schedule(){
 
         // If the week requested doesn't not contains today
         if(!agenda && !nextPrevActive){
-            console.log("internet")
             stillPopupId = stillPopup("Recherche de votre agenda depuis MyGes")
             agenda = await RefreshAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
             thisWeekAlreadyFetched = true
         }
         nextPrevActive = true
-
-        const calendarGrid = document.getElementById("calendar-grid")
-        const currentWeek = document.getElementById("current-week")
-
-        // Créer un formateur de date pour le jour de la semaine
-        const weekdayFormatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'long' });
-
-        // Créer un formateur de date pour le jour et le mois
-        const dateFormatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' });
-
-        // Formater les dates
-        const mondayFormatted = `${weekdayFormatter.format(monday)} ${dateFormatter.format(monday)}`;
-        const saturdayFormatted = `${weekdayFormatter.format(saturday)} ${dateFormatter.format(saturday)}`;
-
-        // Mettre à jour le texte
-        currentWeek.textContent = `🗓️ ${capitalizeFirstLetter(mondayFormatted)} au ${capitalizeFirstLetter(saturdayFormatted)} 🗓️`;
         
         if(agenda){
             calendarGrid.classList.remove('one-columns');
@@ -90,8 +76,7 @@ export async  function schedule(){
             calendarGrid.classList.remove('four-columns');
             await printSchedule(agenda, calendarGrid)
         } else {
-            calendarGrid.classList.add('one-columns');
-            calendarGrid.innerHTML = "<div class='day-column'>Nothing to show</div>"
+            printNothing(calendarGrid, currentWeek)
         }
     } catch (e) {
         console.log(e)
@@ -116,6 +101,24 @@ export function stopSchedule() {
     }
 }
 
+function printNothing(calendarGrid, currentWeek){
+
+    // Créer un formateur de date pour le jour de la semaine
+    const weekdayFormatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'long' });
+
+    // Créer un formateur de date pour le jour et le mois
+    const dateFormatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' });
+
+    // Formater les dates
+    const mondayFormatted = `${weekdayFormatter.format(monday)} ${dateFormatter.format(monday)}`;
+    const saturdayFormatted = `${weekdayFormatter.format(saturday)} ${dateFormatter.format(saturday)}`;
+
+    // Mettre à jour le texte
+    currentWeek.textContent = `🗓️ ${capitalizeFirstLetter(mondayFormatted)} au ${capitalizeFirstLetter(saturdayFormatted)} 🗓️`;
+
+    calendarGrid.classList.add('one-columns');
+    calendarGrid.innerHTML = "<div class='day-column'>Nothing to show</div>"
+}
 
 async function printSchedule(agenda, calendarGrid) {
     // Trier l'agenda par date de début
