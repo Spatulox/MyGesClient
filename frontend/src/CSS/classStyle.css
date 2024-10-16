@@ -503,7 +503,7 @@
 }
 
 .tab-button.active:hover {
-    background-color: #4752c4;
+    background-color: var(--hover-color);
 }
 
 .textCenter{
@@ -720,7 +720,7 @@
 }
 
 .main-content-dashboard .navigation-buttons button:hover {
-    background-color:#4752c4; /* Couleur d'hover plus foncée */
+    background-color:var(--hover-color); /* Couleur d'hover plus foncée */
 }
 
 .main-content-dashboard .navigation-buttons button.clicked {
@@ -816,17 +816,85 @@
     text-transform: uppercase;
 }
 
-@keyframes blob-animation {
-    0% {
-        transform: scale(1); /* Taille normale */
-    }
-    50% {
-        transform: scale(0.9); /* Zoom */
-    }
-    100% {
-        transform: scale(1); /* Retour à la taille normale */
-    }
+
+
+
+
+
+
+.popup-eula {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
+
+.popup-eula .popup-box {
+    background-color: #36393f;
+    color: #dcddde;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+
+    animation: discordPopup 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+
+.popup-eula .popup-box h1 {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.popup-eula .popup-box hr {
+    border: none;
+    border-top: 1px solid #4f545c;
+    margin: 15px 0;
+}
+
+.popup-eula .popup-box .underline {
+    text-decoration: underline;
+}
+
+.popup-eula .popup-box ul {
+    padding-left: 20px;
+    margin: 15px 0;
+}
+
+.popup-eula .popup-box li {
+    margin-bottom: 10px;
+}
+
+.popup-eula .popup-box button {
+    background-color: #7289da;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.popup-eula .popup-box button:hover {
+    background-color: #677bc4;
+}
+
+
+
+
+
+
+
+
 
 .news-banner {
     height: 200px;

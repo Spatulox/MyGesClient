@@ -44,76 +44,86 @@ buttonEula.addEventListener('click', function() {
 buttonConnection.addEventListener("click", async function() {
     const username = document.getElementById("username").value
     const password = document.getElementById("password").value
-    const connectionField = document.getElementById("username").style.display || "noexist"
+    const selectConnexion = document.getElementsByClassName("select-selected")[0] || false
+    const selectUser = document.getElementsByClassName("select-selected")[0].innerHTML.trim()
 
-    if(connectionField === "none"){
-        if(!password){
-            popup("Le mot de passe ne doit pas être vide")
-            return
-        }
-    } else {
-        if(!username || !password){
-            popup("Les deux champs doivent être rempli")
-            return
-        }
-    }
+    console.log(selectConnexion)
+    if(selectConnexion.style.display){
 
-    const still = stillPopup("Verifying infos")
-    try{
-        const user = await GetRegisteredUsers()
-        if(user){
-            try{
-                if( connectionField === "none"){
-                    console.log("Connect user")
-                    const selectedUser = document.getElementById("selectConnectionSelect")
-                    const selectedText = selectedUser.options[selectedUser.selectedIndex].text;
-                    const {user, err} = await ConnectUser(selectedText, password)
-                    if(err){
-                       popup("Une erreur s'est produit")
-                       return
-                    }
+        if(selectUser === "Créer un compte"){
 
-                } else {
-                    console.log("update password")
-                    console.log("Update the password user")
-                    if(await UpdateUserPassword(username, password)){
-                        popup("Mot de passe mis à jour")
-                        document.getElementById("buttonConnection").value = "Créer un compte"
-                    }
-                }
-
-            } catch (e) {
-                stopStillPopup(still)
-                popup(e)
+            // Créer un compte
+            console.log("Créer un compte")
+            if(!username || !password){
+                showConnectionError("Le nom d'utilisateur et le mot de passe doivent être rempli")
+                shakeConnexion()
                 return
             }
-
+            const still = stillPopup("Verifying infos")
+            try{
+                const message = await VerifyUser(username, password);
+                popup(JSON.parse(message).message)
+            } catch (e) {
+                console.log(e)
+                showConnectionError(e.toString())
+                shakeConnexion()
+                stopStillPopup(still)
+                return
+            }
+            stopStillPopup(still)
         } else {
-            console.log("Creater User")
-            // Vérify and create the user
-            const message = await VerifyUser(username, password);
-            popup(JSON.parse(message).message)
+
+            // Se connecter
+            console.log("Connexion")
+            if(!password){
+                showConnectionError("Le mot de passe doit être rempli")
+                shakeConnexion()
+                return
+            }
+            const still = stillPopup("Verifying infos")
+            try{
+                console.log(selectUser)
+                const {user, err} = await ConnectUser(selectUser, password)
+                if(err){
+                    showConnectionError("Une erreur s'est produit")
+                    shakeConnexion()
+                    return
+                }
+                closeConnexion()
+            } catch (e) {
+                console.log(e)
+                showConnectionError("Une erreur s'est produit")
+                shakeConnexion()
+                stopStillPopup(still)
+                return
+            }
+            stopStillPopup(still)
         }
-        stopStillPopup(still)
-
-    } catch (err){
-        stopStillPopup(still)
-        popup(err)
-        return
+        start()
+    } else {
+        console.log("Update the password user")
+        // Update le mot de passe
+        if(!username || !password){
+            showConnectionError("Le nom d'utilisateur et le mot de passe doivent être rempli")
+            shakeConnexion()
+            return
+        }
+        try{
+            if(await UpdateUserPassword(username, password)){
+                popup("Mot de passe mis à jour")
+            }
+        } catch (e) {
+            console.log(e)
+            showConnectionError(e.toString())
+            shakeConnexion()
+            return
+        }
+        closeConnexion()
     }
-
-    buttonCancelConnection.style.visibility = "visible"
-    const connection = document.getElementById('connection')
-    connection.classList.remove("active")
-    start()
-    username.value = ""
-    password.value = ""
 });
 
 buttonCancelConnection.addEventListener('click', function() {
-    const connection = document.getElementById('connection')
-    connection.classList.remove("active")
-
+    closeConnexion()
 })
 
 // ------------ Popup events -------------- //
@@ -123,54 +133,7 @@ async function eulaShow(){
     eula.classList.add('active')
 }
 
-async function changeLoginPassword(button = true){
-    document.getElementById("username").value = ""
-    document.getElementById("password").value = ""
-    const selct = document.getElementById("selectConnectionSelect")
-    if(button){
-        document.getElementById("buttonConnection").value = "Modifier le mot de passe"
-        document.getElementById("username").style.display = ""
-        if(selct){
-            selct.style.display = "none"
-        }
-    } else {
-        if(selct){
-            selct.style.display = "inherit"
-        }
-    }
-    const connection = document.getElementById('connection')
-    connection.classList.add('active')
-}
 
-async function deconnectionFromMyges(){
-    try{
-        await DeconnectUser()
-    } catch (e) {
-        console.log(e)
-        popup("Impossible de vous déconnecter")
-        return
-    }
-    document.getElementById("buttonConnection").value = "Créer un compte"
-    document.getElementById("username").value = ""
-    document.getElementById("password").value = ""
-    loadPage("cya")
-
-    let users
-    try{
-        users = await GetRegisteredUsers()
-    } catch (e) {
-        console.log(e)
-    }
-
-    console.log(users)
-    console.log("yeeeeeeeete")
-    if (users && users.length > 0) {
-        console.log("yeeeeeeeete")
-        createSelectUserDeco(users)
-    }
-
-    changeLoginPassword(false)
-}
 
 async function deleteOldData(){
     if(await DeleteOldData()){
@@ -178,49 +141,4 @@ async function deleteOldData(){
         return
     }
     popup("Une erreur c'est produite. Certaines donnée on cependant peut être été bien supprimée")
-}
-
-function createSelectUserDeco(users){
-    try{
-        console.log("tttttttttttttttt")
-        const connexionSelectField = document.getElementById("connexionSelect")
-        let select = document.getElementById("selectConnectionSelect")
-        if(select){
-            select.remove()
-
-        }
-        select = document.createElement("select");
-        select.innerHTML = ""
-        select.id = "selectConnectionSelect"
-
-        // ODefault option
-        const defaultOpt = document.createElement("option");
-        defaultOpt.value = "default";
-        defaultOpt.textContent = "Créer un compte";
-        defaultOpt.selected = true;
-        select.appendChild(defaultOpt);
-
-        // Add users
-        users.forEach(user => {
-            const option = document.createElement("option");
-            option.value = user.ID;
-            option.textContent = user.Username;
-            select.appendChild(option);
-        });
-
-        // Add select to document
-        connexionSelectField.appendChild(select);
-
-        select.addEventListener("change", ()=>{
-            if(select.selectedIndex > 0){
-                document.getElementById("username").style.display = "none"
-                document.getElementById('buttonConnection').value = "Connexion"
-            } else {
-                document.getElementById("username").style.display = "block"
-                document.getElementById('buttonConnection').value = "Créer un compte"
-            }
-        })
-    } catch (e) {
-        console.log(e)
-    }
 }

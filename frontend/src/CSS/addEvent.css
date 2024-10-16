@@ -27,7 +27,7 @@
 }
 
 .add-button:hover{
-    background-color: #4752c4;
+    background-color: var(--hover-color);
 }
 
 .add-button.active {
@@ -146,11 +146,11 @@
     text-align: left;
 }
 
-/*.modal*/ input[type="text"],
-           input[type="password"],
-           input[type="button"],
-/*.modal*/ input[type="datetime-local"],
-/*.modal*/ textarea {
+/*.modal */input[type="text"],
+/*.modal */input[type="password"],
+/*.modal */input[type="button"],
+/*.modal */input[type="datetime-local"],
+/*.modal */textarea {
     width: 96%;
     padding: 8px;
     border: none;
@@ -159,11 +159,11 @@
     border-radius: 5px;
 }
 
-/*.modal*/ input[type="text"]:hover,
-           input[type="password"]:hover,
-           input[type="button"]:hover,
-   /*.modal*/ input[type="datetime-local"]:hover,
-   /*.modal*/ textarea:hover {
+/*.modal */input[type="text"]:hover,
+/*.modal */input[type="password"]:hover,
+/*.modal */input[type="button"]:hover,
+/*.modal */input[type="datetime-local"]:hover,
+/*.modal */textarea:hover {
    width: 96%;
    padding: 8px;
    border: none;
@@ -172,7 +172,7 @@
    border-radius: 5px;
 }
 
-input[type="button"]:hover{
+/*.modal */input[type="button"]:hover{
     cursor: pointer;
 }
 
@@ -220,7 +220,7 @@ input[type="button"]:hover{
 }
 
 .btn-create:hover {
-    background-color: #4752c4;
+    background-color: var(--hover-color);
 }
 
 

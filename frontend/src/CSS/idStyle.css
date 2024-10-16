@@ -376,7 +376,7 @@
     font-size: clamp(10px, 3vw, 21px);
 }
 
-#connection{
+/*#connection{
     z-index: 2407;
     display: none;
     position: absolute;
@@ -398,7 +398,7 @@
 #connection.active{
     display: block;
     transition: all ease-in-out 0.3s;
-}
+}*/
 
 #containerAbsencesGrades{
     overflow: hidden;

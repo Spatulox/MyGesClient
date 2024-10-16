@@ -9,9 +9,11 @@
 	<link rel="stylesheet" type="text/css" href="src/CSS/tagsStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/idStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/classStyle.css">
-    <link rel="stylesheet" href="./src/CSS/addEvent.css">
+    <link rel="stylesheet" type="text/css" href="./src/CSS/addEvent.css">
+    <link rel="stylesheet" type="text/css" href="src/CSS/login-register.css">
 
     <script type="application/javascript" src="./src/JS/popups.js" defer></script>
+    <script type="application/javascript" src="./src/JS/login-register.js" defer></script>
 
     <!--Don't interact with html element, mandatory to be module (better)-->
     <script type="module" src="./src/JS/start.js" defer></script>
@@ -58,6 +60,34 @@
                     <input id="buttonConnection" class="marginTop10" type="button" value="Save and Connect">
                     <input id="buttonCancelConnection" class="marginTop10" type="button" value="Cancel Connection">
                 </div>
+            </div>
+        </div>-->
+        <div class="bg-connexion">
+            <div class="login-container" id="connection">
+                <h1 id="connexion-title">Connexion</h1>
+
+                <!-- Nouvelle liste déroulante personnalisée -->
+                <p id="connexion_error" style="display: none; color: darkred;" class="textCenter"></p>
+                <div class="custom-select">
+                    <div class="select-selected">Créer un compte</div>
+                    <div class="select-items select-hide" id="select-connexion">
+                        <div>Créer un compte</div>
+                        <div>Serveur 1</div>
+                        <div>Serveur 2</div>
+                        <div>Serveur 3</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="username" autocomplete="off" required>
+                    <label for="username" id="username-label">Nom d'utilisateur</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" autocomplete="off" id="password" required>
+                    <label for="password">Mot de passe</label>
+                </div>
+                <button id="buttonConnection">Se connecter</button>
+                <button id="buttonCancelConnection" class="marginTop10">Annuler</button>
             </div>
         </div>
     </div>
