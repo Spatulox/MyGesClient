@@ -126,6 +126,8 @@ func (a *App) GetYears() (string, error) {
 }
 
 func (a *App) DeconnectUser() error {
+	a.api = nil
+	a.user = UserSettings{}
 	return DeconnectUser(a.db)
 }
 
@@ -149,6 +151,7 @@ func (a *App) GetRegisteredUsers() ([]UserSettings, error) {
 }
 
 func (a *App) ConnectUser(username string, password string) (UserSettings, error) {
+
 	if ConnectUser(a.db, username, password) {
 		user, err := GetUser(a.db)
 		if err != nil {
@@ -158,6 +161,18 @@ func (a *App) ConnectUser(username string, password string) (UserSettings, error
 		a.user = user
 		return user, nil
 	}
+
+	userApi, err := GESLogin(a.user.Username, a.user.Password)
+
+	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible to initialize the API part when connecting %v", err))
+		STARTFINISH = -1
+		return UserSettings{}, err
+	}
+
+	a.api = userApi
+	Log.Infos("API connection Initialized")
+
 	return UserSettings{}, fmt.Errorf("Une erreur s'est produite")
 }
 
