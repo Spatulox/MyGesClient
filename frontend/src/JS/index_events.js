@@ -48,7 +48,7 @@ buttonConnection.addEventListener("click", async function() {
     const selectUser = document.getElementsByClassName("select-selected")[0].innerHTML.trim()
 
     console.log(selectConnexion)
-    if(selectConnexion.style.display){
+    if(selectConnexion.style.display !== "none"){
 
         if(selectUser === "Créer un compte"){
 
@@ -64,6 +64,7 @@ buttonConnection.addEventListener("click", async function() {
                 const message = await VerifyUser(username, password);
                 popup(JSON.parse(message).message)
             } catch (e) {
+                alert("WAO0U")
                 console.log(e)
                 showConnectionError(e.toString())
                 shakeConnexion()
@@ -120,6 +121,7 @@ buttonConnection.addEventListener("click", async function() {
         }
         closeConnexion()
     }
+    hideConnectionError()
 });
 
 buttonCancelConnection.addEventListener('click', function() {

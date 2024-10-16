@@ -14,21 +14,14 @@ function initializeDropDownMenu(){
     const selectSelected = customSelect.querySelector('.select-selected');
     const selectItems = customSelect.querySelector('.select-items');
 
-    console.log('Custom Select:', customSelect);
-    console.log('Select Selected:', selectSelected);
-    console.log('Select Items:', selectItems);
-
     selectSelected.addEventListener('click', function(e) {
-        console.log('Select clicked');
         e.stopPropagation();
         selectItems.classList.toggle('select-hide');
         this.classList.toggle('select-arrow-active');
     });
 
     selectItems.querySelectorAll('div').forEach(item => {
-        console.log(item)
         item.addEventListener('click', function(e) {
-            console.log('Item clicked:', this.innerHTML);
 
             if(this.innerHTML !== "Créer un compte"){
                 showUsernameField(false)
@@ -90,6 +83,7 @@ async function changeLoginPassword(button = true){
 }
 
 async function deconnectionFromMyges(){
+    console.log("Déconnexion")
     try{
         await DeconnectUser()
     } catch (e) {
@@ -107,65 +101,26 @@ async function deconnectionFromMyges(){
     document.getElementById("username").value = ""
     document.getElementById("password").value = ""
 
+    console.log("Starting the connexion form")
+
     let users
     try{
         users = await GetRegisteredUsers()
     } catch (e) {
         console.log(e)
+        popup("Une erreur est survenue : "+e.toString())
+        return
     }
 
+    console.log(users)
     if (users && users.length > 0) {
+        console.log("yey")
         createDropDownMenu(users)
     }
 
     openConnexion()
     loadPage("cya")
-}
-
-function createSelectUserDeco(users){
-    try{
-        console.log("tttttttttttttttt")
-        const connexionSelectField = document.getElementById("connexionSelect")
-        let select = document.getElementById("selectConnectionSelect")
-        if(select){
-            select.remove()
-
-        }
-        showDropDownMenu(true)
-        /*select = document.createElement("select");
-        select.innerHTML = ""
-        select.id = "selectConnectionSelect"*/
-
-        // ODefault option
-        const defaultOpt = document.createElement("option");
-        defaultOpt.value = "default";
-        defaultOpt.textContent = "Créer un compte";
-        defaultOpt.selected = true;
-        select.appendChild(defaultOpt);
-
-        // Add users
-        users.forEach(user => {
-            const option = document.createElement("option");
-            option.value = user.ID;
-            option.textContent = user.Username;
-            select.appendChild(option);
-        });
-
-        // Add select to document
-        connexionSelectField.appendChild(select);
-
-        /*select.addEventListener("change", ()=>{
-            if(select.selectedIndex > 0){
-                document.getElementById("username").style.display = "none"
-                document.getElementById('buttonConnection').value = "Connexion"
-            } else {
-                document.getElementById("username").style.display = "block"
-                document.getElementById('buttonConnection').value = "Créer un compte"
-            }
-        })*/
-    } catch (e) {
-        console.log(e)
-    }
+    initializeDropDownMenu()
 }
 
 function openConnexion(){
@@ -197,7 +152,16 @@ function shakeConnexion(){
 function changeTitle(title){
     const connexionTitle = document.getElementById("connexion-title")
     connexionTitle.innerHTML = title
+    changeLoginButtonName(title)
+    changedefaultSelected(title)
 }
+
+function changedefaultSelected(title){
+    const defaultSelected = document.getElementsByClassName("select-selected")[0]
+    defaultSelected.innerHTML = title
+    changeLoginButtonName(title)
+}
+
 
 function changeLoginButtonName(name){
     const loginBtn = document.getElementById('buttonConnection');
