@@ -58,28 +58,6 @@ async function changeLoginPassword(button = true){
     hideConnectionError()
     showButtonCancelConnection()
     showUsernameField()
-
-    // Code existant pour la gestion du login
-    loginBtn.addEventListener('click', async () => {
-        const username = usernameInput.value;
-        const password = passwordInput.value;
-
-        if (username && password) {
-            console.log('Tentative de connexion avec:', username, password);
-            try{
-                await UpdateUserPassword(username, password)
-                closeConnexion()
-            } catch (e) {
-                showConnectionError(e)
-                popup(e)
-                shakeConnexion()
-            }
-
-        } else {
-            shakeConnexion()
-        }
-
-    });
 }
 
 async function deconnectionFromMyges(){

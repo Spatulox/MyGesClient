@@ -64,7 +64,6 @@ buttonConnection.addEventListener("click", async function() {
                 const message = await VerifyUser(username, password);
                 popup(JSON.parse(message).message)
             } catch (e) {
-                alert("WAO0U")
                 console.log(e)
                 showConnectionError(e.toString())
                 shakeConnexion()
