@@ -8,3 +8,33 @@
         opacity: 1;
     }
 }
+
+@keyframes blob-animation {
+    0% {
+        transform: scale(1); /* Taille normale */
+    }
+    50% {
+        transform: scale(0.9); /* Zoom */
+    }
+    100% {
+        transform: scale(1); /* Retour à la taille normale */
+    }
+}
+
+@keyframes discordPopup {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9) rotate(-2deg);
+    }
+    40% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1.02) rotate(1deg);
+    }
+    70% {
+        transform: translateY(3px) scale(0.98) rotate(-0.5deg);
+    }
+    100% {
+        transform: translateY(0) scale(1) rotate(0);
+    }
+}
+
