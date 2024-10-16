@@ -49,9 +49,8 @@ buttonConnection.addEventListener("click", async function() {
 
     const loginBtn = document.getElementById('buttonConnection');
     const oldInnerHtmlLoginBtn = loginBtn.innerHTML
-    //const oldPaddingLoginBtn = loginBtn.style.padding
-    loginBtn.innerHTML = "<img src='../../src/assets/images/circle-loading.gif' alt='loading' width='30px'>"
-    loginBtn.style.padding = "2px"
+
+    loadingConnectionButton(oldInnerHtmlLoginBtn)
 
     if(selectConnexion.style.display !== "none"){
 
@@ -62,6 +61,7 @@ buttonConnection.addEventListener("click", async function() {
             if(!username || !password){
                 showConnectionError("Le nom d'utilisateur et le mot de passe doivent être rempli")
                 shakeConnexion()
+                loadingConnectionButton(oldInnerHtmlLoginBtn, false)
                 return
             }
             const still = stillPopup("Verifying infos")
@@ -73,6 +73,7 @@ buttonConnection.addEventListener("click", async function() {
                 showConnectionError(e.toString())
                 shakeConnexion()
                 stopStillPopup(still)
+                loadingConnectionButton(oldInnerHtmlLoginBtn, false)
                 return
             }
             stopStillPopup(still)
@@ -83,6 +84,7 @@ buttonConnection.addEventListener("click", async function() {
             if(!password){
                 showConnectionError("Le mot de passe doit être rempli")
                 shakeConnexion()
+                loadingConnectionButton(oldInnerHtmlLoginBtn, false)
                 return
             }
             const still = stillPopup("Verifying infos")
@@ -92,6 +94,7 @@ buttonConnection.addEventListener("click", async function() {
                 if(err){
                     showConnectionError("Une erreur s'est produit")
                     shakeConnexion()
+                    loadingConnectionButton(oldInnerHtmlLoginBtn, false)
                     return
                 }
                 closeConnexion()
@@ -100,6 +103,7 @@ buttonConnection.addEventListener("click", async function() {
                 showConnectionError("Une erreur s'est produit")
                 shakeConnexion()
                 stopStillPopup(still)
+                loadingConnectionButton(oldInnerHtmlLoginBtn, false)
                 return
             }
             stopStillPopup(still)
@@ -111,6 +115,7 @@ buttonConnection.addEventListener("click", async function() {
         if(!username || !password){
             showConnectionError("Le nom d'utilisateur et le mot de passe doivent être rempli")
             shakeConnexion()
+            loadingConnectionButton(oldInnerHtmlLoginBtn, false)
             return
         }
         try{
@@ -121,19 +126,30 @@ buttonConnection.addEventListener("click", async function() {
             console.log(e)
             showConnectionError(e.toString())
             shakeConnexion()
+            loadingConnectionButton(oldInnerHtmlLoginBtn, false)
             return
         }
         closeConnexion()
     }
     hideConnectionError()
-    loginBtn.innerHTML = oldInnerHtmlLoginBtn
-    loginBtn.style.display = "block"
-    loginBtn.style.padding = ""
+    loadingConnectionButton(oldInnerHtmlLoginBtn, false)
 });
 
 buttonCancelConnection.addEventListener('click', function() {
     closeConnexion()
 })
+
+function loadingConnectionButton(oldInnerHtmlLoginBtn, bool = true){
+    const loginBtn = document.getElementById('buttonConnection');
+    if(bool){
+        loginBtn.innerHTML = "<img src='../../src/assets/images/circle-loading.gif' alt='loading' width='30px'>"
+        loginBtn.style.padding = "2px"
+    } else {
+        loginBtn.innerHTML = oldInnerHtmlLoginBtn
+        loginBtn.style.display = "block"
+        loginBtn.style.padding = ""
+    }
+}
 
 // ------------ Popup events -------------- //
 
