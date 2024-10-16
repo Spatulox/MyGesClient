@@ -25,9 +25,11 @@
 
 }
 
+#eula, #mainPart{
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
 
 #mainPart{
-    font-family: 'Helvetica Neue', Arial, sans-serif;
     z-index: 1;
     width: var(--mainPartWidth);
     background-color: var(--mainPartColor);
@@ -360,6 +362,12 @@
 
 #buttonEula{
     width: 100% !important;
+    background-color: var(--highlight-color);
+}
+
+#buttonEula:hover{
+    width: 100% !important;
+    background-color: var(--hover-color);
 }
 
 #calendar-grid h2{
@@ -368,7 +376,7 @@
     font-size: clamp(10px, 3vw, 21px);
 }
 
-#connection{
+/*#connection{
     z-index: 2407;
     display: none;
     position: absolute;
@@ -390,7 +398,7 @@
 #connection.active{
     display: block;
     transition: all ease-in-out 0.3s;
-}
+}*/
 
 #containerAbsencesGrades{
     overflow: hidden;
@@ -414,8 +422,9 @@
 }
 
 #eula div{
-    margin: 8% auto;
-    max-height: 60%;
+    margin: auto;
+    margin-top: 50px;
+    /*max-height: 60%;*/
     width: 40%;
     overflow: auto;
 }

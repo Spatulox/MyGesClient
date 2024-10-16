@@ -9,24 +9,25 @@
 	<link rel="stylesheet" type="text/css" href="src/CSS/tagsStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/idStyle.css">
     <link rel="stylesheet" type="text/css" href="src/CSS/classStyle.css">
-    <link rel="stylesheet" href="./src/CSS/addEvent.css">
+    <link rel="stylesheet" type="text/css" href="./src/CSS/addEvent.css">
+    <link rel="stylesheet" type="text/css" href="src/CSS/login-register.css">
 
     <script type="application/javascript" src="./src/JS/popups.js" defer></script>
+    <script type="application/javascript" src="./src/JS/login-register.js" defer></script>
 
     <!--Don't interact with html element, mandatory to be module (better)-->
     <script type="module" src="./src/JS/start.js" defer></script>
 
     <!--Interact with html element, impossible to be modules-->
     <script type="application/javascript" src="./src/JS/loadingGoFuncOutsideModule.js" defer></script>
-    <!--<script type="application/javascript" src="./src/JS/createEvents.js" defer></script>-->
     <script type="application/javascript" src="./src/JS/index_events.js" defer></script>
 
 </head>
 <body class="dark">
 
     <div id="utilities">
-        <div id="eula">
-            <div class="box maxHeight40Pourcent">
+        <div id="eula" class="popup-eula">
+            <div class="popup-box maxHeight80Pourcent">
                 <h1 class="textCenter">Informations</h1>
                 <hr>
                 <span class="underline">En utilisant ce logiciel, voici ce que vous devez savoir :</span>
@@ -39,11 +40,11 @@
                     <li>C'est un projet open source.</li>
                     <li>Les développeurs du logiciel ne sont en aucun cas responsable des fuites de données possibles</li>
                 </ul>
-                <input id="buttonEula" class="marginTop10" type="button" value="Ok">
+                <button id="buttonEula" class="marginTop10">Ok</button>
             </div>
         </div>
 
-        <div id="connection">
+        <!--<div id="connection">
             <div class="box maxHeight40Pourcent">
                 <h1 class="textCenter">Connexion</h1>
                 <hr>
@@ -58,6 +59,34 @@
                     <input id="buttonConnection" class="marginTop10" type="button" value="Save and Connect">
                     <input id="buttonCancelConnection" class="marginTop10" type="button" value="Cancel Connection">
                 </div>
+            </div>
+        </div>-->
+        <div class="bg-connexion">
+            <div class="login-container" id="connection">
+                <h1 id="connexion-title">Connexion</h1>
+
+                <!-- Nouvelle liste déroulante personnalisée -->
+                <p id="connexion_error" style="display: none; color: darkred;" class="textCenter"></p>
+                <div class="custom-select">
+                    <div class="select-selected">Créer un compte</div>
+                    <div class="select-items select-hide" id="select-connexion">
+                        <div>Créer un compte</div>
+                        <div>Serveur 1</div>
+                        <div>Serveur 2</div>
+                        <div>Serveur 3</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="username" autocomplete="off" required>
+                    <label for="username" id="username-label">Nom d'utilisateur</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" autocomplete="off" id="password" required>
+                    <label for="password">Mot de passe</label>
+                </div>
+                <button id="buttonConnection">Se connecter</button>
+                <button id="buttonCancelConnection" class="marginTop10">Annuler</button>
             </div>
         </div>
     </div>

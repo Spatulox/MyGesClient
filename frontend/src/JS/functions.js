@@ -204,3 +204,8 @@ export function scrollMainPart(){
     const replace = document.getElementById("replace")
     replace.style.height = "auto"
 }
+
+export function alertDebug(e){
+    console.log(e)
+    alert(e.toString())
+}

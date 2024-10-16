@@ -18,22 +18,22 @@ export async function start(){
     try {
         let user = await GetUserData();
         if (user === null || !user.Password) {
-            buttonCancelConnection.style.visibility = "hidden"
-            const connection = document.getElementById('connection')
-            connection.classList.add('active')
+            changeTitle("Créer un compte")
+            changeLoginButtonName("Créer un compte")
+            showButtonCancelConnection(false)
 
             try{
                 // If there already a user in the DB add the list
                 const users = await GetRegisteredUsers()
                 console.log(users)
                 if (users && users.length > 0) {
-                    createSelectUser(users)
+                    createDropDownMenu(users)
                 }
             } catch (e) {
                 console.log(e)
             }
 
-
+            openConnexion()
             stopStillPopup(laStill)
             return
         }

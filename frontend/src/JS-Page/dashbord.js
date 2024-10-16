@@ -1,5 +1,12 @@
 import {GetAgenda, GetEvents, GetGrades, RefreshAgenda, ReturnRefreshScheduleState} from "../../wailsjs/go/backend/App";
-import {getYear, capitalizeFirstLetter, formatDateWithDay, wait, getMonday, getSaturday} from "../JS/functions";
+import {
+    getYear,
+    capitalizeFirstLetter,
+    formatDateWithDay,
+    wait,
+    getMonday,
+    getSaturday,
+} from "../JS/functions";
 import {updateSchedule} from "./schedule";
 import {initGradesDisplay} from "./grades";
 
