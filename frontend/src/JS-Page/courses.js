@@ -31,6 +31,9 @@ export async function courses(){
 
     } catch (e) {
         console.log(e)
+        courseGrid.innerHTML = "Une erreur c'est produite"
+        loading.style.display = "none"
+        courses = JSON.parse(courses)
     }
 }
 
