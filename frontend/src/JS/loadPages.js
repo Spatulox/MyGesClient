@@ -10,6 +10,8 @@ import {dashboard, stopDashboardEvents} from "../JS-Page/dashbord.js";
 import {schedule, stopSchedule} from "../JS-Page/schedule";
 import {grades} from "../JS-Page/grades";
 import {events, stopDisplayingEvents} from "../JS-Page/events";
+import {account} from "../JS-Page/account";
+import {courses} from "../JS-Page/courses";
 
 export async function loadPageGo(string, event = null){
 
@@ -54,19 +56,22 @@ function updatePages(pages){
 
     switch (pages){
         case 'account':
-            //account()
+            account()
             break
+        case 'courses':
+            courses()
+            break;
         case 'dashboard':
             dashboard()
             break
-        case 'schedule':
-            schedule()
+        case 'events':
+            events()
             break
         case 'grades':
             grades()
             break
-        case 'events':
-            events()
+        case 'schedule':
+            schedule()
             break
     }
 

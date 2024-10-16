@@ -1,11 +1,10 @@
 import {GetAllEvents, GetEvents, GetEventsLike, SaveEvents} from "../../wailsjs/go/backend/App";
-import {formatDateWithDay} from "../JS/functions";
+import {formatDateWithDay, scrollMainPart} from "../JS/functions";
 let personnalEvents
 let displayEventsId = []
 export async function events(){
 
-    const replace = document.getElementById("replace")
-    replace.style.height = "auto"
+    scrollMainPart()
 
     const searchBar = document.getElementById("searchBar")
 

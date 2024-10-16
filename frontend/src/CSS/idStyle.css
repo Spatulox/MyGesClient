@@ -291,6 +291,73 @@
     margin-bottom: 2px;
 }
 
+#loading-gif-account{
+    margin: auto;
+    display: block;
+    width: 50px;
+}
+
+#account-presentation{
+    margin-bottom: 50px;
+}
+
+#account-presentation .card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    width: 340px;
+    margin: auto;
+}
+
+#account-presentation .card-header {
+    background: linear-gradient(90deg, #5865f2, #7289da);
+    padding: 20px;
+    text-align: center;
+}
+
+#account-presentation .avatar {
+    border-radius: 50%;
+    width: 80px;
+    height: 100px;
+    border: 4px solid var(--card-bg);
+}
+
+#account-presentation h2 {
+    margin: 10px 0 5px;
+    font-size: 1.5em;
+}
+
+#account-presentation .student-id {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+#account-presentation .card-body {
+    padding: 20px;
+}
+
+#account-presentation .info-section {
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+#account-presentation h3 {
+    margin-top: 0;
+    font-size: 1.1em;
+    color: #7289da;
+}
+
+#account-presentation p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+#account-presentation strong {
+    color: #ffffff;
+}
+
 #buttonEula{
     width: 100% !important;
 }

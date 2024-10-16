@@ -1,5 +1,5 @@
 import {GetAgenda, RefreshAgenda} from "../../wailsjs/go/backend/App";
-import {capitalizeFirstLetter, getMonday, getSaturday, todayDate} from "../JS/functions";
+import {capitalizeFirstLetter, getMonday, getSaturday, scrollMainPart, todayDate} from "../JS/functions";
 
 let scheduleTimeoutId = []
 let monday = getMonday()
@@ -38,9 +38,7 @@ export async  function schedule(){
     if(thisWeekAlreadyFetched){
         return
     }
-
-    const replace = document.getElementById("replace")
-    replace.style.height = "auto"
+    scrollMainPart()
     let stillPopupId
     const today = new Date()
 
