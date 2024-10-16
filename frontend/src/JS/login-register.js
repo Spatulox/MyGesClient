@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 function initializeDropDownMenu(){
-    // Nouveau code pour la gestion de la liste déroulante personnalisée
     const customSelect = document.querySelector('.custom-select');
     const selectSelected = customSelect.querySelector('.select-selected');
     const selectItems = customSelect.querySelector('.select-items');
@@ -47,17 +46,13 @@ function initializeDropDownMenu(){
 }
 
 async function changeLoginPassword(button = true){
-    const loginBtn = document.getElementById('buttonConnection');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-
-    openConnexion()
     changeTitle("Modifier le mot de passe")
     changeLoginButtonName("Modifier")
     showDropDownMenu(false)
     hideConnectionError()
     showButtonCancelConnection()
     showUsernameField()
+    openConnexion()
 }
 
 async function deconnectionFromMyges(){

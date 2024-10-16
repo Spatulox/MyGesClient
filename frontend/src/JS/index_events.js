@@ -47,7 +47,12 @@ buttonConnection.addEventListener("click", async function() {
     const selectConnexion = document.getElementsByClassName("select-selected")[0] || false
     const selectUser = document.getElementsByClassName("select-selected")[0].innerHTML.trim()
 
-    console.log(selectConnexion)
+    const loginBtn = document.getElementById('buttonConnection');
+    const oldInnerHtmlLoginBtn = loginBtn.innerHTML
+    //const oldPaddingLoginBtn = loginBtn.style.padding
+    loginBtn.innerHTML = "<img src='../../src/assets/images/circle-loading.gif' alt='loading' width='30px'>"
+    loginBtn.style.padding = "2px"
+
     if(selectConnexion.style.display !== "none"){
 
         if(selectUser === "Créer un compte"){
@@ -121,6 +126,9 @@ buttonConnection.addEventListener("click", async function() {
         closeConnexion()
     }
     hideConnectionError()
+    loginBtn.innerHTML = oldInnerHtmlLoginBtn
+    loginBtn.style.display = "block"
+    loginBtn.style.padding = ""
 });
 
 buttonCancelConnection.addEventListener('click', function() {
