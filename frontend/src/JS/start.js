@@ -7,6 +7,15 @@ import {
 import { loadPageGo } from "./loadPages";
 import {initCreateEvent} from "./createEvents";
 
+import {stillPopup, stopStillPopup} from './popups'
+import {
+    changeLoginButtonName,
+    changeTitle,
+    createDropDownMenu,
+    openConnexion,
+    showButtonCancelConnection
+} from "./login-register";
+
 export async function start(){
     initCreateEvent()
 
@@ -25,7 +34,6 @@ export async function start(){
             try{
                 // If there already a user in the DB add the list
                 const users = await GetRegisteredUsers()
-                console.log(users)
                 if (users && users.length > 0) {
                     createDropDownMenu(users)
                 }

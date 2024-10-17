@@ -1,8 +1,8 @@
 // Normal functions
-import {capitalizeFirstLetter, log} from "./functions";
+import {capitalizeFirstLetter} from "./functions";
 
 // GO functions
-import {GetPageContent, UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
+import {UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
 
 // Page Functions
 // They are used
