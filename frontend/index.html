@@ -17,6 +17,7 @@
 
     <!--Don't interact with html element, mandatory to be module (better)-->
     <script type="module" src="./src/JS/start.js" defer></script>
+    <script type="module" src="src/JS/loadPages.js" defer></script>
 
     <!--Interact with html element, impossible to be modules-->
     <script type="application/javascript" src="./src/JS/loadingGoFuncOutsideModule.js" defer></script>
@@ -89,34 +90,34 @@
             <!--Up list-->
             <nav>
                 <ul>
-                    <li onclick="loadPage('dashboard', event)">
+                    <li onclick="loadPageGo('dashboard', event)">
                         Accueil
                     </li>
-                    <li onclick="loadPage('schedule', event)">
+                    <li onclick="loadPageGo('schedule', event)">
                         Agenda
                     </li>
-                    <li onclick="loadPage('grades', event)">
+                    <li onclick="loadPageGo('grades', event)">
                         Notes
                     </li>
-                    <li onclick="loadPage('events', event)">
+                    <li onclick="loadPageGo('events', event)">
                         Évènements
                     </li>
-                    <li onclick="loadPage('absences', event)">
+                    <li onclick="loadPageGo('absences', event)">
                         Absences
                     </li>
-                    <li onclick="loadPage('courses', event)">
+                    <li onclick="loadPageGo('courses', event)">
                         Cours
                     </li>
-                    <li onclick="loadPage('projects', event)">
+                    <li onclick="loadPageGo('projects', event)">
                         Projets de Groupes
                     </li>    
-                    <li onclick="loadPage('account', event)">
+                    <li onclick="loadPageGo('account', event)">
                         Compte MyGes
                     </li>
                 </ul>
             </nav>
 
-            <div class="ulBottom flex flexAround"><a class="underlinePointer" onclick="loadPage('credits', event)">Credit</a> <a class="underlinePointer" onclick="loadPage('softwareAccount', event)">Compte</a></div>
+            <div class="ulBottom flex flexAround"><a class="underlinePointer" onclick="loadPageGo('credits', event)">Credit</a> <a class="underlinePointer" onclick="loadPageGo('softwareAccount', event)">Compte</a></div>
 
         </div>  <!--softwareAccount-->
 
