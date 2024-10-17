@@ -65,6 +65,7 @@ export async function dashboard(){
     printDate(htmlElement)
     prevNextCliked = true
 
+    let still = stillPopup("Affichage de vos infomations")
     try{
         const htmlGradeElement = document.getElementById("grades-content")
 
@@ -82,6 +83,7 @@ export async function dashboard(){
             }
 
         }).catch((error) => {
+            prevNextCliked = false
             console.error("Une erreur s'est produite :", error);
         });
 
@@ -89,6 +91,7 @@ export async function dashboard(){
         console.log(e)
         popup("Impossible de mettre à jour l'accueil..")
     }
+    stopStillPopup(still)   
 }
 
 // --------------------------------------------------------------------------------------- //
@@ -276,23 +279,28 @@ async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
 }
 
 function printDate(htmlElement){
-    const now = new Date();
+    try{
+        const now = new Date();
 
-    const isAfter6PM = now.getHours() >= 18;
-    const autoShowTomorrow = isAfter6PM ? 1 : 0;
+        const isAfter6PM = now.getHours() >= 18;
+        const autoShowTomorrow = isAfter6PM ? 1 : 0;
 
-    // Créer une date pour aujourd'hui à minuit UTC
-    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    today.setUTCDate(today.getUTCDate() + userShowTomorrow + autoShowTomorrow);
-    today.setUTCHours(0, 0, 0, 0)
+        // Créer une date pour aujourd'hui à minuit UTC
+        const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        today.setUTCDate(today.getUTCDate() + userShowTomorrow + autoShowTomorrow);
+        today.setUTCHours(0, 0, 0, 0)
 
-    // Ajuster au lundi si c'est un dimanche
-    if (today.getUTCDay() === 0) { // 0 représente dimanche
-        today.setUTCDate(today.getUTCDate() + 1);
-        userShowTomorrow ++
+        // Ajuster au lundi si c'est un dimanche
+        if (today.getUTCDay() === 0) { // 0 représente dimanche
+            today.setUTCDate(today.getUTCDate() + 1);
+            userShowTomorrow ++
+        }
+
+        htmlElement.innerHTML = `<h3>${capitalizeFirstLetter(today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
+        htmlElement.innerHTML += "Nothing to show"
+        document.getElementsByClassName("schedule-section")[0].style.transform = "inherit"
+    } catch (e) {
+        console.log(e)
     }
 
-    htmlElement.innerHTML = `<h3>${capitalizeFirstLetter(today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
-    htmlElement.innerHTML += "Nothing to show"
-    document.getElementsByClassName("schedule-section")[0].style.transform = "inherit"
 }

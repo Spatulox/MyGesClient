@@ -1,5 +1,8 @@
 # README
 
+## Will add
+> - Button to hard refresh schedule
+
 ## About
 
 This is the official Wails Vanilla template.
