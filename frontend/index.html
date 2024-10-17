@@ -43,24 +43,6 @@
                 <button id="buttonEula" class="marginTop10">Ok</button>
             </div>
         </div>
-
-        <!--<div id="connection">
-            <div class="box maxHeight40Pourcent">
-                <h1 class="textCenter">Connexion</h1>
-                <hr>
-                <span class="underline textCenter width100 marginTop10" style="display: block;">Renseigner votre login et mot de passe myGes</span>
-                <div class="flex flexCenter">
-                    <ul class="noDecoration noMargin noPadding">
-                        <li><input type="text" id="username" placeholder="Username" autocomplete="off" required></li>
-                        <li><input type="password" id="password" class="marginTop10" placeholder="Password" autocomplete="off" required></li>
-                    </ul>
-                </div>
-                <div class="flex flexCenter wrap" style="margin-bottom: 0;">
-                    <input id="buttonConnection" class="marginTop10" type="button" value="Save and Connect">
-                    <input id="buttonCancelConnection" class="marginTop10" type="button" value="Cancel Connection">
-                </div>
-            </div>
-        </div>-->
         <div class="bg-connexion">
             <div class="login-container" id="connection">
                 <h1 id="connexion-title">Connexion</h1>
@@ -71,9 +53,6 @@
                     <div class="select-selected">Créer un compte</div>
                     <div class="select-items select-hide" id="select-connexion">
                         <div>Créer un compte</div>
-                        <div>Serveur 1</div>
-                        <div>Serveur 2</div>
-                        <div>Serveur 3</div>
                     </div>
                 </div>
 
@@ -155,8 +134,288 @@
 
             <div id="replace" class="paddingTop70">
                 <div class="flex flexCenter">
-                    <div class="box flex flexCenter" style="width: inherit"><p>Quel endroit bizarre... Tiens, le tacos que Poulpax m'a gentiment donné : 🌮</p></div>
+                    <!--Default page-->
+                    <div class="box flex flexCenter" id="weirdPlace" style="width: inherit"><p>Quel endroit bizarre... Tiens, le tacos que Poulpax m'a gentiment donné : 🌮</p></div>
                 </div>
+                <!--Good bye Page-->
+                <div id="cya" class="flex flexCenter wrap marginTop10 marginBottom10" style="display: none">
+                    <h1>Cya 👋</h1>
+                </div>
+                <!--Main Menu-->
+                <div class="container-dashboard" id="dashboard" style="display: none">
+                    <div class="all-content">
+                        <div class="main-content-dashboard">
+                            <div class="schedule-section">
+                                <div id="scheduleParentBkgColor">
+                                    <div class="header">
+                                        <h2>Emploi du temps du jour</h2>
+                                        <div class="navigation-buttons">
+                                            <button id="backward-button">&#9664;</button> <!-- Flèche gauche -->
+                                            <button id="forward-button">&#9654;</button>  <!-- Flèche droite -->
+                                        </div>
+                                    </div>
+                                    <div id="schedule-content" class="day-column"></div>
+                                </div>
+                            </div>
+                            <div class="summary-section">
+
+                                <div class="recapSection">
+                                    <h2>Récapitulatif des Évènements</h2>
+                                    <div id="event-content">
+                                        <div id="events-container" class="events-container">
+                                            <!-- Les événements seront injectés ici par JavaScript -->
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="recapSection">
+                                    <h2>Récapitulatif des notes</h2>
+                                    <div class="grades-container">
+                                        <div class="grades-header">
+                                            <span>Cours</span>
+                                            <span>Coef</span>
+                                            <span>Professeur</span>
+                                            <span>Notes</span>
+                                            <span>Exam</span>
+                                            <span>Bonus</span>
+                                        </div>
+                                        <div id="grades-content"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Schedule-->
+                <div id="schedule" style="display: none">
+                    <div id="allContainerSchedule" class="flex flexAround wrap box">
+                        <div class="container-schedule">
+                            <div class="main-content-schedule">
+                                <div class="calendar-header">
+                                    <button id="prev-week">&lt;</button>
+                                    <h2 id="current-week"></h2>
+                                    <button id="next-week">&gt;</button>
+                                </div>
+                                <div id="calendar-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Grades-->
+                <div id="grades" style="display: none">
+                    <div id="allGradesContainer" class="marginAuto box width80">
+                        <div class="main-content-grades">
+                            <h2>Mes Notes</h2>
+                            <div class="semester-tabs">
+                                <button class="tab-button active" data-semester="1">Semestre 1</button>
+                                <button class="tab-button" data-semester="2">Semestre 2</button>
+                            </div>
+                            <div class="grades-container">
+                                <div class="grades-header">
+                                    <span>Cours</span>
+                                    <span>ECTS</span>
+                                    <span>Coef</span>
+                                    <span>Professeur</span>
+                                    <span>Notes</span>
+                                    <span>Exam</span>
+                                    <span>Bonus</span>
+                                </div>
+                                <div id="grades-list-semester-1" class="grades-list active">
+                                    <!-- Les notes du premier semestre seront insérées ici -->
+                                </div>
+                                <div id="grades-list-semester-2" class="grades-list">
+                                    <!-- Les notes du deuxième semestre seront insérées ici -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Event-->
+                <div id="events" style="display: none">
+                    <div id="event-manager">
+                        <div class="calendar-container">
+                            <h2 class="calendar-title">Calendrier des événements</h2>
+                            <input type="text" placeholder="Rechercher un évènement" id="searchBar" autocomplete="off">
+                            <div class="event-list">
+                                <div class="event-item" style="border-color: #5865f2;">
+                                    <div class="event-header">
+                                        <span class="event-name">Coucou1</span>
+                                        <span class="event-date">12 Oct - 13 Oct</span>
+                                    </div>
+                                    <p class="event-description">test1</p>
+                                    <div class="event-time">
+                                        <span>Début: 21:23</span>
+                                        <span>Fin: 21:23</span>
+                                    </div>
+                                </div>
+                                <!-- Ajoutez d'autres événements ici -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Absences-->
+                <div id="absences" style="display: none">
+                    <div id="allContainerAbsences" class="flex flexCenter wrap">
+                        absences
+                    </div>
+                </div>
+                <!--Courses-->
+                <div id="courses" style="display: none">
+                    <div class="container-courses">
+                        <h1>Liste des Cours</h1>
+                        <input type="text" placeholder="Cherchez un cours..." id="search-bar-courses" autocomplete="off">
+                        <div id="courseGrid" class="course-grid">
+                            <!-- Les cartes de cours seront insérées ici par JavaScript -->
+                            <img src="./src/assets/images/circle-loading.gif" alt="loading.." id="loading">
+                        </div>
+                    </div>
+                    <style>
+
+                        .container-courses #loading {
+                            width: 100px;
+                            height: auto;
+                            position: absolute;
+                            top: 50%;
+                            left: 57%;
+                            transform: translate(-50%, -50%);
+                        }
+
+                        #search-bar-courses{
+                            width: 98%;
+                        }
+
+                        .container-courses {
+                            max-width: 80%;
+                            min-height: 500px;
+                            margin: 0 auto;
+                            margin-bottom: 50px;
+                            background-color: var(--discord-dark);
+                            padding: 20px;
+                        }
+                        .container-courses h1 {
+                            text-align: center;
+                        }
+                        .container-courses .course-grid {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                            gap: 20px;
+                        }
+
+                        .container-courses .course-name {
+                            font-size: 18px;
+                            font-weight: bold;
+                            margin-bottom: 10px;
+                            text-decoration: underline;
+                        }
+                        .container-courses .course-detail {
+                            font-size: 14px;
+                            margin-bottom: 5px;
+                        }
+                        .container-courses .teacher {
+                            font-style: italic;
+                            font-weight: bold;
+                            text-decoration: underline;
+                            color: var(--highlight-color);
+                        }
+                        .container-courses .badge {
+                            display: inline-block;
+                            padding: 3px 8px;
+                            border-radius: 12px;
+                            font-size: 12px;
+                            font-weight: bold;
+                            margin-right: 5px;
+                        }
+                        .container-courses .badge-blue {
+                            background-color: #e8f0fe;
+                            color: #1a73e8;
+                        }
+                        .container-courses .badge-green {
+                            background-color: #e6f4ea;
+                            color: #137333;
+                        }
+                    </style>
+                </div>
+                <!--Groups project-->
+                <div id="projects" style="display: none"></div>
+                <!--MyGes Account-->
+                <div id="account" style="display: none">
+                    <div id="account-presentation">
+                        <img src="./src/assets/images/circle-loading.gif" alt="loading..." id="loading-gif-account">
+                    </div>
+                </div>
+
+                <!--Credits-->
+                <div id="credits" style="display: none">
+                    <div class="credits-container">
+                        <div class="credits-section">
+                            <h1 class="section-title">Crédits</h1>
+
+                            <div class="subsection">
+                                <h2 class="subsection-title">Créateurs</h2>
+                                <ul class="link-list creator-list">
+                                    <li><a href="https://github.com/Spatulox" target="_blank">Spatulox</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="subsection">
+                                <h2 class="subsection-title">Outils utilisés</h2>
+                                <ul class="link-list tools-list">
+                                    <li><a href="https://tip.golang.org/" target="_blank">GO 22</a></li>
+                                    <li><a href="https://wails.io/docs/guides/frontend/" target="_blank">WailsJS</a></li>
+                                    <li><a href="https://www.jetbrains.com/go/" target="_blank">Jetbrains GoLand</a></li>
+                                    <li><a href="https://www.gitkraken.com/" target="_blank">GitKraken</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="subsection">
+                                <h2 class="subsection-title">Informations</h2>
+                                <ul class="link-list info-list">
+                                    <li><a href="https://github.com/Spatulox/MyGesClient" target="_blank">Code Source</a></li>
+                                    <li><a href="https://github.com/Spatulox/MyGesClient/releases" target="_blank">Releases</a></li>
+                                    <li><a href="https://github.com/Spatulox/MyGesClient/issues" target="_blank">Signaler un problème</a></li>
+                                    <li><a href="https://github.com/Spatulox/MyGesClient/issues" target="_blank">Demander une fonctionnalité</a></li>
+                                    <li><a href="https://github.com/Spatulox?tab=repositories&q=MyGes" target="_blank">Autres Projets MyGes</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+
+                        <div class="credits-section">
+                            <h1 class="section-title">Autres</h1>
+                            <ul class="action-list">
+                                <li onclick="changeLoginPassword()">Modifier le login et le mot de passe</li>
+                                <li onclick="eulaShow()">Voir les informations d'utilisation</li>
+                                <li onclick="deleteOldData()">Supprimer les anciennes données</li>
+                                <li onclick="deconnectionFromMyges()">Déconnexion</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="credits-container bottom-sections">
+
+                        <div class="credits-section full-width">
+                            <div class="subsection">
+                                <h2 class="subsection-title">Disclaimer</h2>
+                                <p>This software is under the GNU GPL v3 Licence</p>
+                                <p>Cette application est fournie « telle quelle », sans aucune garantie, expresse ou implicite. Utilisez-la à vos propres risques. Les créateurs et contributeurs ne sont pas responsables des dommages ou pertes résultant de l'utilisation de cette application.</p>
+                            </div>
+                        </div>
+
+                        <div class="credits-section full-width">
+                            <div class="subsection">
+                                <h2 class="subsection-title">Remerciements</h2>
+                                <p>Un grand Merci à Poulpax, surtout pour le tacos.</p>
+                                <p>Un grand Merci à <a href="https://github.com/quantumsheep" target="_blank"> Nathanael Demacon (quantumsheep)</a> et particulièrement à son projet
+                                    <a href="https://github.com/quantumsheep/myges-cli" target="_blank">myges-cli</a> sans lequel ce projet n'aurait pas pu voir le jour.</p>
+                                <p>Un grand Merci aux équipes de développement de <a href="https://wails.io/docs/guides/frontend/" target="_blank">WailsJS</a>, parce que j'avais franchement la flemme de faire l'appli avec
+                                    <a href="https://fyne.io/" target="_blank">Fyne</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="softwareAccount" style="display: none"></div>
             </div>
 
             <div id="open-modal" class="add-button initial">
