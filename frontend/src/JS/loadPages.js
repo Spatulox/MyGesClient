@@ -13,41 +13,20 @@ import {events, stopDisplayingEvents} from "../JS-Page/events";
 import {account} from "../JS-Page/account";
 import {courses} from "../JS-Page/courses";
 
+let leDocToShow = document.getElementById("weirdPlace")
+
 export async function loadPageGo(string, event = null){
 
-    // Stop all automatic refresh :
-    stopSchedule()
-    stopDashboardEvents()
-    stopDisplayingEvents()
-
-    log(`Loading ${string} page`)
-    const mainPart = document.getElementById("replace")
-    const headerTitle = document.getElementById("headerTitle")
-
-    // Remove all hard style applyied in functions corresponding to files
-    const replace = document.getElementById("replace")
-    replace.style = ""
     let currPage
-    try {
-
-        mainPart.innerHTML = await GetPageContent(string)
-
-        await updatePages(string.split(".html")[0])
+    try{
         currPage = event?.srcElement.innerText ? event.srcElement.innerText : "Accueil"
-
-        headerTitle.innerText = currPage
-
-    } catch(err){
-        log("ERROR : An error occured in the loadPage function : "+err)
-    }
-
-    if (event != null){
-        try{
-            headerTitle.innerHTML = event.target.innerHTML
-        }
-        catch{
-            log("ERROR : Impossible to load the title")
-        }
+        console.log(leDocToShow)
+        leDocToShow.style.display = "none"
+        leDocToShow = document.getElementById(string.split(".html")[0])
+        console.log(leDocToShow)
+        leDocToShow.style.display = "inherit"
+    } catch (e) {
+        console.log(e)
     }
 
     try{
