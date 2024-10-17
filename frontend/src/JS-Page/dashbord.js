@@ -9,6 +9,7 @@ import {
 } from "../JS/functions";
 import {updateSchedule} from "./schedule";
 import {initGradesDisplay} from "./grades";
+import {stillPopup, stopStillPopup} from "../JS/popups";
 
 let displayDashboardId = []
 let prevNextCliked = false

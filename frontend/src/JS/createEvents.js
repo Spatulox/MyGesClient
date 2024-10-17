@@ -1,4 +1,7 @@
 // SaveEvent is async imported inside the loadingGoFunctionOutiseModules.js file
+import {popup} from "./popups";
+import {SaveEvents} from "../../wailsjs/go/backend/App";
+
 export async function initCreateEvent(){
     const addButton = document.getElementById('open-modal');
     const closeModalBtn = document.getElementById('close-modal');

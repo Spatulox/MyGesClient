@@ -2,9 +2,20 @@
 // ------------------------------------------------------------------ //
 // Functions
 
-function loadPage(string, event){ // Used in index.html
+import {popup, stillPopup, stopStillPopup} from "./popups";
+import {closeConnexion, hideConnectionError, shakeConnexion, showConnectionError} from "./login-register";
+import {
+    DeleteOldData,
+    UpdateUserEula,
+    UpdateUserPassword,
+    UpdateUserTheme,
+    VerifyUser
+} from "../../wailsjs/go/backend/App";
+import {start} from "./start";
+
+/*function loadPage(string, event){ // Used in index.html
     loadPageGo(string, event)
-}
+}*/
 
 // ------------------------------------------------------------------ //
 // Listener
@@ -153,14 +164,14 @@ function loadingConnectionButton(oldInnerHtmlLoginBtn, bool = true){
 
 // ------------ Popup events -------------- //
 
-async function eulaShow(){
+export async function eulaShow(){
     const eula = document.getElementById('eula')
     eula.classList.add('active')
 }
 
 
 
-async function deleteOldData(){
+export async function deleteOldData(){
     if(await DeleteOldData()){
         popup("Supression réussie !")
         return

@@ -56,8 +56,7 @@ async function updatePages(pages){
                 grades()
                 break;
             case 'schedule':
-                console.log("schedule call")
-                await schedule()
+                schedule()
                 break;
             default:
                 console.log("Default option in switch case when loading page ??")

@@ -126,10 +126,10 @@ export function changeTitle(title){
     const connexionTitle = document.getElementById("connexion-title")
     connexionTitle.innerHTML = title
     changeLoginButtonName(title)
-    changedefaultSelected(title)
+    changeDefaultSelected(title)
 }
 
-export function changedefaultSelected(title){
+function changeDefaultSelected(title){
     const defaultSelected = document.getElementsByClassName("select-selected")[0]
     defaultSelected.innerHTML = title
     changeLoginButtonName(title)
