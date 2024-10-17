@@ -107,7 +107,6 @@ export async  function schedule(){
 
 // Fonction pour arrêter le setTimeout
 export function stopSchedule() {
-    console.log(scheduleTimeoutId)
     while (scheduleTimeoutId.length > 0) {
         const timeoutId = scheduleTimeoutId.pop(); // Retirer le dernier identifiant du tableau
         clearTimeout(timeoutId); // Arrêter le timeout
