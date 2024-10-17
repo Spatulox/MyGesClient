@@ -6,11 +6,19 @@ let monday = getMonday()
 let saturday = getSaturday()
 let nextPrevActive = true
 let thisWeekAlreadyFetched = false
+let prevWeek = null
+let nextWeek = null
 
 
 function initSchedule(){
-    const prevWeek = document.getElementById("prev-week")
-    const nextWeek = document.getElementById("next-week")
+    console.log("initSchedule")
+    prevWeek = document.getElementById("prev-week")
+    nextWeek = document.getElementById("next-week")
+
+    if(!prevWeek || !nextWeek){
+        console.log("Impossible de sélectionner les prevWeek et nextWeek")
+        return
+    }
 
     prevWeek.addEventListener("click", ()=>{
         if(nextPrevActive){
@@ -83,20 +91,30 @@ export async  function schedule(){
     stopStillPopup(stillPopupId)
     nextPrevActive = true
 
+    console.log(scheduleTimeoutId)
     // Is only execute one time
     if (scheduleTimeoutId.length === 0) {
-        initSchedule()
         scheduleTimeoutId.push(setInterval(schedule, 10000));
+    }
+
+    console.log("End of shcedule")
+    console.log(prevWeek)
+    if(prevWeek == null){
+        initSchedule()
     }
 
 }
 
 // Fonction pour arrêter le setTimeout
 export function stopSchedule() {
+    console.log(scheduleTimeoutId)
     while (scheduleTimeoutId.length > 0) {
         const timeoutId = scheduleTimeoutId.pop(); // Retirer le dernier identifiant du tableau
         clearTimeout(timeoutId); // Arrêter le timeout
     }
+    prevWeek = null
+    nextWeek = null
+    thisWeekAlreadyFetched = false
 }
 
 function printNothing(calendarGrid, currentWeek){
