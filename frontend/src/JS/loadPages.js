@@ -17,12 +17,10 @@ export async function loadPageGo(string, event = null){
 
     // Stop all automatic refresh :
     stopSchedule()
-    //stopAutomaticEventsInDashboard()
     stopDashboardEvents()
     stopDisplayingEvents()
 
     log(`Loading ${string} page`)
-
     const mainPart = document.getElementById("replace")
     const headerTitle = document.getElementById("headerTitle")
 
@@ -31,9 +29,12 @@ export async function loadPageGo(string, event = null){
     replace.style = ""
     let currPage
     try {
+
         mainPart.innerHTML = await GetPageContent(string)
-        updatePages(string.split(".html")[0])
+
+        await updatePages(string.split(".html")[0])
         currPage = event?.srcElement.innerText ? event.srcElement.innerText : "Accueil"
+
         headerTitle.innerText = currPage
 
     } catch(err){
@@ -49,34 +50,42 @@ export async function loadPageGo(string, event = null){
         }
     }
 
-    UpdateDiscordRPC("Unofficial MyGes Client", capitalizeFirstLetter(currPage))
+    try{
+        UpdateDiscordRPC("Unofficial MyGes Client", capitalizeFirstLetter(currPage))
+    } catch (e) {
+        console.log(e)
+    }
 }
 
-function updatePages(pages){
-
-    switch (pages){
-        case 'account':
-            account()
-            break
-        case 'courses':
-            courses()
-            break;
-        case 'dashboard':
-            dashboard()
-            break
-        case 'events':
-            events()
-            break
-        case 'grades':
-            grades()
-            break
-        case 'schedule':
-            schedule()
-            break
+async function updatePages(pages){
+    console.log("pages : "+pages)
+    try{
+        switch (pages){
+            case 'account':
+                account()
+                break;
+            case 'courses':
+                courses()
+                break;
+            case 'dashboard':
+                dashboard()
+                break;
+            case 'events':
+                events()
+                break;
+            case 'grades':
+                grades()
+                break;
+            case 'schedule':
+                console.log("schedule call")
+                await schedule()
+                break;
+            default:
+                console.log("Default option in switch case when loading page ??")
+                break;
+        }
+    } catch (e) {
+        console.log(e)
     }
 
-    // }
-    // catch(err){
-    //     log(`Can't execute ${pages}() function, name is not valid : ${err}`);
-    // }
 }
