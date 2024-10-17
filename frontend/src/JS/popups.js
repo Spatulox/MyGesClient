@@ -87,11 +87,11 @@ function removePopup(popupId) {
     }
 }
 
-function stillPopup(string = "Error when passing args to still popup") {
+export function stillPopup(string = "Error when passing args to still popup") {
     return createPopup('still', string);
 }
 
-function editStillPopup( popupId, string = "Error when passing args to still popup") {
+export function editStillPopup( popupId, string = "Error when passing args to still popup") {
     const pop = document.getElementById(popupId)
     pop.innerHTML = `
             <div class="flex flexStart no-wrap">
@@ -100,11 +100,11 @@ function editStillPopup( popupId, string = "Error when passing args to still pop
             </div>`;
 }
 
-function stopStillPopup(popupId) {
+export function stopStillPopup(popupId) {
     removePopup(popupId);
 }
 
-function popup(string) {
+export function popup(string) {
     const popupId = createPopup('normal', string);
     console.log(string)
     setTimeout(() => {

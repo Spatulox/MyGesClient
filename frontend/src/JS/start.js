@@ -97,7 +97,7 @@ start()
 })
 
 
-
+/*
 function createSelectUser(users){
     const connexionSelectField = document.getElementById("connexionSelect")
     let select = document.getElementById("selectConnectionSelect")
@@ -134,4 +134,4 @@ function createSelectUser(users){
             document.getElementById('buttonConnection').value = "Créer un compte"
         }
     })
-}
+}*/
