@@ -71,6 +71,10 @@ function populateCalendar(events) {
 
     let currentWeek = null;
 
+    if(!events){
+        return
+    }
+
     events.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 
     events.forEach(event => {
