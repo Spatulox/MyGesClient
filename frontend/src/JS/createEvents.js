@@ -75,12 +75,11 @@ export async function initCreateEvent(){
 
         try{
             await SaveEvents(eventName.value.trim(), eventDescription?.value, startDate.toISOString(), endDate.toISOString(), eventColor.value)
+            popup("Évènement sauvegardé avec succès")
         } catch (e) {
             popup(e)
             return
         }
-
-        popup("Évènement sauvegardé avec succès")
 
         // If event successfully created
         closeModal();
