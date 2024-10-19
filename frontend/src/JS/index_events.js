@@ -108,7 +108,7 @@ buttonConnection.addEventListener("click", async function() {
                     loadingConnectionButton(oldInnerHtmlLoginBtn, false)
                     return
                 }
-                closeConnexion()
+                //closeConnexion()
             } catch (e) {
                 console.log(e)
                 showConnectionError("Une erreur s'est produit")
@@ -119,6 +119,7 @@ buttonConnection.addEventListener("click", async function() {
             }
             stopStillPopup(still)
         }
+        closeConnexion()
         start()
     } else {
         console.log("Update the password user")
