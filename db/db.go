@@ -57,11 +57,12 @@ func CreateUser(db *sql.DB, username string, password string) (bool, error) {
 }
 
 func CheckUserExist(db *sql.DB, username string) (bool, error) {
-	_, err := db.Exec("SELECT * FROM USER WHERE username = ?", username)
+	var exists bool
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM USER WHERE username = ?)", username).Scan(&exists)
 	if err != nil {
-		return false, fmt.Errorf("Erreur lors du check si l'utilisateurs %s existe : %w", username, err)
+		return false, fmt.Errorf("Erreur lors du check si l'utilisateur %s existe : %w", username, err)
 	}
-	return true, nil
+	return exists, nil
 }
 
 // ------------------------------------------------ //

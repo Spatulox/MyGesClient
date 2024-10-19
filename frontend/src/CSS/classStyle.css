@@ -3,6 +3,9 @@
 
 @import 'variables.css';
 
+*{
+    transition: background-color 0.5s ease-in-out;
+}
 
 /* Class with tags */
 

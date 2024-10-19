@@ -2,8 +2,13 @@ import {GetAllEvents, GetEvents, GetEventsLike, SaveEvents} from "../../wailsjs/
 import {formatDateWithDay, scrollMainPart} from "../JS/functions";
 let personnalEvents
 let displayEventsId = []
+let specificEvent = false
 export async function events(){
 
+    if(specificEvent){
+        console.log("stopEvent")
+        return
+    }
     scrollMainPart()
 
     const searchBar = document.getElementById("searchBar")
@@ -18,10 +23,13 @@ export async function events(){
     populateCalendar(personnalEvents);
 
     searchBar.addEventListener("input", async()=>{
+        if(searchBar.value === ""){
+            specificEvent = false
+        } else {
+            specificEvent = true
+        }
         const searchedEvents = await GetEventsLike(searchBar.value)
         populateCalendar(searchedEvents)
-        console.log(searchBar.value)
-        console.log(searchedEvents)
     })
 
     if(displayEventsId.length === 0){
@@ -70,6 +78,10 @@ function populateCalendar(events) {
     eventList.innerHTML = ''; // Effacer les événements existants
 
     let currentWeek = null;
+
+    if(!events){
+        return
+    }
 
     events.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 

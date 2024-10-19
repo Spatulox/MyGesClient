@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeDropDownMenu()
 })
 
-function initializeDropDownMenu(){
+export function initializeDropDownMenu(){
     const customSelect = document.querySelector('.custom-select');
     const selectSelected = customSelect.querySelector('.select-selected');
     const selectItems = customSelect.querySelector('.select-items');
@@ -45,7 +45,7 @@ function initializeDropDownMenu(){
     });
 }
 
-async function changeLoginPassword(button = true){
+export async function changeLoginPassword(button = true){
     changeTitle("Modifier le mot de passe")
     changeLoginButtonName("Modifier")
     showDropDownMenu(false)
@@ -55,7 +55,7 @@ async function changeLoginPassword(button = true){
     openConnexion()
 }
 
-async function deconnectionFromMyges(){
+export async function deconnectionFromMyges(){
     console.log("Déconnexion")
     try{
         await DeconnectUser()
@@ -96,7 +96,7 @@ async function deconnectionFromMyges(){
     initializeDropDownMenu()
 }
 
-function openConnexion(){
+export function openConnexion(){
     loginContainer.classList.remove("goesUp")
     loginContainer.classList.add("activeAnim")
     bgConnexion.classList.add("active")
@@ -106,7 +106,7 @@ function openConnexion(){
     }, 1500)
 }
 
-function closeConnexion(){
+export function closeConnexion(){
     loginContainer.classList.add("goesUp")
     bgConnexion.classList.remove("active")
     setTimeout(()=>{
@@ -115,34 +115,34 @@ function closeConnexion(){
     clearConnectionForm()
 }
 
-function shakeConnexion(){
+export function shakeConnexion(){
     loginContainer.classList.add("shake")
     setTimeout(()=>{
         loginContainer.classList.remove("shake")
     }, 500)
 }
 
-function changeTitle(title){
+export function changeTitle(title){
     const connexionTitle = document.getElementById("connexion-title")
     connexionTitle.innerHTML = title
     changeLoginButtonName(title)
-    changedefaultSelected(title)
+    changeDefaultSelected(title)
 }
 
-function changedefaultSelected(title){
+function changeDefaultSelected(title){
     const defaultSelected = document.getElementsByClassName("select-selected")[0]
     defaultSelected.innerHTML = title
     changeLoginButtonName(title)
 }
 
 
-function changeLoginButtonName(name){
+export function changeLoginButtonName(name){
     const loginBtn = document.getElementById('buttonConnection');
     loginBtn.value = name
     loginBtn.innerHTML = name
 }
 
-function showDropDownMenu(bool = true){
+export function showDropDownMenu(bool = true){
     const dropDown = document.getElementsByClassName("select-selected")[0]
 
     if(bool){
@@ -152,13 +152,13 @@ function showDropDownMenu(bool = true){
     dropDown.style.display = "none"
 }
 
-function showConnectionError(error){
+export function showConnectionError(error){
     const connexion_error = document.getElementById("connexion_error")
     connexion_error.innerHTML = error
     connexion_error.style.display = "block"
 }
 
-function showButtonConnection(bool = true){
+export function showButtonConnection(bool = true){
     const button = document.getElementById("buttonConnection")
     if(bool){
         button.style.display = "block"
@@ -167,7 +167,7 @@ function showButtonConnection(bool = true){
     button.style.display = "none"
 }
 
-function showButtonCancelConnection(bool = true){
+export function showButtonCancelConnection(bool = true){
     const button = document.getElementById("buttonCancelConnection")
     if(bool){
         button.style.display = "block"
@@ -176,13 +176,13 @@ function showButtonCancelConnection(bool = true){
     button.style.display = "none"
 }
 
-function hideConnectionError(){
+export function hideConnectionError(){
     const connexion_error = document.getElementById("connexion_error")
     connexion_error.innerHTML = ""
     connexion_error.style.display = "none"
 }
 
-function showUsernameField(bool = true){
+export function showUsernameField(bool = true){
     const username = document.getElementById("username")
     const usernameLabel = document.getElementById("username-label")
     if(bool){
@@ -194,7 +194,7 @@ function showUsernameField(bool = true){
     username.style.display = "none"
 }
 
-function createDropDownMenu(users){
+export function createDropDownMenu(users){
     const connexionSelectField = document.getElementById("select-connexion")
 
     connexionSelectField.innerHTML = "<div>Créer un compte</div>"
@@ -211,7 +211,7 @@ function createDropDownMenu(users){
 
 }
 
-function clearConnectionForm(){
+export function clearConnectionForm(){
     const username = document.getElementById("username")
     const password = document.getElementById("password")
     username.value = ""

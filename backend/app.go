@@ -15,7 +15,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -203,15 +202,16 @@ func (a *App) WriteLogFile(filePath string, content string) error {
 
 // -------------------------------------------------------------------------- //
 
-func (a *App) GetPageContent(page string) (string, error) {
+/*func (a *App) GetPageContent(page string) (string, error) {
 	page = strings.Split(page, ".html")[0]
+	Log.Infos("frontend/" + page + ".html")
 	content, err := os.ReadFile("frontend/" + page + ".html")
 	if err != nil {
 		Log.Error(fmt.Sprintf("Impossible to get the content of the page %d : %v", page, err))
 		return "", err
 	}
 	return string(content), nil
-}
+}*/
 
 // -------------------------------------------------------------------------- //
 

@@ -34,10 +34,11 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 
 	res, err := CheckUserExist(a.db, username)
 	if err != nil {
-		Log.Error("User already exist")
+		Log.Error(fmt.Sprintf("User already exist : %v", err))
 		return "", err
 	}
-	if res {
+
+	if res == true {
 		return "", fmt.Errorf("L'utilisateur existe déjà, impossible de créer un compte")
 	}
 

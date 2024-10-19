@@ -2,13 +2,25 @@
 // ------------------------------------------------------------------ //
 // Functions
 
-function loadPage(string, event){ // Used in index.html
+import {popup, stillPopup, stopStillPopup} from "./popups";
+import {closeConnexion, hideConnectionError, shakeConnexion, showConnectionError} from "./login-register";
+import {
+    DeleteOldData,
+    UpdateUserEula,
+    UpdateUserPassword,
+    UpdateUserTheme,
+    VerifyUser
+} from "../../wailsjs/go/backend/App";
+import {start} from "./start";
+import {hasCommonClass} from "./functions";
+
+/*function loadPage(string, event){ // Used in index.html
     loadPageGo(string, event)
-}
+}*/
 
 // ------------------------------------------------------------------ //
 // Listener
-const lightDark = document.getElementById('theme');
+const lightDark = document.getElementsByClassName('themeLightDark');
 const body = document.getElementsByTagName('body')[0]
 const buttonEula = document.getElementById('buttonEula')
 
@@ -18,26 +30,41 @@ const buttonCancelConnection = document.getElementById('buttonCancelConnection')
 
 
 // ------------ Utilitites events -------------- //
-lightDark.addEventListener('click', function() {
+Array.from(lightDark).forEach((theme)=>{
+    theme.addEventListener('click', async function() {
 
-    if(body.classList.contains('light')){
-        lightDark.src = "./src/assets/images/black-moon.png"
-        UpdateUserTheme("dark")
+        const newTheme = body.classList.contains('light') ? 'dark' : 'light';
+        try{
+            await UpdateUserTheme(newTheme)
+        } catch (e) {
+            console.log(e)
+            popup(e.toString())
+            return
+        }
+
+        body.classList.toggle('light')
+        body.classList.toggle('dark')
+
+        Array.from(lightDark).forEach((img) => {
+            if (img.classList.contains(newTheme)) {
+                img.style.display = "block";
+            } else {
+                img.style.display = "none";
+            }
+        });
+
+    });
+})
+
+buttonEula.addEventListener('click', async function() {
+    try{
+        const eula = document.getElementById('eula')
+        await UpdateUserEula()
+        eula.classList.remove('active')
+    } catch (e) {
+        console.log(e)
+        popup(e.toString())
     }
-    else{
-        lightDark.src = "./src/assets/images/black-sun.png"
-        UpdateUserTheme("light")
-    }
-
-    body.classList.toggle('light')
-    body.classList.toggle('dark')
-
-});
-
-buttonEula.addEventListener('click', function() {
-    const eula = document.getElementById('eula')
-    UpdateUserEula()
-    eula.classList.remove('active')
 })
 
 
@@ -97,7 +124,7 @@ buttonConnection.addEventListener("click", async function() {
                     loadingConnectionButton(oldInnerHtmlLoginBtn, false)
                     return
                 }
-                closeConnexion()
+                //closeConnexion()
             } catch (e) {
                 console.log(e)
                 showConnectionError("Une erreur s'est produit")
@@ -108,6 +135,7 @@ buttonConnection.addEventListener("click", async function() {
             }
             stopStillPopup(still)
         }
+        closeConnexion()
         start()
     } else {
         console.log("Update the password user")
@@ -153,14 +181,14 @@ function loadingConnectionButton(oldInnerHtmlLoginBtn, bool = true){
 
 // ------------ Popup events -------------- //
 
-async function eulaShow(){
+export async function eulaShow(){
     const eula = document.getElementById('eula')
     eula.classList.add('active')
 }
 
 
 
-async function deleteOldData(){
+export async function deleteOldData(){
     if(await DeleteOldData()){
         popup("Supression réussie !")
         return

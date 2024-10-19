@@ -1,8 +1,8 @@
 // Normal functions
-import {capitalizeFirstLetter, log} from "./functions";
+import {capitalizeFirstLetter} from "./functions";
 
 // GO functions
-import {GetPageContent, UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
+import {UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
 
 // Page Functions
 // They are used
@@ -13,41 +13,19 @@ import {events, stopDisplayingEvents} from "../JS-Page/events";
 import {account} from "../JS-Page/account";
 import {courses} from "../JS-Page/courses";
 
+let leDocToShow = document.getElementById("weirdPlace")
+
 export async function loadPageGo(string, event = null){
 
-    // Stop all automatic refresh :
-    stopSchedule()
-    stopDashboardEvents()
-    stopDisplayingEvents()
-
-    log(`Loading ${string} page`)
-    const mainPart = document.getElementById("replace")
-    const headerTitle = document.getElementById("headerTitle")
-
-    // Remove all hard style applyied in functions corresponding to files
-    const replace = document.getElementById("replace")
-    replace.style = ""
     let currPage
-    try {
-
-        mainPart.innerHTML = await GetPageContent(string)
-
-        await updatePages(string.split(".html")[0])
+    try{
         currPage = event?.srcElement.innerText ? event.srcElement.innerText : "Accueil"
-
-        headerTitle.innerText = currPage
-
-    } catch(err){
-        log("ERROR : An error occured in the loadPage function : "+err)
-    }
-
-    if (event != null){
-        try{
-            headerTitle.innerHTML = event.target.innerHTML
-        }
-        catch{
-            log("ERROR : Impossible to load the title")
-        }
+        leDocToShow.style.display = "none"
+        leDocToShow = document.getElementById(string.split(".html")[0])
+        leDocToShow.style.display = "inherit"
+        updatePages(string.split(".html")[0])
+    } catch (e) {
+        console.log(e)
     }
 
     try{
@@ -77,8 +55,7 @@ async function updatePages(pages){
                 grades()
                 break;
             case 'schedule':
-                console.log("schedule call")
-                await schedule()
+                schedule()
                 break;
             default:
                 console.log("Default option in switch case when loading page ??")

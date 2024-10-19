@@ -9,6 +9,7 @@ import {
 } from "../JS/functions";
 import {updateSchedule} from "./schedule";
 import {initGradesDisplay} from "./grades";
+import {stillPopup, stopStillPopup} from "../JS/popups";
 
 let displayDashboardId = []
 let prevNextCliked = false
@@ -31,7 +32,6 @@ async function handleButtonClick(direction) {
         popup(`Action en cours, veuillez patienter.`);
         return;
     }
-
     prevNextCliked = true;
     try {
         const button = document.getElementById(`${direction}-button`);
@@ -42,6 +42,8 @@ async function handleButtonClick(direction) {
 
         const agenda = await getTodayAgendaPlusDay(direction === 'forward' ? 1 : -1, true);
         const htmlElement = document.getElementById("schedule-content");
+
+        document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)"
 
         if (agenda) {
             await updateSchedule(agenda, htmlElement);
@@ -62,10 +64,9 @@ export async function dashboard(){
         return
     }
     const htmlElement = document.getElementById("schedule-content")
-    printDate(htmlElement)
     prevNextCliked = true
 
-    let still = stillPopup("Affichage de vos infomations")
+    let still = stillPopup("Affichage de vos informations")
     try{
         const htmlGradeElement = document.getElementById("grades-content")
 
@@ -91,13 +92,13 @@ export async function dashboard(){
         console.log(e)
         popup("Impossible de mettre à jour l'accueil..")
     }
-    stopStillPopup(still)   
+    stopStillPopup(still)
 }
 
 // --------------------------------------------------------------------------------------- //
 
 // Créez des fonctions pour chaque tâche
-function handleAgenda(htmlElement) {
+async function handleAgenda(htmlElement) {
     return getTodayAgendaPlusDay().then((agenda) => {
         if (agenda) {
             updateSchedule(agenda, htmlElement);
@@ -236,12 +237,14 @@ function getDayWithDecalage(direction){
 }
 
 async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
-
     const today = getDayWithDecalage(direction)
 
+    if (today.getDay() === 0) {
+        today.setDate(today.getDate() + 1);
+    }
     // Créer une date pour aujourd'hui à 23:00 UTC
     const todayNight = new Date(today);
-    todayNight.setUTCHours(20, 0, 0, 0);
+    todayNight.setUTCHours(24, 0, 0, 0);
 
     let theStill
     let agenda = null
@@ -262,7 +265,7 @@ async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
                 wait(1)
             }
             if(showMessage){
-                theStill = stillPopup("Recherche de votre emploi du temps..")
+                /*theStill = stillPopup("Recherche de votre emploi du temps..")*/
             }
             agenda = await RefreshAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
         }

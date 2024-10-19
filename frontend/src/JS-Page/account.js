@@ -99,7 +99,7 @@ const createStudentCard = (profile) => {
         'Date de naissance': new Date(profile.birthday).toLocaleDateString(),
         'Lieu de naissance': `${profile.birth_place}, ${profile.birth_country}`,
         'Nationalité': profile.nationality,
-        'Nom de jeune fille': profile.nom_avant_mariage || 'N/A'
+        'Nom de jeune fille': profile.nom_avant_mariage || ''
     }));
 
     // Coordonnées
@@ -162,6 +162,7 @@ export async function account() {
 
         const studentCard = createStudentCard(user);
         loadingGifAccount.style.display = "none"
+        target.innerHTML = ""
         target.appendChild(studentCard);
 
     } catch (e) {

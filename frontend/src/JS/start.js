@@ -7,8 +7,26 @@ import {
 import { loadPageGo } from "./loadPages";
 import {initCreateEvent} from "./createEvents";
 
+import {popup, stillPopup, stopStillPopup} from './popups'
+import {
+    changeLoginButtonName, changeLoginPassword,
+    changeTitle,
+    createDropDownMenu, deconnectionFromMyges,
+    openConnexion,
+    showButtonCancelConnection
+} from "./login-register";
+import {capitalizeFirstLetter, hasCommonClass} from "./functions";
+import {deleteOldData, eulaShow} from "./index_events";
+
+let initializedStart = false
+
 export async function start(){
-    initCreateEvent()
+    if(!initializedStart){
+        await initializeLoadPage()
+        await initCreateEvent()
+        await initializeCredits()
+        initializedStart = true
+    }
 
     // Check if :
     // - The user exist
@@ -25,7 +43,6 @@ export async function start(){
             try{
                 // If there already a user in the DB add the list
                 const users = await GetRegisteredUsers()
-                console.log(users)
                 if (users && users.length > 0) {
                     createDropDownMenu(users)
                 }
@@ -46,20 +63,27 @@ export async function start(){
 
         // Apply the theme
         const theme = document.getElementsByTagName('body')[0]
-        const themeImg = document.getElementById('theme')
+        const themeImg = document.getElementsByClassName('themeLightDark')
         if(user.Theme){
             theme.classList = user.Theme
         }
 
-        if(theme.classList.contains('light')){
-            themeImg.src = './src/assets/images/black-sun.png'
-        }
-        else{
-            themeImg.src = './src/assets/images/black-moon.png'
-        }
+        Array.from(themeImg).forEach((th)=>{
+            if(hasCommonClass(theme, th)){
+                th.style.display = "block"
+            }
+            else{
+                th.style.display = "none"
+            }
+        })
 
-        connectDiscord()
-        loadPageGo("dashboard.html")
+        try{
+            connectDiscord()
+            loadPageGo("dashboard.html")
+        } catch (e) {
+            console.log(e)
+            popup(e.toString())
+        }
 
     } catch (error) {
         console.error("Erreur lors de la récupération des données utilisateur :", error);
@@ -88,42 +112,43 @@ start()
     console.log("Frontend Started")
 })
 
+async function initializeLoadPage(){
+    let loadingPageButton = document.getElementsByClassName("loadPage")
 
+    Array.from(loadingPageButton).forEach((button) =>{
+        button.addEventListener("click", async (event)=>{
+            let currPage
+            try{
+                console.log(button)
+                console.log(button.dataset.idpage)
+                await loadPageGo(button.dataset.idpage + "")
+            } catch (e) {
+                console.log(e)
+            }
+        })
+    } )
 
-function createSelectUser(users){
-    const connexionSelectField = document.getElementById("connexionSelect")
-    let select = document.getElementById("selectConnectionSelect")
-    if(!select){
-        select = document.createElement("select");
-    }
-    select.innerHTML = ""
-    select.id = "selectConnectionSelect"
+}
 
-    // ODefault option
-    const defaultOpt = document.createElement("option");
-    defaultOpt.value = "default";
-    defaultOpt.textContent = "Créer un compte";
-    defaultOpt.selected = true;
-    select.appendChild(defaultOpt);
+async function initializeCredits(){
+    const changePassword = document.getElementById("changePassword")
+    const eulaShowId = document.getElementById("eulaShow")
+    const deleteOldDataId = document.getElementById("deleteOldData")
+    const deconnectionFromMygesId = document.getElementById("deconnectionFromMyges")
 
-    // Add users
-    users.forEach(user => {
-        const option = document.createElement("option");
-        option.value = user.ID;
-        option.textContent = user.Username;
-        select.appendChild(option);
-    });
+    changePassword.addEventListener("click", ()=>{
+        changeLoginPassword()
+    })
 
-    // Add select to document
-    connexionSelectField.appendChild(select);
+    eulaShowId.addEventListener("click", ()=>{
+        eulaShow()
+    })
 
-    select.addEventListener("change", ()=>{
-        if(select.selectedIndex > 0){
-            document.getElementById("username").style.display = "none"
-            document.getElementById('buttonConnection').value = "Connexion"
-        } else {
-            document.getElementById("username").style.display = "block"
-            document.getElementById('buttonConnection').value = "Créer un compte"
-        }
+    deleteOldDataId.addEventListener("click", ()=>{
+        deleteOldData()
+    })
+
+    deconnectionFromMygesId.addEventListener("click", ()=>{
+        deconnectionFromMyges()
     })
 }

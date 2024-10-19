@@ -209,3 +209,15 @@ export function alertDebug(e){
     console.log(e)
     alert(e.toString())
 }
+
+export function hasCommonClass(element1, element2) {
+    const classes1 = element1.classList;
+    const classes2 = element2.classList;
+
+    for (let className of classes1) {
+        if (classes2.contains(className)) {
+            return true;
+        }
+    }
+    return false;
+}

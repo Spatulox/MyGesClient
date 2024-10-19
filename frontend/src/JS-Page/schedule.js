@@ -1,5 +1,6 @@
 import {GetAgenda, RefreshAgenda} from "../../wailsjs/go/backend/App";
 import {capitalizeFirstLetter, getMonday, getSaturday, scrollMainPart, todayDate} from "../JS/functions";
+import {popup, stillPopup, stopStillPopup} from "../JS/popups";
 
 let scheduleTimeoutId = []
 let monday = getMonday()
@@ -47,7 +48,7 @@ export async  function schedule(){
         return
     }
     scrollMainPart()
-    let stillPopupId
+    /*let stillPopupId*/
     const today = new Date()
 
     try{
@@ -69,7 +70,7 @@ export async  function schedule(){
 
         // If the week requested doesn't not contains today
         if(!agenda && !nextPrevActive){
-            stillPopupId = stillPopup("Recherche de votre agenda depuis MyGes")
+            /*stillPopupId = stillPopup("Recherche de votre agenda depuis MyGes")*/
             agenda = await RefreshAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
             thisWeekAlreadyFetched = true
         }
@@ -88,7 +89,7 @@ export async  function schedule(){
         console.log(e)
     }
 
-    stopStillPopup(stillPopupId)
+    /*stopStillPopup(stillPopupId)*/
     nextPrevActive = true
 
     console.log(scheduleTimeoutId)
@@ -228,38 +229,6 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
         finalHtmlElement.appendChild(courseElement);
     });
 }
-
-/*export async function updateGrades(grades, finalHtmlElement) {
-    grades.forEach(grade => {
-        const gradeElement = document.createElement('div');
-        gradeElement.className = 'grade-item';
-        gradeElement.innerHTML = `
-            <h3>${grade.discipline.name}</h3>
-            <p>Note: ${grade.grade}/20</p>
-            <p>Coefficient: ${grade.discipline.coef || 'N/A'}</p>
-            <p>Professeur: ${grade.discipline.teacher.teacher_name}</p>
-        `;
-        finalHtmlElement.appendChild(gradeElement);
-    });
-}*/
-
-/*export async function updateAbsences(absences, finalHtmlElement) {
-    absences.forEach(absence => {
-        const absenceElement = document.createElement('div');
-        absenceElement.className = 'absence-item';
-        absenceElement.innerHTML = `
-            <h3>${absence.course_name}</h3>
-            <p>Date: ${new Date(absence.date).toLocaleDateString('fr-FR')}</p>
-            <p>Raison: ${absence.reason || 'Non spécifiée'}</p>
-        `;
-        finalHtmlElement.appendChild(absenceElement);
-    });
-}*/
-
-/*updateSchedule();
-updateGrades();
-updateAbsences();*/
-
 
 function checkDiffTime(direction){
     let currMonday = getMonday()
