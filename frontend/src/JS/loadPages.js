@@ -20,11 +20,10 @@ export async function loadPageGo(string, event = null){
     let currPage
     try{
         currPage = event?.srcElement.innerText ? event.srcElement.innerText : "Accueil"
-        console.log(leDocToShow)
         leDocToShow.style.display = "none"
         leDocToShow = document.getElementById(string.split(".html")[0])
-        console.log(leDocToShow)
         leDocToShow.style.display = "inherit"
+        updatePages(string.split(".html")[0])
     } catch (e) {
         console.log(e)
     }

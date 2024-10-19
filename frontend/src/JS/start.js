@@ -9,15 +9,24 @@ import {initCreateEvent} from "./createEvents";
 
 import {stillPopup, stopStillPopup} from './popups'
 import {
-    changeLoginButtonName,
+    changeLoginButtonName, changeLoginPassword,
     changeTitle,
-    createDropDownMenu,
+    createDropDownMenu, deconnectionFromMyges,
     openConnexion,
     showButtonCancelConnection
 } from "./login-register";
+import {capitalizeFirstLetter} from "./functions";
+import {deleteOldData, eulaShow} from "./index_events";
+
+let initializedStart = false
 
 export async function start(){
-    initCreateEvent()
+    if(!initializedStart){
+        await initializeLoadPage()
+        await initCreateEvent()
+        //await initializeCredits()
+        initializedStart = true
+    }
 
     // Check if :
     // - The user exist
@@ -96,42 +105,21 @@ start()
     console.log("Frontend Started")
 })
 
+async function initializeLoadPage(){
+    let loadingPageButton = document.getElementsByClassName("loadPage")
 
-/*
-function createSelectUser(users){
-    const connexionSelectField = document.getElementById("connexionSelect")
-    let select = document.getElementById("selectConnectionSelect")
-    if(!select){
-        select = document.createElement("select");
-    }
-    select.innerHTML = ""
-    select.id = "selectConnectionSelect"
+    Array.from(loadingPageButton).forEach((button) =>{
+        button.addEventListener("click", async (event)=>{
+            let currPage
+            try{
+                console.log(button)
+                console.log(button.dataset.idpage)
+                await loadPageGo(button.dataset.idpage + "")
+            } catch (e) {
+                console.log(e)
+            }
+        })
+    } )
 
-    // ODefault option
-    const defaultOpt = document.createElement("option");
-    defaultOpt.value = "default";
-    defaultOpt.textContent = "Créer un compte";
-    defaultOpt.selected = true;
-    select.appendChild(defaultOpt);
+}
 
-    // Add users
-    users.forEach(user => {
-        const option = document.createElement("option");
-        option.value = user.ID;
-        option.textContent = user.Username;
-        select.appendChild(option);
-    });
-
-    // Add select to document
-    connexionSelectField.appendChild(select);
-
-    select.addEventListener("change", ()=>{
-        if(select.selectedIndex > 0){
-            document.getElementById("username").style.display = "none"
-            document.getElementById('buttonConnection').value = "Connexion"
-        } else {
-            document.getElementById("username").style.display = "block"
-            document.getElementById('buttonConnection').value = "Créer un compte"
-        }
-    })
-}*/
