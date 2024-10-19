@@ -7,7 +7,7 @@ import {
 import { loadPageGo } from "./loadPages";
 import {initCreateEvent} from "./createEvents";
 
-import {stillPopup, stopStillPopup} from './popups'
+import {popup, stillPopup, stopStillPopup} from './popups'
 import {
     changeLoginButtonName, changeLoginPassword,
     changeTitle,
@@ -15,7 +15,7 @@ import {
     openConnexion,
     showButtonCancelConnection
 } from "./login-register";
-import {capitalizeFirstLetter} from "./functions";
+import {capitalizeFirstLetter, hasCommonClass} from "./functions";
 import {deleteOldData, eulaShow} from "./index_events";
 
 let initializedStart = false
@@ -63,20 +63,27 @@ export async function start(){
 
         // Apply the theme
         const theme = document.getElementsByTagName('body')[0]
-        const themeImg = document.getElementById('theme')
+        const themeImg = document.getElementsByClassName('themeLightDark')
         if(user.Theme){
             theme.classList = user.Theme
         }
 
-        if(theme.classList.contains('light')){
-            themeImg.src = './src/assets/images/black-sun.png'
-        }
-        else{
-            themeImg.src = './src/assets/images/black-moon.png'
-        }
+        Array.from(themeImg).forEach((th)=>{
+            if(hasCommonClass(theme, th)){
+                th.style.display = "block"
+            }
+            else{
+                th.style.display = "none"
+            }
+        })
 
-        connectDiscord()
-        loadPageGo("dashboard.html")
+        try{
+            connectDiscord()
+            loadPageGo("dashboard.html")
+        } catch (e) {
+            console.log(e)
+            popup(e.toString())
+        }
 
     } catch (error) {
         console.error("Erreur lors de la récupération des données utilisateur :", error);
