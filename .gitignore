@@ -10,3 +10,5 @@ config.json
 db.sqlite
 
 db.sqlite
+
+MyGesClient-res.syso
