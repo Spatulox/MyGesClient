@@ -24,7 +24,7 @@ export async function start(){
     if(!initializedStart){
         await initializeLoadPage()
         await initCreateEvent()
-        //await initializeCredits()
+        await initializeCredits()
         initializedStart = true
     }
 
@@ -123,3 +123,25 @@ async function initializeLoadPage(){
 
 }
 
+async function initializeCredits(){
+    const changePassword = document.getElementById("changePassword")
+    const eulaShowId = document.getElementById("eulaShow")
+    const deleteOldDataId = document.getElementById("deleteOldData")
+    const deconnectionFromMygesId = document.getElementById("deconnectionFromMyges")
+
+    changePassword.addEventListener("click", ()=>{
+        changeLoginPassword()
+    })
+
+    eulaShowId.addEventListener("click", ()=>{
+        eulaShow()
+    })
+
+    deleteOldDataId.addEventListener("click", ()=>{
+        deleteOldData()
+    })
+
+    deconnectionFromMygesId.addEventListener("click", ()=>{
+        deconnectionFromMyges()
+    })
+}
