@@ -236,7 +236,7 @@ function getDayWithDecalage(direction){
     return today
 }
 
-async function getTodayAgendaPlusDay(direction = null, showMessage = true) {
+async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
     const today = getDayWithDecalage(direction)
 
     if (today.getDay() === 0) {
@@ -265,7 +265,7 @@ async function getTodayAgendaPlusDay(direction = null, showMessage = true) {
                 wait(1)
             }
             if(showMessage){
-                theStill = stillPopup("Recherche de votre emploi du temps..")
+                /*theStill = stillPopup("Recherche de votre emploi du temps..")*/
             }
             agenda = await RefreshAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
         }
