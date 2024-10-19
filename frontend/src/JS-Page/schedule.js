@@ -48,7 +48,7 @@ export async  function schedule(){
         return
     }
     scrollMainPart()
-    let stillPopupId
+    /*let stillPopupId*/
     const today = new Date()
 
     try{
@@ -70,7 +70,7 @@ export async  function schedule(){
 
         // If the week requested doesn't not contains today
         if(!agenda && !nextPrevActive){
-            stillPopupId = stillPopup("Recherche de votre agenda depuis MyGes")
+            /*stillPopupId = stillPopup("Recherche de votre agenda depuis MyGes")*/
             agenda = await RefreshAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
             thisWeekAlreadyFetched = true
         }
@@ -89,7 +89,7 @@ export async  function schedule(){
         console.log(e)
     }
 
-    stopStillPopup(stillPopupId)
+    /*stopStillPopup(stillPopupId)*/
     nextPrevActive = true
 
     console.log(scheduleTimeoutId)
