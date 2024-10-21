@@ -1,6 +1,6 @@
 import {popup, stillPopup, stopStillPopup} from "../JS/popups";
 import {getYear} from "../JS/functions";
-import {GetProjects} from "../../wailsjs/go/backend/App";
+import {GetProfile, GetProjects} from "../../wailsjs/go/backend/App";
 
 export async function projects(){
     let laStill = stillPopup("Recherche de vos projets..")
@@ -8,8 +8,10 @@ export async function projects(){
     //try{
         const year = getYear()
         const mygesProjects = await GetProjects(year.toString())
-        /*console.log(mygesProjects)*/
-        populateData(JSON.parse(mygesProjects))
+        let profile = await GetProfile()
+        profile = await JSON.parse(profile)
+
+        populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         loadingProject.style.display = "none"
         stopStillPopup(laStill)
     /*} catch (e) {
@@ -22,26 +24,27 @@ export async function projects(){
 }
 
 
-function populateData(data) {
+function populateData(data, lastname, firstname) {
     const groupsContainer = document.getElementById('courses-container');
     groupsContainer.innerHTML = ""
 
-    console.log(data.items)
-    data.items.forEach(group => {
+    console.log(data)
+    data.items.forEach(course => {
         const groupElement = document.createElement('div');
         groupElement.className = 'group';
 
         const courseTitle = document.createElement("h1")
-        courseTitle.innerHTML = group.name
+        courseTitle.innerHTML = course.name
         groupElement.appendChild(courseTitle);
 
         const para = document.createElement("p")
-        para.innerHTML = `${group.author} ・ ${group.course_name}`
+        para.innerHTML = `${course.author} ・ ${course.course_name}`
         /*group.course_name
         group.project_teaching_goals
         group.project_type_subject
         group.project_hearing_presentation
         group.project_type_presentation*/
+        groupElement.id = getGroupIdIfInside(course.groups, lastname, firstname).toString()
         groupElement.appendChild(para);
 
         /*const groupName = document.createElement('div');
@@ -67,9 +70,42 @@ function populateData(data) {
         });*/
 
         groupElement.addEventListener("click", ()=>{
+            console.log(yep)
+            getGroupIfInside(course.group, lastname, firstname)
             popup("Under Contruction")
         })
 
         groupsContainer.appendChild(groupElement);
     });
+}
+
+
+function getGroupIdIfInside(groups, lastname, firstname){
+    if (!Array.isArray(groups)) {
+        console.log("Groups is not an array");
+        return 0;
+    }
+
+    for (const group of groups) {
+        if (!group || typeof group !== 'object') {
+            console.log("Invalid group object");
+            continue;
+        }
+
+        const students = group.project_group_students;
+        if (!Array.isArray(students)) {
+            console.log("project_group_students is not an array for group:", group.project_group_id);
+            continue;
+        }
+
+        for (const student of students) {
+            if (student &&
+                student.firstname === firstname &&
+                student.name === lastname) {
+                return group.project_group_id;
+            }
+        }
+    }
+
+    return 0;
 }
