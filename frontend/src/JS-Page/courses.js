@@ -6,7 +6,6 @@ export async function courses(){
     const loading = document.getElementById("loadingCourses")
     const search = document.getElementById("search-bar-courses")
     const courseGrid = document.getElementById('courseGrid');
-    courseGrid.innerHTML = ""
     let mygescourses
     try{
         const year = getYear()
@@ -20,18 +19,18 @@ export async function courses(){
                 }
             });
         })
-        mygescourses = JSON.parse(courses)
+        mygescourses = JSON.parse(mygescourses)
 
         // Supposons que 'data' contient les données de l'API
+        courseGrid.innerHTML = ""
         mygescourses.items.forEach(course => {
             courseGrid.innerHTML += createCourseCard(course);
         });
-        loading.style.display = "none"
 
     } catch (e) {
         console.log(e)
         courseGrid.innerHTML = "Une erreur c'est produite"
-        mygescourses = JSON.parse(courses)
+        mygescourses = JSON.parse(mygescourses)
         loading.style.display = "none"
     }
 }
