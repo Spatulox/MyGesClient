@@ -1,5 +1,6 @@
 import {GetProfile} from "../../wailsjs/go/backend/App";
 import {scrollMainPart} from "../JS/functions";
+import {stopStillPopup} from "../JS/popups";
 // Fonction pour créer un élément avec des attributs et du contenu
 const createElement = (tag, attributes = {}, content = '') => {
     const element = document.createElement(tag);
@@ -31,15 +32,18 @@ const createStudentCard = (profile) => {
 
     // Corps de la carte
     const body = createElement('div', { class: 'card-body' });
-
-    // Informations personnelles
-    body.appendChild(createInfoSection('Informations Personnelles', {
+    let lesData = {
         'Civilité': profile.civility,
         'Date de naissance': new Date(profile.birthday).toLocaleDateString(),
         'Lieu de naissance': `${profile.birth_place}, ${profile.birth_country}`,
-        'Nationalité': profile.nationality,
-        'Nom de jeune fille': profile.nom_avant_mariage || ''
-    }));
+        'Nationalité': profile.nationality
+    }
+    if(profile.nom_avant_mariage !== "N/A"){
+        lesData['Nom de jeune fille'] = profile.nom_avant_mariage
+    }
+    console.log(lesData)
+    // Informations personnelles
+    body.appendChild(createInfoSection('Informations Personnelles', lesData));
 
     // Coordonnées
     body.appendChild(createInfoSection('Coordonnées', {
@@ -65,6 +69,7 @@ export async function account() {
     const target = document.getElementById("account-presentation")
 
     scrollMainPart()
+    let laStill = stopStillPopup("Recherche de vos informations...")
 
     try{
         let profile = await GetProfile()
@@ -99,6 +104,7 @@ export async function account() {
 
         }
 
+        stopStillPopup(laStill)
         const studentCard = createStudentCard(user);
         loadingGifAccount.style.display = "none"
         target.innerHTML = ""
@@ -106,6 +112,7 @@ export async function account() {
 
     } catch (e) {
         console.log(e)
+        stopStillPopup(laStill)
         loadingGifAccount.style.display = "none"
         target.innerHTML = "Une erreur c'est produite"
     }
