@@ -244,7 +244,7 @@ async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
     }
     // Créer une date pour aujourd'hui à 23:00 UTC
     const todayNight = new Date(today);
-    todayNight.setUTCHours(24, 0, 0, 0);
+    todayNight.setUTCHours(22, 0, 0, 0);
 
     let theStill
     let agenda = null
