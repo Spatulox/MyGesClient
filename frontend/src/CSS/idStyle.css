@@ -424,8 +424,7 @@
 #eula div{
     margin: auto;
     margin-top: 50px;
-    /*max-height: 60%;*/
-    width: 40%;
+    width: 60%;
     overflow: auto;
 }
 
