@@ -336,9 +336,21 @@
                 <div id="projects" style="display: none">
                     <style>
                         #projects .container {
+                            display: grid;
                             max-width: 800px;
                             margin: 0 auto;
                         }
+
+                        #projects .group {
+                            cursor: pointer;
+                            transition: all ease-in-out 0.3s;
+                        }
+
+                        #projects .group:hover {
+                            transform: scale(1.05);
+                            transition: all ease-in-out 0.3s;
+                        }
+
                         #projects h1 {
                             color: #ffffff;
                             border-bottom: 1px solid #4f545c;
@@ -368,8 +380,7 @@
                         }
                     </style>
                     <div class="container">
-                        <h1 id="course-name"></h1>
-                        <div id="groups-container"></div>
+                        <div id="courses-container"></div>
                     </div>
                 </div>
                 <!--MyGes Account-->
