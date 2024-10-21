@@ -333,7 +333,45 @@
                     </style>
                 </div>
                 <!--Groups project-->
-                <div id="projects" style="display: none"></div>
+                <div id="projects" style="display: none">
+                    <style>
+                        #projects .container {
+                            max-width: 800px;
+                            margin: 0 auto;
+                        }
+                        #projects h1 {
+                            color: #ffffff;
+                            border-bottom: 1px solid #4f545c;
+                            padding-bottom: 10px;
+                        }
+                        #projects .group {
+                            background-color: #2f3136;
+                            border-radius: 5px;
+                            padding: 15px;
+                            margin-bottom: 20px;
+                        }
+                        #projects .group-name {
+                            font-size: 18px;
+                            font-weight: bold;
+                            color: #ffffff;
+                            margin-bottom: 10px;
+                        }
+                        #projects .student {
+                            padding: 5px 0;
+                        }
+                        #projects .student-name {
+                            color: #00b0f4;
+                        }
+                        #projects .student-info {
+                            color: #8e9297;
+                            font-size: 14px;
+                        }
+                    </style>
+                    <div class="container">
+                        <h1 id="course-name"></h1>
+                        <div id="groups-container"></div>
+                    </div>
+                </div>
                 <!--MyGes Account-->
                 <div id="account" style="display: none">
                     <div id="account-presentation">
@@ -350,7 +388,7 @@
                             <div class="subsection">
                                 <h2 class="subsection-title">Créateurs</h2>
                                 <ul class="link-list creator-list">
-                                    <li><a href="https://github.com/Spatulox" target="_blank">Spatulox</a> - <a href="https://github.com/Spatulox?tab=repositories&q=MyGes" target="_blank">(Projets MyGes)</a></li>
+                                    <li><a href="https://github.com/Spatulox" target="_blank">Spatulox</a> <!-- - <a href="https://github.com/Spatulox?tab=repositories&q=MyGes" target="_blank">(Projets MyGes)</a>--></li>
                                 </ul>
                             </div>
 
@@ -371,7 +409,6 @@
                                     <li><a href="https://github.com/Spatulox/MyGesClient/releases" target="_blank">Releases</a></li>
                                     <li><a href="https://github.com/Spatulox/MyGesClient/issues" target="_blank">Signaler un problème</a></li>
                                     <li><a href="https://github.com/Spatulox/MyGesClient/issues" target="_blank">Demander une fonctionnalité</a></li>
-                                    <!--<li><a href="https://github.com/Spatulox?tab=repositories&q=MyGes" target="_blank">Autres Projets MyGes</a></li>-->
                                 </ul>
                             </div>
                         </div>
