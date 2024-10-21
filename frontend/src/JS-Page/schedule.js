@@ -240,9 +240,9 @@ function checkDiffTime(direction){
 
 function getNextWeek(){
     console.log(checkDiffTime())
-    if(checkDiffTime() >= 30){
+    /*if(checkDiffTime() >= 30){
         return
-    }
+    }*/
 
     monday.setDate(monday.getDate() + 7)
     saturday.setDate(saturday.getDate() + 7)
