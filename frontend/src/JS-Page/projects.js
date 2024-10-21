@@ -60,9 +60,10 @@ function populateData(data) {
             groupElement.appendChild(studentElement);
         });*/
 
-        groupsContainer.appendChild(groupElement);
-        groupsContainer.addEventListener("click", ()=>{
+        groupElement.addEventListener("click", ()=>{
             popup("coucou")
         })
+
+        groupsContainer.appendChild(groupElement);
     });
 }
