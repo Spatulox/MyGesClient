@@ -117,10 +117,7 @@ async function initializeLoadPage(){
 
     Array.from(loadingPageButton).forEach((button) =>{
         button.addEventListener("click", async (event)=>{
-            let currPage
             try{
-                console.log(button)
-                console.log(button.dataset.idpage)
                 await loadPageGo(button.dataset.idpage + "")
             } catch (e) {
                 console.log(e)

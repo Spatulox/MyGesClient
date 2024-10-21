@@ -200,7 +200,6 @@ export function formatTime(dateString) {
 }
 
 export function scrollMainPart(){
-    console.log("scroll part")
     const replace = document.getElementById("replace")
     replace.style.height = "auto"
 }

@@ -37,7 +37,6 @@ export async function loadPageGo(string, event = null){
 }
 
 async function updatePages(pages){
-    console.log("pages : "+pages)
     try{
         switch (pages){
             case 'account':
