@@ -1,6 +1,6 @@
 import {GetProfile} from "../../wailsjs/go/backend/App";
 import {scrollMainPart} from "../JS/functions";
-import {stopStillPopup} from "../JS/popups";
+import {stillPopup, stopStillPopup} from "../JS/popups";
 // Fonction pour créer un élément avec des attributs et du contenu
 const createElement = (tag, attributes = {}, content = '') => {
     const element = document.createElement(tag);
@@ -65,11 +65,10 @@ const createStudentCard = (profile) => {
 
 
 export async function account() {
-    const loadingGifAccount = document.getElementById("loading-gif-account")
     const target = document.getElementById("account-presentation")
 
     scrollMainPart()
-    let laStill = stopStillPopup("Recherche de vos informations...")
+    let laStill = stillPopup("Recherche de vos informations...")
 
     try{
         let profile = await GetProfile()
@@ -106,14 +105,12 @@ export async function account() {
 
         stopStillPopup(laStill)
         const studentCard = createStudentCard(user);
-        loadingGifAccount.style.display = "none"
         target.innerHTML = ""
         target.appendChild(studentCard);
 
     } catch (e) {
         console.log(e)
         stopStillPopup(laStill)
-        loadingGifAccount.style.display = "none"
         target.innerHTML = "Une erreur c'est produite"
     }
 }
