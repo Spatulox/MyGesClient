@@ -2,6 +2,13 @@
 
 ## Will add
 > - Button to hard refresh schedule
+> - Changer de place les déconnexion/modifier le mot de passe / supprimer les anciennes données ?? (mettre ça dans softwareAccount ?)
+> - Faire les absences (Local DB WELP)
+> - Projet de groupe :
+>  - Listes des projets
+>  - Si on n'est pas dans un groupe, show tous les groupes dispo
+>  - Si on est dans un groupe, on voit notre groupe avec les données utile (Type, etc...)
+> `Impossible de partir d'un groupe, impossible de télécharger les fichiers d'un groupe, impossible d'upload des fichiers sur le groupe :/`
 
 ## About
 
