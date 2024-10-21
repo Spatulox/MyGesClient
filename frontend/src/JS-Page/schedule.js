@@ -133,7 +133,7 @@ function printNothing(calendarGrid, currentWeek){
     currentWeek.textContent = `🗓️ ${capitalizeFirstLetter(mondayFormatted)} au ${capitalizeFirstLetter(saturdayFormatted)} 🗓️`;
 
     calendarGrid.classList.add('one-columns');
-    calendarGrid.innerHTML = "<div class='day-column'>Nothing to show</div>"
+    calendarGrid.innerHTML = "<div class='day-column'>Aucun Agenda</div>"
 }
 
 async function printSchedule(agenda, calendarGrid) {
