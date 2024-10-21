@@ -67,7 +67,7 @@ function populateData(data) {
         });*/
 
         groupElement.addEventListener("click", ()=>{
-            popup("coucou")
+            popup("Under Contruction")
         })
 
         groupsContainer.appendChild(groupElement);
