@@ -1,17 +1,23 @@
-import {popup} from "../JS/popups";
+import {popup, stillPopup, stopStillPopup} from "../JS/popups";
 import {getYear} from "../JS/functions";
 import {GetProjects} from "../../wailsjs/go/backend/App";
 
 export async function projects(){
-
+    let laStill = stillPopup("Recherche de vos projets..")
+    const loadingProject = document.getElementById("loadingProject")
     //try{
         const year = getYear()
         const mygesProjects = await GetProjects(year.toString())
         /*console.log(mygesProjects)*/
         populateData(JSON.parse(mygesProjects))
+        loadingProject.style.display = "none"
+        stopStillPopup(laStill)
     /*} catch (e) {
         console.log(e)
         popup(e.toString())
+        stopStillPopup(laStill)
+        // Can crah for no reason
+        loadingProject.style.display = "none"
     }*/
 }
 

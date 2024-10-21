@@ -565,6 +565,12 @@
     max-height: 100%;
 }
 
+#loadingProject{
+    display: block;
+    margin: auto;
+    width: 100px;
+}
+
 
 
 @media only screen and (max-width: 1500px) {
