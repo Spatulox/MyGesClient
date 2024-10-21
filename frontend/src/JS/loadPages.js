@@ -57,6 +57,9 @@ async function updatePages(pages){
             case 'schedule':
                 schedule()
                 break;
+            case 'projects' :
+                projects()
+                break;
             default:
                 console.log("Default option in switch case when loading page ??")
                 break;
