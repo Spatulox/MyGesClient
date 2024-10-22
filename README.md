@@ -9,7 +9,7 @@
 >  - Listes des projets
 >  - Si on n'est pas dans un groupe, show tous les groupes dispo
 >  - Si on est dans un groupe, on voit notre groupe avec les données utile (Type, etc...)
-> `Impossible de partir d'un groupe, Impossible de télécharger les fichiers d'un groupe, Impossible d'upload des fichiers sur le groupe :/`
+> `Impossible de télécharger les fichiers d'un groupe, Impossible d'upload des fichiers sur le groupe :/`
 
 ## About
 
