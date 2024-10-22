@@ -136,16 +136,6 @@ function isGroupElementOrChild(element, groupElement) {
 function createGroupInformations(groupElement, values, group_id){
     console.log(values)
     const div = document.createElement("div")
-/*    //values.project_group_logs
-    values.course_name
-    values.project_teaching_goals // Sujet
-    values.project_type_subject // Imposé
-    values.project_type_group // Imposé
-    values.project_hearing_presentation // a huis clos
-    project_presentation_duration // Minutes
-    project_personnal_work // Hours
-    values.project_type_presentation*/
-
     let groupInfo = {
         name: '',
         users: []
@@ -208,6 +198,40 @@ function createGroupInformations(groupElement, values, group_id){
     });
 
     groupInfoDiv.appendChild(membersList);
+
+    // Ajout de la section des fichiers du projet
+    const filesTitle = document.createElement('h3');
+    filesTitle.innerHTML = 'Fichiers du projet : <span class="tooltip-trigger">(A récupérer sur MyGes)<span class="tooltip">L\'API actuellement utilisée ne donne pas accès au téléchargement des fichiers</span></span>';
+    groupInfoDiv.appendChild(filesTitle);
+
+    const filesList = document.createElement('ul');
+    filesList.className = 'project-files';
+
+    values.project_files.forEach(file => {
+        const li = document.createElement('li');
+        const date = new Date(file.pf_crea_date);
+        li.textContent = `${file.pf_title} (${date.toLocaleDateString()})`;
+        filesList.appendChild(li);
+    });
+
+    groupInfoDiv.appendChild(filesList);
+
+    // Ajout de la section des logs du groupe
+    const logsTitle = document.createElement('h3');
+    logsTitle.textContent = 'Historique du groupe :';
+    groupInfoDiv.appendChild(logsTitle);
+
+    const logsList = document.createElement('ul');
+    logsList.className = 'group-logs';
+
+    values.project_group_logs.forEach(log => {
+        const li = document.createElement('li');
+        const date = new Date(log.pgl_date);
+        li.textContent = `${date.toLocaleString()} - ${log.pgl_describe}`;
+        logsList.appendChild(li);
+    });
+
+    groupInfoDiv.appendChild(logsList);
 
     groupElement.appendChild(groupInfoDiv)
 }
