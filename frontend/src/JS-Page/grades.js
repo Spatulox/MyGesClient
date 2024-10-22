@@ -1,7 +1,8 @@
 import {GetGrades} from "../../wailsjs/go/backend/App";
-import {capitalizeFirstLetter, getYear} from "../JS/functions";
+import {capitalizeFirstLetter, getYear, scrollMainPart} from "../JS/functions";
 
 export async function grades() {
+    scrollMainPart()
     const gradesList1 = document.getElementById('grades-list-semester-1');
     const gradesList2 = document.getElementById('grades-list-semester-2');
     const tabButtons = document.querySelectorAll('.tab-button');
