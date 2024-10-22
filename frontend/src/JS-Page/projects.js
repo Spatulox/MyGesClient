@@ -11,20 +11,18 @@ export async function projects(){
         const mygesProjects = await GetProjects(year.toString())
         let profile = await GetProfile()
         profile = await JSON.parse(profile)
-
+        console.log(JSON.parse(mygesProjects))
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         loadingProject.style.display = "none"
-        stopStillPopup(laStill)
     /*} catch (e) {
         console.log(e)
         popup(e.toString())
-        stopStillPopup(laStill)
-        // Can crah for no reason
         loadingProject.style.display = "none"
     }*/
+    stopStillPopup(laStill)
 }
 
 
@@ -47,38 +45,17 @@ function populateData(data, lastname, firstname) {
 
         let groupId = getGroupIdIfInside(course.groups, lastname, firstname)
         if(groupId !== 0){
+            // Create informations of the project when joined
             groupElement.id = `group-element-id${groupId}`
             createGroupInformations(groupElement, course, groupId)
         } else {
-            // Not in a group
-            // Réalise la liste des groupes avec la possibilité de les rejoindre
+            // Create a list of Groups
+            createGroupList(groupElement, course, groupId)
             groupId = courseGroup
             groupElement.id = `group-element-id${groupId}`
         }
 
         groupElement.appendChild(para);
-
-        /*const groupName = document.createElement('div');
-        groupName.className = 'group-name';
-        groupName.textContent = group.group_name;
-        groupElement.appendChild(groupName);*/
-
-        /*group.groups.project_group_students.forEach(student => {
-            const studentElement = document.createElement('div');
-            studentElement.className = 'student';
-
-            const studentName = document.createElement('span');
-            studentName.className = 'student-name';
-            studentName.textContent = `${student.firstname} ${student.name}`;
-            studentElement.appendChild(studentName);
-
-            const studentInfo = document.createElement('span');
-            studentInfo.className = 'student-info';
-            studentInfo.textContent = ` ${student.promotion} - ${student.classe}`;
-            studentElement.appendChild(studentInfo);
-
-            groupElement.appendChild(studentElement);
-        });*/
 
         groupElement.addEventListener("click", (event)=>{
             const element = document.querySelector(`#group-element-id${groupId} > div`)
@@ -122,20 +99,7 @@ function getGroupIdIfInside(groups, lastname, firstname){
     return 0;
 }
 
-function isGroupElementOrChild(element, groupElement) {
-    while (element) {
-        if (element === groupElement) {
-            return true;
-        }
-        element = element.parentElement;
-    }
-    return false;
-}
-
-
 function createGroupInformations(groupElement, values, group_id){
-    console.log(values)
-    const div = document.createElement("div")
     let groupInfo = {
         name: '',
         users: []
@@ -169,7 +133,7 @@ function createGroupInformations(groupElement, values, group_id){
         { label: 'Type de groupe', value: values.project_type_group },
         { label: 'Présentation', value: values.project_hearing_presentation },
         { label: 'Durée de présentation', value: `${values.project_presentation_duration} minutes` },
-        { label: 'Travail personnel', value: `${values.project_personal_work} heures` },
+        { label: 'Travail personnel estimé', value: `${values.project_personal_work} heures` },
         { label: 'Type de présentation', value: values.project_type_presentation }
     ];
 
@@ -234,4 +198,10 @@ function createGroupInformations(groupElement, values, group_id){
     groupInfoDiv.appendChild(logsList);
 
     groupElement.appendChild(groupInfoDiv)
+}
+
+
+
+function createGroupList(groupElement, values, groupId){
+    console.log(values)
 }

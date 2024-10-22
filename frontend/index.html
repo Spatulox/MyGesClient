@@ -336,129 +336,15 @@
                 <!--Groups project-->
                 <div id="projects" style="display: none">
                     <img src="./src/assets/images/circle-loading.gif" id="loadingProject" alt="loading...">
-                    <style>
-
-                        #projects{
-                            margin-bottom: 20px;
-                        }
-
-                        #projects .container {
-                            max-width: 80%;
-                            margin: 0 auto;
-
-                        }
-
-                        #projects #courses-container{
-                            width: 100%;
-                            margin: 0 auto;
-                            display: grid;
-                            grid-template-columns: repeat(auto-fit, minmax(min(100%, 550px), 1fr));
-                            gap: 20px;
-                        }
-
-
-                        @media (min-width: 1200px) {
-                            #projects .container {
-                                grid-template-columns: repeat(2, 1fr);
-                            }
-                        }
-
-
-
-
-
-
-
-                        #projects .group {
-                            cursor: pointer;
-                            transition: all ease-in-out 0.3s;
-                            background-color: #2f3136;
-                            border-radius: 5px;
-                            padding: 15px;
-                            margin: auto;
-                            margin-bottom: 20px;
-                            max-width: 550px;
-                        }
-
-                        #projects .group:hover {
-                            transform: scale(1.05);
-                            transition: all ease-in-out 0.3s;
-                        }
-
-                        #project .groups *{
-                            pointer-events: none;
-                        }
-
-                        #projects h1 {
-                            color: #ffffff;
-                            border-bottom: 1px solid #4f545c;
-                            padding-bottom: 10px;
-                            pointer-events: none;
-                        }
-
-                        /*#projects .group-name {
-                            font-size: 18px;
-                            font-weight: bold;
-                            color: #ffffff;
-                            margin-bottom: 10px;
-                        }
-                        #projects .student {
-                            padding: 5px 0;
-                        }
-                        #projects .student-name {
-                            color: #00b0f4;
-                        }
-                        #projects .student-info {
-                            color: #8e9297;
-                            font-size: 14px;
-                        }*/
-
-                        #projects .group-info {
-                            color: var(--policeColor);
-                            max-width: 600px;
-                            margin: 20px auto;
-                            padding: 20px;
-                            border: 1px solid #ddd;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                            background-color: var(--boxBackgroundColor);
-                            max-height: 17px;
-                            overflow: hidden;
-                            transition: all ease-in-out 0.5s;
-                        }
-
-                        #projects .group-info.active{
-                            max-height: 1000px;
-                            transition: all ease-in-out 0.5s;
-                        }
-
-                        #projects .group-info h2 {
-                            border-bottom: 2px solid #333;
-                            padding-bottom: 10px;
-                        }
-                        #projects .project-details p {
-                            margin: 5px 0;
-                        }
-                        #projects .group-members {
-                            list-style-type: none;
-                            padding: 0;
-                        }
-                        #projects .group-members li {
-                            pointer-events: auto;
-                            background-color: var(--highlight-color);
-                            margin: 5px 0;
-                            padding: 10px;
-                            border-radius: 4px;
-                        }
-
-
-                    </style>
-                        <div id="courses-container"></div>
+                    <div id="courses-container"></div>
                 </div>
                 <!--MyGes Account-->
                 <div id="account" style="display: none">
                     <div id="account-presentation">
-                        <img src="./src/assets/images/circle-loading.gif" alt="loading..." id="loading-gif-account">
+                        <div class="tooltip-trigger" style="width: 100%; height: 100%">
+                            <img src="./src/assets/images/circle-loading.gif" alt="loading..." id="loading-gif-account">
+                            <span class="tooltip">Recherche sur internet... Peut prendre du temps...</span>
+                        </div>
                     </div>
                 </div>
 
