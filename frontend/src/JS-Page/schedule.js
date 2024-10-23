@@ -205,8 +205,8 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
     agenda.forEach(course => {
         const courseElement = document.createElement('div');
         courseElement.className = 'course-card';
-        let courseName = course.agenda_name.includes("S1") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 -") ? course.agenda_name.split("S2 - ") : course.agenda_name)
-        courseName = capitalizeFirstLetter(courseName)
+        let courseName = course.agenda_name.includes("S1 - ") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 - ") ? course.agenda_name.split("S2 - ") : course.agenda_name)
+        courseName = capitalizeFirstLetter(courseName+"")
         courseElement.innerHTML = `
             <h3 style="color: ${course.room.color.Valid ? course.room.color.String : "#FFFFFF"}">${courseName}</h3>
             <p>${course.start_date.split('T')[1].substring(0, 5)} - ${course.end_date.split('T')[1].substring(0, 5)}</p>
