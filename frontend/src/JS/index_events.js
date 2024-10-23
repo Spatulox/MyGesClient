@@ -5,6 +5,7 @@
 import {popup, stillPopup, stopStillPopup} from "./popups";
 import {closeConnexion, hideConnectionError, shakeConnexion, showConnectionError} from "./login-register";
 import {
+    ConnectUser,
     DeleteOldData,
     UpdateUserEula,
     UpdateUserPassword,
