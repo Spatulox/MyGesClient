@@ -65,8 +65,7 @@ export async function dashboard(){
     }
     const htmlElement = document.getElementById("schedule-content")
     prevNextCliked = true
-
-    let still = stillPopup("Affichage de vos informations")
+    
     try{
         const htmlGradeElement = document.getElementById("grades-content")
 
@@ -92,7 +91,6 @@ export async function dashboard(){
         console.log(e)
         popup("Impossible de mettre à jour l'accueil..")
     }
-    stopStillPopup(still)
 }
 
 // --------------------------------------------------------------------------------------- //
