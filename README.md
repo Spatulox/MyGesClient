@@ -51,6 +51,7 @@ __Évènements__<br>
 
 Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
 
+<br><br><hr>
 # How to run the code
 
 This code use the official [Wails](https://wails.io/) Vanilla template.
