@@ -58,9 +58,11 @@ function populateData(data, lastname, firstname) {
         groupElement.appendChild(para);
 
         groupElement.addEventListener("click", (event)=>{
+            const parentElement = document.querySelector(`#group-element-id${groupId}`)
             const element = document.querySelector(`#group-element-id${groupId} > div`)
             console.log(element)
             element.classList.toggle("active")
+            parentElement.classList.toggle("active")
 
         })
 

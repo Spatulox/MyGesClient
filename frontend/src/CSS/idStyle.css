@@ -122,6 +122,8 @@
 
 #projects{
     margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 #projects #courses-container{
@@ -132,7 +134,14 @@
     gap: 20px;
 }
 
-#projects .group {
+#projects #courses-container .group.active {
+    width: 80%;
+    grid-column: span 2;
+    max-width: inherit;
+    transition: all 0.5s ease-in-out;
+}
+
+#projects #courses-container .group {
     cursor: pointer;
     transition: all ease-in-out 0.3s;
     background-color: var(--sidebar-color);
@@ -141,6 +150,7 @@
     margin: auto;
     margin-bottom: 20px;
     max-width: 550px;
+    justify-self: center;
 }
 
 #projects .group:hover {
@@ -148,8 +158,12 @@
     transition: all ease-in-out 0.3s;
 }
 
-#project .groups *{
+#project .groups{
     pointer-events: none;
+}
+
+#project .groups.active *{
+    pointer-events: auto !important;
 }
 
 #projects h1 {
