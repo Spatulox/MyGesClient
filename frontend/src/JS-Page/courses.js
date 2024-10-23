@@ -1,5 +1,6 @@
 import {GetCourses} from "../../wailsjs/go/backend/App";
 import {getYear, scrollMainPart} from "../JS/functions";
+import {popup} from "../JS/popups";
 
 export async function courses(){
     scrollMainPart()
@@ -10,6 +11,11 @@ export async function courses(){
     try{
         const year = getYear()
         mygescourses = await GetCourses(year.toString())
+
+        if(!mygescourses){
+            popup("Impossible de lister vos Cours")
+            return
+        }
 
         search.addEventListener("input", ()=>{
             courseGrid.innerHTML = ""
