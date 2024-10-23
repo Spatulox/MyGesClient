@@ -65,7 +65,7 @@ export async function dashboard(){
     }
     const htmlElement = document.getElementById("schedule-content")
     prevNextCliked = true
-    
+
     try{
         const htmlGradeElement = document.getElementById("grades-content")
 
