@@ -26,12 +26,13 @@ MyGesClient vous offre une vue d'ensemble de votre vie étudiante :
 - Projets de groupe : Visualisez et gérez vos projets pédagogiques MyGes
     - Rejoignez ou quittez des groupes
     - Consultez les informations des projets
+<br>
 
 ## Aperçu de l'interface
 __Menu Principal__
 <img src="./README-src/menu_principal.png">
 
-__Évènements__
+__Évènements__<br>
 <img src="./README-src/create_event.png">
 
 ## Futur Ajouts
