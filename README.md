@@ -33,7 +33,7 @@ __Menu Principal__
 <img src="./README-src/menu_principal.png">
 
 __Évènements__<br>
-<img src="./README-src/create_event.png">
+<img src="./README-src/create_event.png" style="width: 50%;">
 
 ## Futur Ajouts
 > - Button to hard refresh schedule
