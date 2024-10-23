@@ -1,30 +1,53 @@
-# PRESENTATION
+# MyGes Client
+[MyGes Client](https://github.com/Spatulox/MyGesClient) est un logiciel qui vous permet d'accéder facilement à vos informations MyGes, même hors ligne.
 
 ## ⚠️ Disclaimer ⚠️ (⛔🛑)
 Ce logiciel utilise l'API Scholae pour se connecter aux services MyGes (voir [MyGesApis](https://github.com/Spatulox/MyGesApis)).<br>
-Certaines fonctionnalités (téléchargements des fichiers) peuvent dont casser car elles ne se bases pas sur cette API
+Certaines fonctionnalités (téléchargements des fichiers) peuvent donc casser car elles ne se bases pas sur cette API
 
-## Fonctionnalités
+## Fonctionnalités Principales
+MyGesClient vous offre une vue d'ensemble de votre vie étudiante :
+- Visualisation de l'agenda : Consultez vos emplois du temps passés, présents et futurs
+- Suivi des notes : Accédez à vos résultats par semestre
+- Gestion des absences : Gardez un œil sur vos présences et absences
+- Informations du compte : Visualisez les données de votre profil MyGes
 
-[MyGes Client](https://github.com/Spatulox/MyGesClient) vous permet de **visualiser votre agenda**, vos **notes**, vos **absences** ainsi que toutes les informations utiles.<br>
-De plus, plus besoin de connexion internet ! Ce logiciel utilise SQLite afin de stocker localement vos données, permettant ainsi un accès rapide à vos informations !
-Ne vous inquiétez pas de potentielles fausse informations, les données locales sont très souvent synchronisées avec MyGes !
+## Avantages clés
+- Accès hors ligne : Grâce à SQLite, vos données sont stockées localement pour un accès rapide
+- Synchronisation régulière : Mise à jour fréquente avec MyGes pour des informations précises
+- Support multi-comptes : Gérez plusieurs profils MyGes dans une seule application <img src="./README-src/omar-sy.gif" width="120px" style="position: absolute; transform: translateX(10px);">
 
+<br>
+
+## Fonctionnalités avancées
+- Menu intuitif : Navigation simplifiée à travers l'application
+- Tableau de bord récapitulatif : Vue d'ensemble de vos informations importantes
+- Gestion d'événements locaux : Ajoutez vos propres rappels pour les contrôles, rendus, etc.
+- Projets de groupe : Visualisez et gérez vos projets pédagogiques MyGes
+    - Rejoignez ou quittez des groupes
+    - Consultez les informations des projets
+
+## Aperçu de l'interface
 __Menu Principal__
 <img src="./README-src/menu_principal.png">
 
+__Évènements__
+<img src="./README-src/create_event.png">
+
 ## Futur Ajouts
 > - Button to hard refresh schedule
+> - Gestion des évènements (modifier / supprimer)
 > - Changer de place les déconnexion/modifier le mot de passe / supprimer les anciennes données ?? (mettre ça dans softwareAccount ?)
 > - Faire les absences (Local DB WELP)
 > - Software Account page
 > - Projet de groupe :
->  - Listes des projets
+>  - Listes des projets ✅
 >  - Si on n'est pas dans un groupe, show tous les groupes dispo
->  - Si on est dans un groupe, on voit notre groupe avec les données utile (Type, etc...)
+>  - Si on est dans un groupe, on voit notre groupe avec les données utile (Type, etc...) ✅ 
 > `Impossible de télécharger les fichiers d'un groupe, Impossible d'upload des fichiers sur le groupe :/`
 
 
+Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
 
 # How to run the code
 
