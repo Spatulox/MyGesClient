@@ -1,6 +1,19 @@
-# README
+# PRESENTATION
 
-## Will add
+## ⚠️ Disclaimer ⚠️ (⛔🛑)
+Ce logiciel utilise l'API Scholae pour se connecter aux services MyGes (voir [MyGesApis](https://github.com/Spatulox/MyGesApis)).<br>
+Certaines fonctionnalités (téléchargements des fichiers) peuvent dont casser car elles ne se bases pas sur cette API
+
+## Fonctionnalités
+
+[MyGes Client](https://github.com/Spatulox/MyGesClient) vous permet de **visualiser votre agenda**, vos **notes**, vos **absences** ainsi que toutes les informations utiles.<br>
+De plus, plus besoin de connexion internet ! Ce logiciel utilise SQLite afin de stocker localement vos données, permettant ainsi un accès rapide à vos informations !
+Ne vous inquiétez pas de potentielles fausse informations, les données locales sont très souvent synchronisées avec MyGes !
+
+__Menu Principal__
+<img src="./README-src/menu_principal.png">
+
+## Futur Ajouts
 > - Button to hard refresh schedule
 > - Changer de place les déconnexion/modifier le mot de passe / supprimer les anciennes données ?? (mettre ça dans softwareAccount ?)
 > - Faire les absences (Local DB WELP)
@@ -11,12 +24,11 @@
 >  - Si on est dans un groupe, on voit notre groupe avec les données utile (Type, etc...)
 > `Impossible de télécharger les fichiers d'un groupe, Impossible d'upload des fichiers sur le groupe :/`
 
-## About
 
-This is the official Wails Vanilla template.
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+# How to run the code
+
+This code use the official [Wails](https://wails.io/) Vanilla template.
 
 ## Live Development
 
