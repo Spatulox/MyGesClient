@@ -244,6 +244,49 @@
 .defaultHeaderMenuColor{
     color: var(--policeColor);
 }
+/*Paris Location under Schedule*/
+.discord-container {
+    max-width: 600px;
+    margin: auto;
+    margin-bottom: 20px;
+    background-color: var(--boxBackgroundColor);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.discord-container .title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.discord-container .location-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.discord-container .location-item {
+    background-color: var(--discord-light);
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.discord-container .location-item:hover {
+    background-color: var(--discord-lightlight);
+    transform: translateY(-2px);
+}
+
+.discord-container .location-item h2 {
+    margin: 0;
+}
+
+.discord-container .location-item p {
+    margin: 5px 0 0;
+}
 
 .flex{
     display: flex;
