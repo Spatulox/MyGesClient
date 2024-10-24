@@ -214,6 +214,16 @@
     background-color: var(--discord-lightlight);
 }
 
+.btn-delete {
+    background-color: #b10202;
+    color: #fff;
+    margin-right: 10px;
+}
+
+.btn-delete:hover {
+    background-color: darkred;
+}
+
 .btn-create {
     background-color: var(--highlight-color);
     color: #fff;

@@ -199,6 +199,18 @@ function createGroupInformations(groupElement, values, group_id){
 
     groupInfoDiv.appendChild(logsList);
 
+    const button = document.createElement("button")
+    button.classList.add("btn")
+    button.classList.add("btn-delete")
+    button.innerHTML = "Quitter"
+    button.addEventListener("click", (e)=>{
+        e.stopPropagation()
+        popup("Under construction")
+    })
+
+    groupInfoDiv.appendChild(button)
+
+
     groupElement.appendChild(groupInfoDiv)
 }
 
@@ -264,8 +276,8 @@ function createGroupCard(data){
     joinButton.textContent = 'Rejoindre';
     joinButton.addEventListener('click', (event) => {
         event.stopPropagation();
-        console.log('Joining group:', data.name);
         groupName.classList.toggle("active")
+        popup("Under Construction")
         // Logique pour rejoindre le groupe
 
         //data.groupId

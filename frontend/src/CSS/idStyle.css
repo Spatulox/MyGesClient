@@ -212,9 +212,16 @@
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     background-color: var(--boxBackgroundColor);
-    max-height: 17px;
+    max-height: 5px;
     overflow: hidden;
     transition: all ease-in-out 0.5s;
+    position: relative;
+    padding-bottom: 50px;
+}
+
+#projects .group-info button{
+    position: absolute;
+    right: 30px;
 }
 
 #projects .group-info.active{
