@@ -44,9 +44,11 @@ __Évènements__<br>
 > - Software Account page
 > - Projet de groupe :
 >  - Listes des projets ✅
->  - Si on n'est pas dans un groupe, show tous les groupes dispo
+>  - Ajoute les logiques derrière les boutons pour rejoindre/quitter un groupe
+>  - Rajouter le nombre personnes max dans le groupe si possible !
+>  - Téléchargement les fichiers des projets
 >  - Si on est dans un groupe, on voit notre groupe avec les données utile (Type, etc...) ✅ 
-> `Impossible de télécharger les fichiers d'un groupe, Impossible d'upload des fichiers sur le groupe :/`
+> `Impossible d'upload des fichiers sur le groupe :/`
 
 
 Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
