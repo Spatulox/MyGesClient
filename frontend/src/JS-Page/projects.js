@@ -1,27 +1,23 @@
 import {popup, stillPopup, stopStillPopup} from "../JS/popups";
 import {getYear, scrollMainPart} from "../JS/functions";
 import {GetProfile, GetProjects} from "../../wailsjs/go/backend/App";
-
 export async function projects(){
     scrollMainPart()
     let laStill = stillPopup("Recherche de vos projets..")
     const loadingProject = document.getElementById("loadingProject")
-    //try{
+    try{
         const year = getYear()
         const mygesProjects = await GetProjects(year.toString())
         let profile = await GetProfile()
         profile = await JSON.parse(profile)
         console.log(JSON.parse(mygesProjects))
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
-        populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
-        populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
-        populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         loadingProject.style.display = "none"
-    /*} catch (e) {
+    } catch (e) {
         console.log(e)
         popup(e.toString())
         loadingProject.style.display = "none"
-    }*/
+    }
     stopStillPopup(laStill)
 }
 
@@ -50,21 +46,23 @@ function populateData(data, lastname, firstname) {
             createGroupInformations(groupElement, course, groupId)
         } else {
             // Create a list of Groups
-            createGroupList(groupElement, course, groupId)
+            groupElement.appendChild(createGroupList(groupElement, course, groupId))
             groupId = courseGroup
             groupElement.id = `group-element-id${groupId}`
         }
 
         groupElement.appendChild(para);
 
-        groupElement.addEventListener("click", (event)=>{
-            const parentElement = document.querySelector(`#group-element-id${groupId}`)
-            const element = document.querySelector(`#group-element-id${groupId} > div`)
-            console.log(element)
-            element.classList.toggle("active")
-            parentElement.classList.toggle("active")
-
-        })
+        groupElement.addEventListener("click", (event) => {
+            // Vérifier si l'élément cliqué est directement le groupElement
+            if (event.target === groupElement || event.target === courseTitle || event.target === para) {
+                const element = groupElement.querySelector('div');
+                if (element) {
+                    element.classList.toggle("active");
+                    groupElement.classList.toggle("active");
+                }
+            }
+        });
 
         groupsContainer.appendChild(groupElement);
     });
@@ -109,13 +107,15 @@ function createGroupInformations(groupElement, values, group_id){
     values.groups.forEach((group) => {
         if (group.project_group_id === group_id) {
             groupInfo.name = group.group_name;
-            group.project_group_students.forEach(student => {
-                groupInfo.users.push({
-                    classe: student.classe,
-                    firstname: student.firstname,
-                    name: student.name
+            if (Array.isArray(group.project_group_students)) {
+                group.project_group_students.forEach(student => {
+                    groupInfo.users.push({
+                        classe: student.classe,
+                        firstname: student.firstname,
+                        name: student.name
+                    });
                 });
-            });
+            }
         }
     });
 
@@ -204,6 +204,119 @@ function createGroupInformations(groupElement, values, group_id){
 
 
 
-function createGroupList(groupElement, values, groupId){
-    console.log(values)
+function createGroupList(groupElement, values){
+
+    let groupList = []
+    let groupInfo
+    console.log(values.groups)
+    values.groups.forEach((group) => {
+        let groupUsers = []
+        groupInfo = {}
+        if (Array.isArray(group.project_group_students)) {
+            group.project_group_students.forEach(student => {
+                groupUsers.push({
+                    firstname: student.firstname,
+                    name: student.name
+                });
+            });
+        }
+
+        groupInfo = {
+            "name": group.group_name,
+            "id": group.project_group_id,
+            "person": groupUsers
+        }
+
+        groupList.push(groupInfo)
+
+    });
+    let div = document.createElement("div")
+    div.classList.add("random-div-class-for-groups")
+    groupList.forEach((groupCard)=>{
+        div.appendChild(createGroupCard(groupCard))
+    })
+    return div
+
+}
+
+
+function createGroupCard(data){
+
+    const div = document.createElement("div")
+    div.classList.add("container")
+
+    div.addEventListener("click", ()=>{
+        div.classList.toggle("active")
+    })
+
+    // Create group name container
+    const groupNameContainer = document.createElement('div');
+    groupNameContainer.className = 'group-name-container';
+
+    // Create group name element
+    const groupName = document.createElement('div');
+    groupName.className = 'group-name';
+    groupName.textContent = data.name;
+
+    // Create join button
+    const joinButton = document.createElement('button');
+    joinButton.className = 'join-button';
+    joinButton.textContent = 'Rejoindre';
+    joinButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        console.log('Joining group:', data.name);
+        groupName.classList.toggle("active")
+        // Logique pour rejoindre le groupe
+
+        //data.groupId
+
+
+
+
+
+    });
+
+    // Append group name and join button to the container
+    groupNameContainer.appendChild(groupName);
+    groupNameContainer.appendChild(joinButton);
+
+    // Append group name container to main div
+    div.appendChild(groupNameContainer);
+
+    // Create member list
+    const memberList = document.createElement('ul');
+    memberList.className = 'member-list';
+
+    // Populate member list
+    data.person.forEach(member => {
+        const memberItem = document.createElement('li');
+        memberItem.className = 'member';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = member.firstname.charAt(0);
+
+        const memberInfo = document.createElement('div');
+        memberInfo.className = 'member-info';
+
+        const memberName = document.createElement('div');
+        memberName.className = 'member-name';
+        memberName.textContent = member.firstname;
+
+        const memberFullname = document.createElement('div');
+        memberFullname.className = 'member-fullname';
+        memberFullname.textContent = member.name;
+
+        // Append elements to the DOM
+        memberInfo.appendChild(memberName);
+        memberInfo.appendChild(memberFullname);
+
+        memberItem.appendChild(avatar);
+        memberItem.appendChild(memberInfo);
+
+        memberList.appendChild(memberItem);
+    });
+
+    div.appendChild(memberList)
+    return div
 }
