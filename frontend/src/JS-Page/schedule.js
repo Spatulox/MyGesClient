@@ -9,7 +9,7 @@ let nextPrevActive = true
 let thisWeekAlreadyFetched = false
 let prevWeek = null
 let nextWeek = null
-
+let agenda = null
 
 function initSchedule(){
     console.log("initSchedule")
@@ -54,12 +54,9 @@ export async  function schedule(){
     try{
 
         nextPrevActive = false
-
-        let agenda = null
-
+        let bkpAgenda = agenda
         const calendarGrid = document.getElementById("calendar-grid")
         const currentWeek = document.getElementById("current-week")
-        printNothing(calendarGrid, currentWeek)
 
         // If the today is in the requested week
         if(monday<= today && today <= saturday){
@@ -75,7 +72,11 @@ export async  function schedule(){
             thisWeekAlreadyFetched = true
         }
         nextPrevActive = true
-        
+        if(JSON.stringify(bkpAgenda) === JSON.stringify(agenda)){
+            return
+        }
+        printNothing(calendarGrid, currentWeek)
+
         if(agenda){
             calendarGrid.classList.remove('one-columns');
             calendarGrid.classList.remove('two-columns');
