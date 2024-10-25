@@ -37,11 +37,8 @@ __Évènements__<br>
 <img src="./README-src/create_event.png" style="width: 50%;">
 
 ## Futur Ajouts
-> - Button to hard refresh schedule
 > - Faire les absences (Local DB WELP)
 > - Encrypter le mot de passe
-> - Projet de groupe :
->  - Téléchargement les fichiers des projets
 
 
 Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
