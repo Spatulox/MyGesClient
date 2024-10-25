@@ -28,6 +28,8 @@ const buttonEula = document.getElementById('buttonEula')
 const buttonConnection = document.getElementById('buttonConnection')
 const buttonCancelConnection = document.getElementById('buttonCancelConnection')
 
+const encryptBtn = document.getElementById("encrypt-btn")
+
 
 
 // ------------ Theme events -------------- //
@@ -167,6 +169,12 @@ buttonConnection.addEventListener("click", async function() {
 buttonCancelConnection.addEventListener('click', function() {
     closeConnexion()
 })
+
+encryptBtn.addEventListener("click", ()=>{
+    const encryptInput = document.getElementById('encrypt-input')
+    popup("Under construction")
+})
+
 
 function loadingConnectionButton(oldInnerHtmlLoginBtn, bool = true){
     const loginBtn = document.getElementById('buttonConnection');
