@@ -1,6 +1,6 @@
 import {popup, stillPopup, stopStillPopup} from "../JS/popups";
 import {getYear, scrollMainPart} from "../JS/functions";
-import {GetProfile, GetProjects} from "../../wailsjs/go/backend/App";
+import {GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup} from "../../wailsjs/go/backend/App";
 export async function projects(){
     scrollMainPart()
     let laStill = stillPopup("Recherche de vos projets..")
@@ -206,16 +206,26 @@ function createGroupInformations(groupElement, values, group_id){
 
     groupInfoDiv.appendChild(logsList);
 
-    const button = document.createElement("button")
-    button.classList.add("btn")
-    button.classList.add("btn-delete")
-    button.innerHTML = "Quitter"
-    button.addEventListener("click", (e)=>{
-        e.stopPropagation()
-        popup("Under construction")
-    })
-
-    groupInfoDiv.appendChild(button)
+    if(!values.project_type_group.includes("Imposé")){
+        const button = document.createElement("button")
+        button.classList.add("btn")
+        button.classList.add("btn-delete")
+        button.innerHTML = "Quitter"
+        button.addEventListener("click", async (e)=>{
+            e.stopPropagation()
+            try{
+                if(await QuitProjectGroup(values.rc_id, values.project_id, group_id)){
+                    popup("Groupe quitté")
+                    document.getElementById("courses-container").innerHTML = ""
+                    projects()
+                }
+            } catch (e) {
+                console.log(e)
+                popup("Ue erreur est survenue")
+            }
+        })
+        groupInfoDiv.appendChild(button)
+    }
 
 
     groupElement.appendChild(groupInfoDiv)
@@ -252,14 +262,14 @@ function createGroupList(groupElement, values){
     let div = document.createElement("div")
     div.classList.add("random-div-class-for-groups")
     groupList.forEach((groupCard)=>{
-        div.appendChild(createGroupCard(groupCard))
+        div.appendChild(createGroupCard(groupCard, values.rc_id, values.project_id))
     })
     return div
 
 }
 
 
-function createGroupCard(data){
+function createGroupCard(data, rc_id, project_id){
     console.log(data)
     const div = document.createElement("div")
     div.classList.add("container")
@@ -281,10 +291,19 @@ function createGroupCard(data){
     const joinButton = document.createElement('button');
     joinButton.className = 'join-button';
     joinButton.textContent = 'Rejoindre';
-    joinButton.addEventListener('click', (event) => {
+    joinButton.addEventListener('click', async (event) => {
         event.stopPropagation();
         groupName.classList.toggle("active")
-        popup("Under Construction")
+        try{
+            if(await JoinProjectGroup(rc_id, project_id, data.id)){
+                popup("Groupe rejoind")
+                document.getElementById("courses-container").innerHTML = ""
+                projects()
+            }
+        } catch (e) {
+            console.log(e)
+            popup("Une erreur est survenue")
+        }
         // Logique pour rejoindre le groupe
     });
 
