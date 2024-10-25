@@ -41,10 +41,7 @@ __Évènements__<br>
 > - Faire les absences (Local DB WELP)
 > - Encrypter le mot de passe
 > - Projet de groupe :
->  - Ajoute les logiques derrière les boutons pour rejoindre/quitter un groupe
->  - Rajouter le nombre personnes max dans le groupe si possible !
->  - Téléchargement les fichiers des projets 
-> `Impossible d'upload des fichiers sur le groupe :/`
+>  - Téléchargement les fichiers des projets
 
 
 Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
