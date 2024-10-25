@@ -179,26 +179,34 @@ func initDBTables() {
 }
 
 func createDB() error {
-
 	appDataPath, err := os.UserConfigDir()
 	if err != nil {
 		return fmt.Errorf("erreur lors de l'obtention du dossier AppData: %v", err)
 	}
 
-	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
+	dbDir := filepath.Join(appDataPath, "MyGes")
+	dbPath := filepath.Join(dbDir, "db.sqlite")
 
-	//dbFile := "./db.sqlite"
+	// Assurez-vous que le dossier MyGes existe
+	if err := os.MkdirAll(dbDir, 0755); err != nil {
+		return fmt.Errorf("erreur lors de la création du dossier MyGes: %v", err)
+	}
 
 	// Vérifie si le fichier existe
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		// Le fichier n'existe pas, donc on le crée
 		file, err := os.Create(dbPath)
 		if err != nil {
-			Log.Error(fmt.Sprintf("erreur lors de la création du fichier de base de données: %v\", err"))
+			errMsg := fmt.Sprintf("erreur lors de la création du fichier de base de données: %v", err)
+			Log.Error(errMsg)
+			return fmt.Errorf(errMsg)
 		}
 		defer file.Close()
-		Log.Infos("Fichier sb.sqlite crée.")
+		Log.Infos("Fichier db.sqlite créé.")
+
 		initDBTables()
+	} else if err != nil {
+		return fmt.Errorf("erreur lors de la vérification de l'existence du fichier: %v", err)
 	} else {
 		Log.Infos("Le fichier db.sqlite existe déjà.")
 	}
