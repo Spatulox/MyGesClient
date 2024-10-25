@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/gommon/log"
 	_ "modernc.org/sqlite"
 	"os"
+	"path/filepath"
 )
 
 // To store the user of the application
@@ -102,7 +103,13 @@ const ABSENCES = `CREATE TABLE IF NOT EXISTS ABSENCES(
 );`
 
 func initDBTables() {
-	db, err := sql.Open("sqlite", "./db.sqlite")
+	appDataPath, err := os.UserConfigDir()
+	if err != nil {
+		Log.Error(fmt.Sprintf("erreur lors de l'obtention du dossier AppData: %v", err))
+		return
+	}
+	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		fmt.Printf("Erreur lors de l'ouverture de la base de données: %v\n", err)
 		return
@@ -172,12 +179,20 @@ func initDBTables() {
 }
 
 func createDB() error {
-	dbFile := "./db.sqlite"
+
+	appDataPath, err := os.UserConfigDir()
+	if err != nil {
+		return fmt.Errorf("erreur lors de l'obtention du dossier AppData: %v", err)
+	}
+
+	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
+
+	//dbFile := "./db.sqlite"
 
 	// Vérifie si le fichier existe
-	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		// Le fichier n'existe pas, donc on le crée
-		file, err := os.Create(dbFile)
+		file, err := os.Create(dbPath)
 		if err != nil {
 			Log.Error(fmt.Sprintf("erreur lors de la création du fichier de base de données: %v\", err"))
 		}

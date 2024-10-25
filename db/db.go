@@ -9,11 +9,12 @@ import (
 	"fmt"
 	_ "modernc.org/sqlite"
 	"os"
+	"path/filepath"
 )
 
 // ------------------------------------------------ //
 
-func InitDBConnexion() (*sql.DB, error) {
+/*func InitDBConnexion() (*sql.DB, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("erreur lors de l'obtention du répertoire de travail: %v", err)
@@ -30,6 +31,33 @@ func InitDBConnexion() (*sql.DB, error) {
 		fmt.Printf("Error opening database: %v\n", err)
 		return nil, err
 	}
+	return db, nil
+}*/
+
+func InitDBConnexion() (*sql.DB, error) {
+	appDataPath, err := os.UserConfigDir()
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de l'obtention du dossier AppData: %v", err)
+	}
+
+	dbFolder := filepath.Join(appDataPath, "MyGes")
+	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
+
+	// Assurez-vous que le dossier MyGes existe
+	err = os.MkdirAll(filepath.Dir(dbFolder), 0755)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de la création du dossier MyGes: %v", err)
+	}
+
+	if err := createDB(); err != nil {
+		return nil, err
+	}
+
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de l'ouverture de la base de données: %v", err)
+	}
+
 	return db, nil
 }
 
