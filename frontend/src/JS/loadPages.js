@@ -13,6 +13,7 @@ import {events, stopDisplayingEvents} from "../JS-Page/events";
 import {account} from "../JS-Page/account";
 import {courses} from "../JS-Page/courses";
 import {projects} from "../JS-Page/projects";
+import {absences} from "../JS-Page/absences";
 
 let leDocToShow = document.getElementById("weirdPlace")
 
@@ -59,6 +60,9 @@ async function updatePages(pages){
                 break;
             case 'projects' :
                 projects()
+                break;
+            case 'absences' :
+                absences()
                 break;
             default:
                 console.log("Default option in switch case when loading page ??")
