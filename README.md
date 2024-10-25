@@ -38,16 +38,12 @@ __Évènements__<br>
 
 ## Futur Ajouts
 > - Button to hard refresh schedule
-> - Gestion des évènements (modifier / supprimer)
-> - Changer de place les déconnexion/modifier le mot de passe / supprimer les anciennes données ?? (mettre ça dans softwareAccount ?)
 > - Faire les absences (Local DB WELP)
-> - Software Account page
+> - Encrypter le mot de passe
 > - Projet de groupe :
->  - Listes des projets ✅
 >  - Ajoute les logiques derrière les boutons pour rejoindre/quitter un groupe
 >  - Rajouter le nombre personnes max dans le groupe si possible !
->  - Téléchargement les fichiers des projets
->  - Si on est dans un groupe, on voit notre groupe avec les données utile (Type, etc...) ✅ 
+>  - Téléchargement les fichiers des projets 
 > `Impossible d'upload des fichiers sur le groupe :/`
 
 
