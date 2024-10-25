@@ -10,3 +10,11 @@ type Absences struct {
 	Type          string   `json:"type"`
 	Year          int      `json:"year"`
 }
+
+type LocalAbsences struct {
+	CourseName    string `json:"course_name"`
+	Date          string `json:"date"`
+	Justified     bool   `json:"justified"`
+	TrimesterName string `json:"trimester_name"`
+	Year          string `json:"year"`
+}
