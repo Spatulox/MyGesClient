@@ -7,7 +7,6 @@ let specificEvent = false
 export async function events(){
 
     if(specificEvent){
-        console.log("stopEvent")
         return
     }
     scrollMainPart()

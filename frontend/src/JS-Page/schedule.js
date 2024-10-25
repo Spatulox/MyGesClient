@@ -12,7 +12,6 @@ let nextWeek = null
 let agenda = null
 
 function initSchedule(){
-    console.log("initSchedule")
     prevWeek = document.getElementById("prev-week")
     nextWeek = document.getElementById("next-week")
 
@@ -113,14 +112,11 @@ export async  function schedule(){
     /*stopStillPopup(stillPopupId)*/
     nextPrevActive = true
 
-    console.log(scheduleTimeoutId)
     // Is only execute one time
     if (scheduleTimeoutId.length === 0) {
         scheduleTimeoutId.push(setInterval(schedule, 10000));
     }
 
-    console.log("End of shcedule")
-    console.log(prevWeek)
     if(prevWeek == null){
         initSchedule()
     }
@@ -260,25 +256,21 @@ function checkDiffTime(direction){
 }
 
 function getNextWeek(){
-    console.log(checkDiffTime())
     /*if(checkDiffTime() >= 30){
         return
     }*/
 
     monday.setDate(monday.getDate() + 7)
     saturday.setDate(saturday.getDate() + 7)
-    console.log(monday, saturday)
     schedule()
 }
 
 function getPrevWeek(){
-    console.log(checkDiffTime())
     if(checkDiffTime() <= -30){
         return
     }
 
     monday.setDate(monday.getDate() - 7)
     saturday.setDate(saturday.getDate() - 7)
-    console.log(monday, saturday)
     schedule()
 }

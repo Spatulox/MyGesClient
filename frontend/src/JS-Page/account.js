@@ -41,7 +41,6 @@ const createStudentCard = (profile) => {
     if(profile.nom_avant_mariage !== "N/A"){
         lesData['Nom de jeune fille'] = profile.nom_avant_mariage
     }
-    console.log(lesData)
     // Informations personnelles
     body.appendChild(createInfoSection('Informations Personnelles', lesData));
 

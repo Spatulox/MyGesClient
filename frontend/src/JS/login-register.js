@@ -97,9 +97,7 @@ export async function deconnectionFromMyges(){
         return
     }
 
-    console.log(users)
     if (users && users.length > 0) {
-        console.log("yey")
         createDropDownMenu(users)
     }
 

@@ -118,7 +118,6 @@ buttonConnection.addEventListener("click", async function() {
             }
             const still = stillPopup("Verifying infos")
             try{
-                console.log(selectUser)
                 const {user, err} = await ConnectUser(selectUser, password)
                 if(err){
                     showConnectionError("Une erreur s'est produit")

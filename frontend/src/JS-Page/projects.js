@@ -10,7 +10,6 @@ export async function projects(){
         const mygesProjects = await GetProjects(year.toString())
         let profile = await GetProfile()
         profile = await JSON.parse(profile)
-        console.log(JSON.parse(mygesProjects))
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         loadingProject.style.display = "none"
     } catch (e) {
@@ -181,6 +180,7 @@ function createGroupInformations(groupElement, values, group_id){
     filesList.className = 'project-files';
 
     values.project_files.forEach(file => {
+        console.log(file)
         const li = document.createElement('li');
         const date = new Date(file.pf_crea_date);
         li.textContent = `${file.pf_title} (${date.toLocaleDateString()})`;
@@ -237,7 +237,6 @@ function createGroupList(groupElement, values){
 
     let groupList = []
     let groupInfo
-    console.log(values.groups)
     values.groups.forEach((group) => {
         let groupUsers = []
         groupInfo = {}
@@ -270,7 +269,6 @@ function createGroupList(groupElement, values){
 
 
 function createGroupCard(data, rc_id, project_id){
-    console.log(data)
     const div = document.createElement("div")
     div.classList.add("container")
 

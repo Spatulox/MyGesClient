@@ -106,7 +106,6 @@ export function stopStillPopup(popupId) {
 
 export function popup(string) {
     const popupId = createPopup('normal', string);
-    console.log(string)
     setTimeout(() => {
         removePopup(popupId);
     }, 5000);
