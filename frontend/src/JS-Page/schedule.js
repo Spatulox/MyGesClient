@@ -86,6 +86,26 @@ export async  function schedule(){
         } else {
             printNothing(calendarGrid, currentWeek)
         }
+
+        const button = document.createElement("button")
+        button.classList.add("btn")
+        button.classList.add("btn-create")
+        button.innerHTML = "Rafaîchir l'agenda"
+        button.style.gridColumn = "span 5"
+
+        button.addEventListener("click", async ()=>{
+            let still = stillPopup("Mise à jour forcée de votre emploi du temp")
+            try{
+                agenda = await RefreshAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+            } catch (e) {
+                console.log(e)
+                popup("Une erreur est survenue")
+            }
+            stopStillPopup(still)
+        })
+
+        calendarGrid.appendChild(button)
+
     } catch (e) {
         console.log(e)
     }
