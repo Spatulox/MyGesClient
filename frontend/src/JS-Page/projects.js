@@ -123,7 +123,10 @@ function createGroupInformations(groupElement, values, group_id){
     groupInfoDiv.className = 'group-info';
 
     const groupTitle = document.createElement('h2');
-    groupTitle.textContent = groupInfo.name;
+    groupTitle.textContent = groupInfo.name + ` | ${groupInfo.users.length}/${values.project_max_student_group}`;
+    if(groupInfo.users.length === values.project_max_student_group){
+        groupTitle.innerHTML = groupInfo.name + " | <span class='underline' style='color: #b10202'>Complet</span>"
+    }
     groupInfoDiv.appendChild(groupTitle);
 
     const projectDetails = document.createElement('div');
@@ -153,6 +156,10 @@ function createGroupInformations(groupElement, values, group_id){
     const membersTitle = document.createElement('h3');
     membersTitle.textContent = 'Membres du groupe :';
     groupInfoDiv.appendChild(membersTitle);
+
+    const span = document.createElement("span")
+    span.innerHTML = `Min : ${values.project_min_student_group} / Max : ${values.project_max_student_group}`
+    groupInfoDiv.appendChild(span)
 
     const membersList = document.createElement('ul');
     membersList.className = 'group-members';
@@ -253,7 +260,7 @@ function createGroupList(groupElement, values){
 
 
 function createGroupCard(data){
-
+    console.log(data)
     const div = document.createElement("div")
     div.classList.add("container")
 
@@ -279,13 +286,6 @@ function createGroupCard(data){
         groupName.classList.toggle("active")
         popup("Under Construction")
         // Logique pour rejoindre le groupe
-
-        //data.groupId
-
-
-
-
-
     });
 
     // Append group name and join button to the container
