@@ -40,9 +40,8 @@ __Évènements__<br>
 Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
 
 ## Futur Ajouts
-> - Faire les absences (frontend)
 > - Encrypter le mot de passe
-> - Rien de planifié
+> - Rien de plus planifié
 
 <br><br><hr>
 # How to run the code

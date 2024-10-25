@@ -15,7 +15,7 @@ function createPopup(type, content) {
     if (type === 'still') {
         newPopup.innerHTML = `
             <div class="flex flexStart no-wrap">
-                <img src="./src/assets/images/circle-loading.gif" alt="loading circle">
+                <!--<img src="./src/assets/images/circle-loading.gif" alt="loading circle">-->
                 <div>${content}</div>
             </div>`;
     } else {
@@ -95,7 +95,7 @@ export function editStillPopup( popupId, string = "Error when passing args to st
     const pop = document.getElementById(popupId)
     pop.innerHTML = `
             <div class="flex flexStart no-wrap">
-                <img src="./src/assets/images/circle-loading.gif" alt="loading circle">
+                <!--<img src="./src/assets/images/circle-loading.gif" alt="loading circle">-->
                 <div>${string}</div>
             </div>`;
 }

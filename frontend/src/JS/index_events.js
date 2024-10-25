@@ -179,7 +179,8 @@ encryptBtn.addEventListener("click", ()=>{
 function loadingConnectionButton(oldInnerHtmlLoginBtn, bool = true){
     const loginBtn = document.getElementById('buttonConnection');
     if(bool){
-        loginBtn.innerHTML = "<img src='../../src/assets/images/circle-loading.gif' alt='loading' width='30px'>"
+        /*loginBtn.innerHTML = "<img src='../../src/assets/images/circle-loading.gif' alt='loading' width='30px'>"*/
+        loginBtn.innerHTML = "Loading..."
         loginBtn.style.padding = "2px"
     } else {
         loginBtn.innerHTML = oldInnerHtmlLoginBtn
