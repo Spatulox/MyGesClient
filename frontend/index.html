@@ -385,8 +385,8 @@
                             <div class="subsection">
                                 <h2 class="subsection-title">Outils utilisés</h2>
                                 <ul class="link-list tools-list">
-                                    <li><a href="https://tip.golang.org/" target="_blank">GO 22</a></li>
-                                    <li><a href="https://wails.io/docs/guides/frontend/" target="_blank">Wails</a></li>
+                                    <li><a href="https://tip.golang.org/" target="_blank">GO 22</a> (Backend)</li>
+                                    <li><a href="https://wails.io/docs/guides/frontend/" target="_blank">Wails</a> (Frontend)</li>
                                     <li><a href="https://www.jetbrains.com/go/" target="_blank">Jetbrains GoLand</a></li>
                                     <li><a href="https://www.gitkraken.com/" target="_blank">GitKraken</a></li>
                                 </ul>
@@ -408,10 +408,10 @@
                         <div class="credits-section">
                             <h1 class="section-title">Autres</h1>
                             <ul class="action-list">
-                                <li id="changePassword">Modifier le login et le mot de passe</li>
-                                <li id="eulaShow">Voir les informations d'utilisation</li>
-                                <li id="deleteOldData">Supprimer les anciennes données</li>
-                                <li id="deconnectionFromMyges">Déconnexion</li>
+                                <!--<li id="changePassword">Modifier le login et le mot de passe</li>-->
+                                <li id="eulaShow">Voir les informations d'utilisation de l'application</li>
+                                <!--<li id="deleteOldData">Supprimer les anciennes données</li>
+                                <li id="deconnectionFromMyges">Déconnexion</li>-->
                             </ul>
                         </div>
                     </div>
@@ -438,7 +438,24 @@
                         </div>
                     </div>
                 </div>
-                <div id="softwareAccount" style="display: none"></div>
+                <div id="softwareAccount" style="display: none">
+                    <div class="credits-container">
+                        <div class="credits-section width80">
+                            <h1 class="section-title">Autres</h1>
+                            <ul class="action-list">
+                                <li id="changePassword">Modifier le login et le mot de passe</li>
+                                <li id="deleteOldData">Supprimer les anciennes données</li>
+                                <li id="deconnectionFromMyges">Déconnexion</li>
+                            </ul>
+                        </div>
+                        <div class="credits-section width80">
+                            <h1 class="section-title">Encrypter le mot de passe</h1>
+                            <p>A chaque démarrage de l'application, vous devrez renseigner votre phrase secrète permettant de décrypter votre mot de passe</p>
+                            <input type="text" placeholder="Renseignez votre phrase secrète">
+                            <input type="button" class="marginTop10" style="width: 100%" value="Encrypter votre mot de passe">
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="open-modal" class="add-button initial">
