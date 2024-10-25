@@ -405,6 +405,43 @@
     margin-top: 0;
 }
 
+#allContainerAbsences h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#allContainerAbsences table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden; /* Pour arrondir les coins */
+}
+
+#allContainerAbsences th, #allContainerAbsences td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+#allContainerAbsences th {
+    background-color: var(--highlight-color); /* Couleur d'en-tête inspirée de Discord */
+}
+
+#allContainerAbsences tr:nth-child(even) {
+    background-color: var(--card-bg); /* Couleur des lignes paires */
+}
+
+#allContainerAbsences tr:hover {
+    background-color: #5C5F61; /* Couleur au survol */
+}
+
+#allContainerAbsences .justified {
+    color: #43B581; /* Couleur verte pour "Justifié" */
+}
+
+#allContainerAbsences .not-justified {
+    color: #F04747; /* Couleur rouge pour "Non Justifié" */
+}
+
 #allContainerSchedule{
     transform: translateY(-30px);
     min-width: 98%;
