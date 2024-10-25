@@ -88,6 +88,19 @@ const EVENTS = `CREATE TABLE IF NOT EXISTS EVENTS(
     FOREIGN KEY (user_id) REFERENCES USER(user_id)
 );`
 
+const ABSENCES = `CREATE TABLE IF NOT EXISTS ABSENCES(
+    abs_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    abs_cours TEXT NOT NULL,
+    abs_date TEXT NOT NULL,
+    abs_justified TEXT NOT NULL,
+	abs_trimester TEXT NOT NULL,
+	abs_trimester_name TEXT NOT NULL,
+	abs_type TEXT NOT NULL,
+	abs_year TEXT NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USER(user_id)
+);`
+
 func initDBTables() {
 	db, err := sql.Open("sqlite", "./db.sqlite")
 	if err != nil {
@@ -149,6 +162,12 @@ func initDBTables() {
 		return
 	}
 	Log.Infos("Table 'Events' créée avec succès.")
+
+	if _, err := db.Exec(ABSENCES); err != nil {
+		Log.Error(fmt.Sprintf("Erreur lors de la création de la table absences: %v\n", err))
+		return
+	}
+	Log.Infos("Table 'Absences' créée avec succès.")
 
 }
 

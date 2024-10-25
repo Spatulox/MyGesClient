@@ -12,12 +12,11 @@ func (a *App) ReturnRefreshAbsencesState() int {
 	return FETCHINGABSENCES
 }
 
-func (a *App) GetAbsences(year string) (string, error) {
-	return "absence", nil
-	//return GetDBUserGrades(a.db)
+func (a *App) GetAbsences(year string) ([]LocalAbsences, error) {
+	return GetDBUserAbsences(year, a.db)
 }
 
-func (a *App) RefreshAbsences(year string) ([]Absences, error) {
+func (a *App) RefreshAbsences(year string) ([]LocalAbsences, error) {
 	if FETCHINGABSENCES == 1 {
 		return nil, errors.New("Waiting for the previous grades fetch to end")
 	}
@@ -37,9 +36,9 @@ func (a *App) RefreshAbsences(year string) ([]Absences, error) {
 
 	SaveAbsencesToDB(grades, a.db)
 
-	userGrades, err := GetDBUserAbsences(year, a.db)
+	userAbs, err := GetDBUserAbsences(year, a.db)
 	if err != nil {
 		return nil, err
 	}
-	return userGrades, nil
+	return userAbs, nil
 }
