@@ -51,7 +51,7 @@ func SaveEventDB(db *sql.DB, name string, description *string, startDate string,
 func GetEventDB(db *sql.DB) ([]Event, error) {
 	// Définir la requête SQL
 	query := `
-        SELECT event_name, event_description, start_date, end_date, color
+        SELECT event_id, event_name, event_description, start_date, end_date, color
         FROM EVENTS
         WHERE start_date BETWEEN datetime('now') AND datetime('now', '+7 days') AND user_id = ?
         ORDER BY start_date ASC
@@ -79,6 +79,7 @@ func GetEventDB(db *sql.DB) ([]Event, error) {
 		var startDateStr, endDateStr string
 
 		err := rows.Scan(
+			&event.Id,
 			&event.Name,
 			&description,
 			&startDateStr,
@@ -118,7 +119,7 @@ func GetEventDB(db *sql.DB) ([]Event, error) {
 func GetAllEventDB(db *sql.DB) ([]Event, error) {
 	// Définir la requête SQL
 	query := `
-        SELECT event_name, event_description, start_date, end_date, color
+        SELECT event_id, event_name, event_description, start_date, end_date, color
         FROM EVENTS
         WHERE start_date >= datetime('now') AND user_id = ?
         ORDER BY start_date ASC
@@ -146,6 +147,7 @@ func GetAllEventDB(db *sql.DB) ([]Event, error) {
 		var startDateStr, endDateStr string
 
 		err := rows.Scan(
+			&event.Id,
 			&event.Name,
 			&description,
 			&startDateStr,
@@ -182,9 +184,22 @@ func GetAllEventDB(db *sql.DB) ([]Event, error) {
 	return events, nil
 }
 
+func DeleteEvent(db *sql.DB, event_id int) (bool, error) {
+	query := `DELETE FROM EVENTS WHERE event_id = ?`
+
+	// Exécuter la requête
+	rows, err := db.Query(query, event_id)
+	if err != nil {
+		return false, fmt.Errorf("erreur lors de l'exécution de la requête : %v", err)
+	}
+	defer rows.Close()
+
+	return true, nil
+}
+
 func GetEventByNameDB(db *sql.DB, eventName string) ([]Event, error) {
 	query := `
-        SELECT event_name, event_description, start_date, end_date, color
+        SELECT event_id, event_name, event_description, start_date, end_date, color
 		FROM EVENTS
 		WHERE start_date >= datetime('now')
 		  AND user_id = ?
@@ -225,6 +240,7 @@ func parseEvents(rows *sql.Rows) ([]Event, error) {
 		var startDateStr, endDateStr string
 
 		err := rows.Scan(
+			&event.Id,
 			&event.Name,
 			&description,
 			&startDateStr,
