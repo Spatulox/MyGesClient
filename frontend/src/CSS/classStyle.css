@@ -288,6 +288,11 @@
     margin: 5px 0 0;
 }
 
+.discord-container .location-item a{
+    text-decoration: none;
+    color: inherit;
+}
+
 .flex{
     display: flex;
 }
