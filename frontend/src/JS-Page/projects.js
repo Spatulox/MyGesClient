@@ -23,7 +23,7 @@ export async function projects(){
 
 function populateData(data, lastname, firstname) {
     const groupsContainer = document.getElementById('courses-container');
-    //groupsContainer.innerHTML = ""
+    groupsContainer.innerHTML = ""
 
     let courseGroup = 0
     data.items.forEach(course => {
