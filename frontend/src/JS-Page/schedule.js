@@ -40,7 +40,7 @@ function initSchedule(){
     })
 }
 
-export async  function schedule(){
+export async  function schedule(forceRefresh = false){
 
     // Avoid useless API request and html overwrite
     if(thisWeekAlreadyFetched){
@@ -71,7 +71,8 @@ export async  function schedule(){
             thisWeekAlreadyFetched = true
         }
         nextPrevActive = true
-        if(JSON.stringify(bkpAgenda) === JSON.stringify(agenda)){
+        if(JSON.stringify(bkpAgenda) === JSON.stringify(agenda) && !forceRefresh){
+            console.log("schedule4")
             return
         }
         printNothing(calendarGrid, currentWeek)
@@ -96,6 +97,7 @@ export async  function schedule(){
             let still = stillPopup("Mise à jour forcée de votre emploi du temp")
             try{
                 agenda = await RefreshAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+                schedule(true)
             } catch (e) {
                 console.log(e)
                 popup("Une erreur est survenue")
