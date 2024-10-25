@@ -3,7 +3,6 @@
 
 ## ⚠️ Disclaimer ⚠️ 
 Ce logiciel utilise l'API Scholae pour se connecter aux services MyGes (voir [MyGesApis](https://github.com/Spatulox/MyGesApis)).<br>
-Certaines fonctionnalités (téléchargements des fichiers) peuvent donc casser car elles ne se bases pas sur cette API
 
 ## Fonctionnalités Principales
 MyGesClient vous offre une vue d'ensemble de votre vie étudiante :
