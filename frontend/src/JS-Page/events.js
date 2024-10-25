@@ -1,5 +1,6 @@
-import {GetAllEvents, GetEvents, GetEventsLike, SaveEvents} from "../../wailsjs/go/backend/App";
+import {DeleteEvent, GetAllEvents, GetEvents, GetEventsLike, SaveEvents} from "../../wailsjs/go/backend/App";
 import {formatDateWithDay, scrollMainPart} from "../JS/functions";
+import {popup} from "../JS/popups";
 let personnalEvents
 let displayEventsId = []
 let specificEvent = false
@@ -33,7 +34,7 @@ export async function events(){
     })
 
     if(displayEventsId.length === 0){
-        displayEventsId.push(setInterval(events, 5000))
+        displayEventsId.push(setInterval(events, 20000))
     }
 }
 
@@ -44,7 +45,6 @@ function createEventElement(event) {
 
     const startDate = formatDateWithDay(event.start_date);
     const endDate = formatDateWithDay(event.end_date);
-
     eventElement.innerHTML = `
         <div class="event-header">
             <span class="event-name">${event.name}</span>
@@ -53,9 +53,10 @@ function createEventElement(event) {
         <div class="event-time">
             <span class="event-date">${startDate} - ${endDate}</span>
         </div>
+        <button class="marginTop10 btn btn-delete" id="event-${event.event_id}" value="Supprimer">Supprimer</button>
     `;
 
-    return eventElement;
+    return {eventElement, eventId : event.event_id};
 }
 
 function getMonthName(date) {
@@ -73,19 +74,19 @@ function createWeekSeparator(weekNumber) {
     return separator;
 }
 
-function populateCalendar(events) {
+function populateCalendar(eventv) {
     const eventList = document.querySelector('.event-list');
     eventList.innerHTML = ''; // Effacer les événements existants
 
     let currentWeek = null;
 
-    if(!events){
+    if(!eventv){
         return
     }
 
-    events.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+    eventv.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 
-    events.forEach(event => {
+    eventv.forEach(event => {
         const eventDate = new Date(event.start_date);
         const weekNumber = getMonthName(eventDate);
 
@@ -95,7 +96,19 @@ function populateCalendar(events) {
         }
 
         const eventElement = createEventElement(event);
-        eventList.appendChild(eventElement);
+        eventList.appendChild(eventElement.eventElement);
+
+        document.getElementById(`event-${eventElement.eventId}`).addEventListener("click", async ()=>{
+            try{
+                if(await DeleteEvent(eventElement.eventId)){
+                    popup("Supression réussie !")
+                    events()
+                }
+            } catch (e) {
+                console.log(e)
+                popup("Une erreur est survenue lors de la suppression d'un évènement")
+            }
+        })
     });
 }
 

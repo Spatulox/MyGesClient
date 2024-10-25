@@ -191,6 +191,11 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
+.event-item button{
+    position: relative;
+    right: -80%;
+}
+
 .event-card {
     width: 40%;
     max-width: 287px;
