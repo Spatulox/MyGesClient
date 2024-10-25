@@ -5,6 +5,7 @@
 import {popup, stillPopup, stopStillPopup} from "./popups";
 import {closeConnexion, hideConnectionError, shakeConnexion, showConnectionError} from "./login-register";
 import {
+    ConnectUser,
     DeleteOldData,
     UpdateUserEula,
     UpdateUserPassword,
@@ -29,7 +30,7 @@ const buttonCancelConnection = document.getElementById('buttonCancelConnection')
 
 
 
-// ------------ Utilitites events -------------- //
+// ------------ Theme events -------------- //
 Array.from(lightDark).forEach((theme)=>{
     theme.addEventListener('click', async function() {
 
@@ -39,7 +40,8 @@ Array.from(lightDark).forEach((theme)=>{
         } catch (e) {
             console.log(e)
             popup(e.toString())
-            return
+            popup("Impossible de sauvegarder votre thème choisi")
+            //return
         }
 
         body.classList.toggle('light')
@@ -116,7 +118,6 @@ buttonConnection.addEventListener("click", async function() {
             }
             const still = stillPopup("Verifying infos")
             try{
-                console.log(selectUser)
                 const {user, err} = await ConnectUser(selectUser, password)
                 if(err){
                     showConnectionError("Une erreur s'est produit")

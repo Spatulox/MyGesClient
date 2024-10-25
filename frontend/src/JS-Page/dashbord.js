@@ -66,7 +66,6 @@ export async function dashboard(){
     const htmlElement = document.getElementById("schedule-content")
     prevNextCliked = true
 
-    let still = stillPopup("Affichage de vos informations")
     try{
         const htmlGradeElement = document.getElementById("grades-content")
 
@@ -92,7 +91,6 @@ export async function dashboard(){
         console.log(e)
         popup("Impossible de mettre à jour l'accueil..")
     }
-    stopStillPopup(still)
 }
 
 // --------------------------------------------------------------------------------------- //
@@ -114,7 +112,7 @@ function handleGrades(htmlGradeElement) {
         if (grades) {
             recapGrades(htmlGradeElement, grades);
         } else {
-            document.getElementById("grades-content").innerHTML = "<div class='grade-item'>Nothing to show</div>";
+            document.getElementById("grades-content").innerHTML = "<div class='grade-item'>Aucune Notes</div>";
         }
     });
 }
@@ -124,7 +122,7 @@ function handleEvents() {
         if (events) {
             recapEvents(events);
         } else {
-            document.getElementById("event-content").innerHTML = "Nothing to show";
+            document.getElementById("event-content").innerHTML = "Aucun Évènement";
         }
     });
 }
@@ -300,7 +298,7 @@ function printDate(htmlElement){
         }
 
         htmlElement.innerHTML = `<h3>${capitalizeFirstLetter(today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
-        htmlElement.innerHTML += "Nothing to show"
+        htmlElement.innerHTML += "Aucun Agenda"
         document.getElementsByClassName("schedule-section")[0].style.transform = "inherit"
     } catch (e) {
         console.log(e)

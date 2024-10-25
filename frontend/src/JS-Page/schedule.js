@@ -9,10 +9,9 @@ let nextPrevActive = true
 let thisWeekAlreadyFetched = false
 let prevWeek = null
 let nextWeek = null
-
+let agenda = null
 
 function initSchedule(){
-    console.log("initSchedule")
     prevWeek = document.getElementById("prev-week")
     nextWeek = document.getElementById("next-week")
 
@@ -54,12 +53,9 @@ export async  function schedule(){
     try{
 
         nextPrevActive = false
-
-        let agenda = null
-
+        let bkpAgenda = agenda
         const calendarGrid = document.getElementById("calendar-grid")
         const currentWeek = document.getElementById("current-week")
-        printNothing(calendarGrid, currentWeek)
 
         // If the today is in the requested week
         if(monday<= today && today <= saturday){
@@ -75,7 +71,11 @@ export async  function schedule(){
             thisWeekAlreadyFetched = true
         }
         nextPrevActive = true
-        
+        if(JSON.stringify(bkpAgenda) === JSON.stringify(agenda)){
+            return
+        }
+        printNothing(calendarGrid, currentWeek)
+
         if(agenda){
             calendarGrid.classList.remove('one-columns');
             calendarGrid.classList.remove('two-columns');
@@ -85,6 +85,26 @@ export async  function schedule(){
         } else {
             printNothing(calendarGrid, currentWeek)
         }
+
+        const button = document.createElement("button")
+        button.classList.add("btn")
+        button.classList.add("btn-create")
+        button.innerHTML = "Rafaîchir l'agenda"
+        button.style.gridColumn = "span 5"
+
+        button.addEventListener("click", async ()=>{
+            let still = stillPopup("Mise à jour forcée de votre emploi du temp")
+            try{
+                agenda = await RefreshAgenda(monday.toISOString().split("T")[0], saturday.toISOString().split("T")[0])
+            } catch (e) {
+                console.log(e)
+                popup("Une erreur est survenue")
+            }
+            stopStillPopup(still)
+        })
+
+        calendarGrid.appendChild(button)
+
     } catch (e) {
         console.log(e)
     }
@@ -92,14 +112,11 @@ export async  function schedule(){
     /*stopStillPopup(stillPopupId)*/
     nextPrevActive = true
 
-    console.log(scheduleTimeoutId)
     // Is only execute one time
     if (scheduleTimeoutId.length === 0) {
         scheduleTimeoutId.push(setInterval(schedule, 10000));
     }
 
-    console.log("End of shcedule")
-    console.log(prevWeek)
     if(prevWeek == null){
         initSchedule()
     }
@@ -133,7 +150,7 @@ function printNothing(calendarGrid, currentWeek){
     currentWeek.textContent = `🗓️ ${capitalizeFirstLetter(mondayFormatted)} au ${capitalizeFirstLetter(saturdayFormatted)} 🗓️`;
 
     calendarGrid.classList.add('one-columns');
-    calendarGrid.innerHTML = "<div class='day-column'>Nothing to show</div>"
+    calendarGrid.innerHTML = "<div class='day-column'>Aucun Agenda</div>"
 }
 
 async function printSchedule(agenda, calendarGrid) {
@@ -205,8 +222,8 @@ export async function updateSchedule(agenda, finalHtmlElement, printCurrDate = t
     agenda.forEach(course => {
         const courseElement = document.createElement('div');
         courseElement.className = 'course-card';
-        let courseName = course.agenda_name.includes("S1") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 -") ? course.agenda_name.split("S2 - ") : course.agenda_name)
-        courseName = capitalizeFirstLetter(courseName)
+        let courseName = course.agenda_name.includes("S1 - ") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 - ") ? course.agenda_name.split("S2 - ") : course.agenda_name)
+        courseName = capitalizeFirstLetter(courseName+"")
         courseElement.innerHTML = `
             <h3 style="color: ${course.room.color.Valid ? course.room.color.String : "#FFFFFF"}">${courseName}</h3>
             <p>${course.start_date.split('T')[1].substring(0, 5)} - ${course.end_date.split('T')[1].substring(0, 5)}</p>
@@ -239,25 +256,21 @@ function checkDiffTime(direction){
 }
 
 function getNextWeek(){
-    console.log(checkDiffTime())
     /*if(checkDiffTime() >= 30){
         return
     }*/
 
     monday.setDate(monday.getDate() + 7)
     saturday.setDate(saturday.getDate() + 7)
-    console.log(monday, saturday)
     schedule()
 }
 
 function getPrevWeek(){
-    console.log(checkDiffTime())
     if(checkDiffTime() <= -30){
         return
     }
 
     monday.setDate(monday.getDate() - 7)
     saturday.setDate(saturday.getDate() - 7)
-    console.log(monday, saturday)
     schedule()
 }

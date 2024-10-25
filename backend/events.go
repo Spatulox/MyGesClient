@@ -33,3 +33,12 @@ func (a *App) GetAllEvents() ([]Event, error) {
 	Log.Infos("Get all events")
 	return GetAllEventDB(a.db)
 }
+
+func (a *App) DeleteEvent(eventId int) bool {
+	_, err := DeleteEvent(a.db, eventId)
+	if err != nil {
+		Log.Error(fmt.Sprintf("%v", err))
+		return false
+	}
+	return true
+}

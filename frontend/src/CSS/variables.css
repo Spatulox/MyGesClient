@@ -12,6 +12,7 @@
 	--colorMain: #9F9E9E;
     --policeColor : white;
     --mainPoliceColor : black;
+    --darkPoliceColor : #2f3136;
 
     --popupColor : #364156;
     --boxBackgroundColor : #536483;
@@ -35,6 +36,7 @@
 	--colorMain: #1D1D1D;
     --policeColor : white;
     --mainPoliceColor : white;
+    --darkPoliceColor : #2f3136;
 
     --popupColor : grey;
     --boxBackgroundColor : rgb(104, 104, 104);
@@ -49,6 +51,7 @@
     --discord-dark: #2f3136;
     --discord-light: #40444b;
     --discord-lightlight: #56585c;
+    --discord-verylight : #abadb3;
 
     transition: all ease-in-out 0.5s;
 }

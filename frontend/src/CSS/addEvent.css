@@ -204,6 +204,11 @@
     transition: background-color 0.2s;
 }
 
+.btn:active {
+    transform: scale(0.9);
+    transition: transform ease-in-out 0.1s;
+}
+
 .btn-cancel {
     background-color: #747f8d;
     color: #fff;
@@ -212,6 +217,16 @@
 
 .btn-cancel:hover {
     background-color: var(--discord-lightlight);
+}
+
+.btn-delete {
+    background-color: #b10202;
+    color: #fff;
+    margin-right: 10px;
+}
+
+.btn-delete:hover {
+    background-color: darkred;
 }
 
 .btn-create {

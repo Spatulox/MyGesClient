@@ -68,7 +68,7 @@
 
     <header id="header">
         <div id="logoGES" class="flex flexCenter">
-            <img src="./src/assets/images/GES_Master_logo.png" alt="GES logo">
+            <a href="https://myges.fr/" target="_blank"><img src="./src/assets/images/GES_Master_logo.png" alt="GES logo"></a>
         </div>
         <div class="textCenter" id="mainHeader">
             <h1 class="bold underline" id="headerTitle">Accueil</h1>
@@ -198,6 +198,35 @@
                             </div>
                         </div>
                     </div>
+                    <div class="discord-container">
+                        <h1 class="title">Paris Locations</h1>
+                        <div class="location-list">
+                            <div class="location-item">
+                                <a href="https://www.google.fr/maps/place/242+Rue+du+Faubourg+Saint-Antoine,+75012+Paris/@48.8491485,2.3870842,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6727347e25d67:0xc73e22c1131584f7!8m2!3d48.849145!4d2.3896591!16s%2Fg%2F11cslq77k8?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">
+                                    <h2 style="color: #FF6D01;">NATION1</h2>
+                                    <p>242 Rue du Faubourg Saint Antoine, Paris 75012</p>
+                                </a>
+                            </div>
+                            <div class="location-item">
+                                <a href="https://www.google.fr/maps/place/220+Rue+du+Faubourg+Saint-Antoine,+75012+Paris/@48.8494825,2.3846271,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6720cbd349643:0x7b264d91a7ebdd1!8m2!3d48.849479!4d2.387202!16s%2Fg%2F11jdtjsng4?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">
+                                    <h2 style="color: #FF0000">NATION2</h2>
+                                    <p>220 Rue du Faubourg Saint-Antoine, Paris 75012</p>
+                                </a>
+                            </div>
+                            <div class="location-item">
+                                <a href="https://www.google.fr/maps/place/21+Rue+Erard,+75012+Paris/@48.8461334,2.3829808,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6720d997a4b7d:0x86fe46d4b5ab876!8m2!3d48.8461299!4d2.3855557!16s%2Fg%2F11c5km4q9l?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">
+                                    <h2 style="color: #FFCE00">Erard</h2>
+                                    <p>21 Rue Erard, Paris 75012</p>
+                                </a>
+                            </div>
+                            <div class="location-item">
+                                <a href="https://www.google.fr/maps/place/14+Pass.+de+la+Main+d'Or,+75011+Paris/@48.8521651,2.3756302,17z/data=!3m1!4b1!4m6!3m5!1s0x47e672089960759b:0x4cce028653dcec68!8m2!3d48.8521616!4d2.3782051!16s%2Fg%2F11c22d31vy?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">
+                                    <h2 style="color: #FFCE00">MAIN-D-OR</h2>
+                                    <p>14 Passage de la Main d'Or, Paris 75011</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!--Grades-->
                 <div id="grades" style="display: none">
@@ -269,7 +298,7 @@
                     </div>
                     <style>
 
-                        .container-courses #loading {
+                        .container-courses #loadingCourses {
                             width: 100px;
                             height: auto;
                             position: absolute;
@@ -336,59 +365,15 @@
                 <!--Groups project-->
                 <div id="projects" style="display: none">
                     <img src="./src/assets/images/circle-loading.gif" id="loadingProject" alt="loading...">
-                    <style>
-                        #projects .container {
-                            display: grid;
-                            max-width: 800px;
-                            margin: 0 auto;
-                        }
-
-                        #projects .group {
-                            cursor: pointer;
-                            transition: all ease-in-out 0.3s;
-                        }
-
-                        #projects .group:hover {
-                            transform: scale(1.05);
-                            transition: all ease-in-out 0.3s;
-                        }
-
-                        #projects h1 {
-                            color: #ffffff;
-                            border-bottom: 1px solid #4f545c;
-                            padding-bottom: 10px;
-                        }
-                        #projects .group {
-                            background-color: #2f3136;
-                            border-radius: 5px;
-                            padding: 15px;
-                            margin-bottom: 20px;
-                        }
-                        #projects .group-name {
-                            font-size: 18px;
-                            font-weight: bold;
-                            color: #ffffff;
-                            margin-bottom: 10px;
-                        }
-                        #projects .student {
-                            padding: 5px 0;
-                        }
-                        #projects .student-name {
-                            color: #00b0f4;
-                        }
-                        #projects .student-info {
-                            color: #8e9297;
-                            font-size: 14px;
-                        }
-                    </style>
-                    <div class="container">
-                        <div id="courses-container"></div>
-                    </div>
+                    <div id="courses-container"></div>
                 </div>
                 <!--MyGes Account-->
                 <div id="account" style="display: none">
                     <div id="account-presentation">
-                        <img src="./src/assets/images/circle-loading.gif" alt="loading..." id="loading-gif-account">
+                        <div class="tooltip-trigger" style="width: 100%; height: 100%">
+                            <img src="./src/assets/images/circle-loading.gif" alt="loading..." id="loading-gif-account">
+                            <span class="tooltip">Recherche sur internet... Peut prendre du temps...</span>
+                        </div>
                     </div>
                 </div>
 
@@ -408,8 +393,8 @@
                             <div class="subsection">
                                 <h2 class="subsection-title">Outils utilisés</h2>
                                 <ul class="link-list tools-list">
-                                    <li><a href="https://tip.golang.org/" target="_blank">GO 22</a></li>
-                                    <li><a href="https://wails.io/docs/guides/frontend/" target="_blank">Wails</a></li>
+                                    <li><a href="https://tip.golang.org/" target="_blank">GO 22</a> (Backend)</li>
+                                    <li><a href="https://wails.io/docs/guides/frontend/" target="_blank">Wails</a> (Frontend)</li>
                                     <li><a href="https://www.jetbrains.com/go/" target="_blank">Jetbrains GoLand</a></li>
                                     <li><a href="https://www.gitkraken.com/" target="_blank">GitKraken</a></li>
                                 </ul>
@@ -431,10 +416,10 @@
                         <div class="credits-section">
                             <h1 class="section-title">Autres</h1>
                             <ul class="action-list">
-                                <li id="changePassword" onclick="changeLoginPassword()">Modifier le login et le mot de passe</li>
-                                <li id="eulaShow" onclick="eulaShow()">Voir les informations d'utilisation</li>
-                                <li id="deleteOldData" onclick="deleteOldData()">Supprimer les anciennes données</li>
-                                <li id="deconnectionFromMyges" onclick="deconnectionFromMyges()">Déconnexion</li>
+                                <!--<li id="changePassword">Modifier le login et le mot de passe</li>-->
+                                <li id="eulaShow">Voir les informations d'utilisation de l'application</li>
+                                <!--<li id="deleteOldData">Supprimer les anciennes données</li>
+                                <li id="deconnectionFromMyges">Déconnexion</li>-->
                             </ul>
                         </div>
                     </div>
@@ -461,7 +446,24 @@
                         </div>
                     </div>
                 </div>
-                <div id="softwareAccount" style="display: none"></div>
+                <div id="softwareAccount" style="display: none">
+                    <div class="credits-container">
+                        <div class="credits-section width80">
+                            <h1 class="section-title">Autres</h1>
+                            <ul class="action-list">
+                                <li id="changePassword">Modifier le login et le mot de passe</li>
+                                <li id="deleteOldData">Supprimer les anciennes données</li>
+                                <li id="deconnectionFromMyges">Déconnexion</li>
+                            </ul>
+                        </div>
+                        <div class="credits-section width80">
+                            <h1 class="section-title">Encrypter le mot de passe</h1>
+                            <p>A chaque démarrage de l'application, vous devrez renseigner votre phrase secrète permettant de décrypter votre mot de passe</p>
+                            <input type="text" placeholder="Renseignez votre phrase secrète">
+                            <input type="button" class="marginTop10" style="width: 100%" value="Encrypter votre mot de passe">
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="open-modal" class="add-button initial">

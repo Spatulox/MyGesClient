@@ -120,6 +120,227 @@
     cursor: inherit;
 }
 
+#projects{
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+#projects #courses-container{
+    width: 100%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 550px), 1fr));
+    gap: 20px;
+}
+
+/*When in group for projects*/
+#projects #courses-container .group.active {
+    width: 80%;
+    grid-column: span 2;
+    max-width: inherit;
+    transition: all 0.5s ease-in-out;
+    cursor: auto;
+    /*pointer-events: none;*/
+}
+
+#projects #courses-container .container:hover{
+    cursor: pointer;
+}
+
+#projects #courses-container .group {
+    cursor: pointer;
+    transition: all ease-in-out 0.3s;
+    background-color: var(--sidebar-color);
+    border-radius: 5px;
+    padding: 15px;
+    margin: auto;
+    margin-bottom: 20px;
+    max-width: 550px;
+    justify-self: center;
+}
+
+/*#projects .group:hover {
+    transform: scale(1.05);
+    transition: all ease-in-out 0.3s;
+}*/
+
+/*
+#project .groups{
+    pointer-events: none;
+}
+
+#project .groups.active *{
+    pointer-events: auto !important;
+}
+*/
+
+#projects h1 {
+    color: var(--highlight-color);
+    border-bottom: 1px solid #4f545c;
+    padding-bottom: 10px;
+    /*pointer-events: none;*/
+}
+
+#projects .group-info h2 {
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+    color: var(--darkPoliceColor);
+}
+
+#projects .group-info h3 {
+    color: var(--darkPoliceColor);
+    border-top: 2px solid #333;
+    padding-top: 10px;
+    text-decoration: underline;
+}
+
+#projects .project-details p {
+    margin: 5px 0;
+}
+
+#projects .group > p{
+    color: var(--discord-verylight);
+}
+
+#projects .group-info {
+    color: var(--policeColor);
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: var(--boxBackgroundColor);
+    max-height: 5px;
+    overflow: hidden;
+    transition: all ease-in-out 0.5s;
+    position: relative;
+    padding-bottom: 50px;
+}
+
+#projects .group-info button{
+    position: absolute;
+    right: 30px;
+}
+
+#projects .group-info.active{
+    max-height: 1000px;
+    transition: all ease-in-out 0.5s;
+}
+
+#projects .group-members {
+    list-style-type: none;
+    padding: 0;
+}
+#projects .group-members li {
+    /*pointer-events: auto;*/
+    background-color: var(--highlight-color);
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+[id^="group-element-id"] > .random-div-class-for-groups{
+    height: 70px;
+    overflow: hidden;
+    transition: all 0.5s ease-in-out;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+}
+
+[id^="group-element-id"] > .random-div-class-for-groups.active{
+    height: auto;
+    transition: all 0.5s ease-in-out;
+}
+
+#courses-container .container {
+    width: 80%;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    background-color: var(--boxBackgroundColor);
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 2px 10px 0 rgba(0,0,0,.2);
+    height: 24px;
+    overflow: hidden;
+    transition: all 0.5s ease-in-out;
+}
+
+#courses-container .container.active{
+    height: auto;
+    transition: all 0.5s ease-in-out;
+}
+
+#courses-container .group-name-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #40444b;
+}
+
+#courses-container .group-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+#courses-container .join-button {
+    background-color: #7289da;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+#courses-container .join-button:hover {
+    background-color: #5b6eae;
+}
+
+#courses-container .member-list {
+    list-style-type: none;
+    padding: 0;
+}
+#courses-container .member {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #40444b;
+}
+#courses-container .member:last-child {
+    border-bottom: none;
+}
+#courses-container .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #7289da;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #ffffff;
+}
+#courses-container .member-info {
+    flex-grow: 1;
+}
+#courses-container .member-name {
+    font-weight: bold;
+    color: #ffffff;
+}
+#courses-container .member-fullname {
+    font-size: 0.9em;
+    color: #b9bbbe;
+}
+
 #rightPart ul{
     padding: 0px;
 }
@@ -203,6 +424,7 @@
 #allGradesContainer {
     max-height: 90%;
     display: flex;
+    margin-bottom: 50px;
 }
 
 #allGradesContainer h1, #allGradesContainer h2 {
@@ -527,6 +749,13 @@
 
 #semester2 hr{
     margin-top: 30px;
+}
+
+#softwareAccount > div{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 80%;
+    margin: auto;
 }
 
 #stillpopup > div{

@@ -1,3 +1,6 @@
+import {loadPageGo} from "./loadPages";
+import {popup} from "./popups";
+import {DeconnectUser, GetRegisteredUsers} from "../../wailsjs/go/backend/App";
 
 let loginContainer
 let bgConnexion
@@ -5,44 +8,53 @@ let bgConnexion
 document.addEventListener('DOMContentLoaded', () => {
     loginContainer = document.getElementsByClassName('login-container')[0]
     bgConnexion =document.getElementsByClassName("bg-connexion")[0]
-    initializeDropDownMenu()
+    //initializeDropDownMenu()
 })
 
 export function initializeDropDownMenu(){
+    console.log("Initialize drop down menu")
     const customSelect = document.querySelector('.custom-select');
     const selectSelected = customSelect.querySelector('.select-selected');
     const selectItems = customSelect.querySelector('.select-items');
 
-    selectSelected.addEventListener('click', function(e) {
+    function toggleSelect(e) {
         e.stopPropagation();
         selectItems.classList.toggle('select-hide');
         this.classList.toggle('select-arrow-active');
-    });
+    }
 
-    selectItems.querySelectorAll('div').forEach(item => {
-        item.addEventListener('click', function(e) {
+    selectSelected.removeEventListener("click", toggleSelect)
+    selectSelected.addEventListener("click", toggleSelect)
 
-            if(this.innerHTML !== "Créer un compte"){
-                showUsernameField(false)
-                changeLoginButtonName("Se connecter")
-                changeTitle("Se connecter")
-            } else {
-                changeLoginButtonName("Créer un compte")
-                changeTitle("Créer un compte")
-                showUsernameField()
-            }
+    function handleItemClick(e) {
+        if (this.innerHTML !== "Créer un compte") {
+            showUsernameField(false);
+            changeLoginButtonName("Se connecter");
+            changeTitle("Se connecter");
+        } else {
+            changeLoginButtonName("Créer un compte");
+            changeTitle("Créer un compte");
+            showUsernameField();
+        }
 
-            e.stopPropagation();
-            selectSelected.innerHTML = this.innerHTML;
-            selectItems.classList.add('select-hide');
-            selectSelected.classList.remove('select-arrow-active');
-        });
-    });
-
-    document.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectSelected.innerHTML = this.innerHTML;
         selectItems.classList.add('select-hide');
         selectSelected.classList.remove('select-arrow-active');
+    }
+
+    function handleOutsideClick() {
+        selectItems.classList.add('select-hide');
+        selectSelected.classList.remove('select-arrow-active');
+    }
+
+    selectItems.querySelectorAll('div').forEach(item => {
+        item.removeEventListener('click', handleItemClick);
+        item.addEventListener('click', handleItemClick);
     });
+
+    document.removeEventListener('click', handleOutsideClick);
+    document.addEventListener('click', handleOutsideClick);
 }
 
 export async function changeLoginPassword(button = true){
@@ -85,14 +97,12 @@ export async function deconnectionFromMyges(){
         return
     }
 
-    console.log(users)
     if (users && users.length > 0) {
-        console.log("yey")
         createDropDownMenu(users)
     }
 
     openConnexion()
-    loadPage("cya")
+    loadPageGo("cya")
     initializeDropDownMenu()
 }
 
