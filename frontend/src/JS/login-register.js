@@ -81,7 +81,7 @@ export async function deconnectionFromMyges(){
     changeLoginButtonName("Créer un compte")
     showDropDownMenu(true)
     showButtonConnection()
-    showButtonCancelConnection()
+    showButtonCancelConnection(false)
 
     document.getElementById("username").value = ""
     document.getElementById("password").value = ""
