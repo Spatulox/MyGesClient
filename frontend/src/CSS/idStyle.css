@@ -47,6 +47,11 @@
     background-color: var(--rightPartColor);
 }
 
+#prev-week:active, #next-week:active{
+    transform: scale(0.9);
+    transition: all ease-in-out 0.2s;
+}
+
 #plusAddEvent{
     background-color: var(--colorMain);
     color: var(--mainPoliceColor);
