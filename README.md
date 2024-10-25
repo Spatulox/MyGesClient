@@ -36,12 +36,13 @@ __Menu Principal__
 __Évènements__<br>
 <img src="./README-src/create_event.png" style="width: 50%;">
 
-## Futur Ajouts
-> - Faire les absences (Local DB WELP)
-> - Encrypter le mot de passe
-
 
 Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
+
+## Futur Ajouts
+> - Faire les absences (frontend)
+> - Encrypter le mot de passe
+> - Rien de planifié
 
 <br><br><hr>
 # How to run the code
