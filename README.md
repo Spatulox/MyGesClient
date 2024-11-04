@@ -40,6 +40,10 @@ Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
 
 ## Futur Ajouts
 > - Encrypter le mot de passe
+> - Deconnexion => Reconnexion : Problème d'intance nil car mal réinitialisée ?
+> - Light mode => Horrible
+> - Lier un event à un cours ?
+> - Quand on créer l'event, ca ne rafaichit pas la page event instant
 > - Rien de plus planifié
 
 <br><br><hr>
