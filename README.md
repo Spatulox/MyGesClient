@@ -39,6 +39,7 @@ __Évènements__<br>
 Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
 
 ## Futur Ajouts
+> - Refaire le multithread avec des mutexs/semaphore et wait group
 > - Encrypter le mot de passe
 > - Deconnexion => Reconnexion : Problème d'intance nil car mal réinitialisée ?
 > - Light mode => Horrible
