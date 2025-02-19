@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 func (a *App) ReturnRefreshGradesState() bool {
@@ -44,6 +45,20 @@ func (a *App) RefreshGrades(year string) ([]LocalGrades, error) {
 	grades, err := api.GetGrades(year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
+	}
+
+	// Curr year, but if your begin the school year in 2024, you need to request 2024 grades for 2025 year grades
+	if grades == "null" {
+		yearInt, _ := strconv.Atoi(year)
+		yearInt = yearInt - 1
+		year = strconv.Itoa(yearInt)
+		grades, err = api.GetGrades(year) // Curr year -1
+		if err != nil {
+			Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
+		}
+		if grades == "null" {
+			return nil, errors.New("No grades found")
+		}
 	}
 
 	err = DeleteGradesForYear(a.db, year)
