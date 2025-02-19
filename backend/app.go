@@ -18,14 +18,22 @@ import (
 	"time"
 )
 
-var STARTFINISH = 0
+type StartupStatus int
+
+const (
+	StatusNotStarted StartupStatus = iota
+	StatusInProgress
+	StatusCompleted
+	StatusFailed
+)
 
 // App struct
 type App struct {
-	ctx  context.Context
-	db   *sql.DB
-	api  *GESapi
-	user UserSettings
+	ctx           context.Context
+	db            *sql.DB
+	api           *GESapi
+	user          UserSettings
+	startupStatus StartupStatus
 }
 
 // -------------------------------------------------------------------------- //
@@ -54,6 +62,7 @@ func (a *App) CheckOpenDb() bool {
 
 // -------------------------------------------------------------------------- //
 
+// Execute any function in parameter every x minutes
 func (a *App) runEveryXMinutes(ctx context.Context, x time.Duration, f func()) {
 	ticker := time.NewTicker(x * time.Minute)
 	defer ticker.Stop()
@@ -75,73 +84,86 @@ func (a *App) runEveryXMinutes(ctx context.Context, x time.Duration, f func()) {
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 
-func (a *App) Startup(ctx context.Context) {
-	Log.Infos("Initializing App")
+func (a *App) Startup(ctx context.Context) error {
 	a.ctx = ctx
+	a.startupStatus = StatusInProgress
 
+	if err := a.initDB(); err != nil {
+		return a.handleStartupError("DB initialization", err)
+	}
+
+	if err := a.initUser(); err != nil {
+		return a.handleStartupError("User initialization", err)
+	}
+
+	if err := a.initAPI(); err != nil {
+		return a.handleStartupError("API initialization", err)
+	}
+
+	a.startBackgroundTasks()
+	a.startupStatus = StatusCompleted
+	Log.Infos("Startup completed successfully")
+	return nil
+}
+
+func (a *App) initDB() error {
 	var err error
 	a.db, err = InitDBConnexion()
 	if err != nil {
-		Log.Error(fmt.Sprintf("Failed to initialize DB : %s", err))
-		STARTFINISH = -1
-		return
+		return fmt.Errorf("failed to initialize DB: %w", err)
+	}
+	if err := a.db.Ping(); err != nil {
+		return fmt.Errorf("failed to ping DB: %w", err)
 	}
 	Log.Infos("DB connection Initialized")
+	return nil
+}
 
-	if err := a.db.Ping(); err != nil {
-		Log.Error(fmt.Sprintf("Failed to ping DB %v", err))
-		STARTFINISH = -1
-		return
-	}
-
+func (a *App) initUser() error {
 	userLocal, err := GetUser(a.db)
-
 	if err != nil {
-		Log.Error(fmt.Sprintf("Impossible to initialize the user, the database is may be empty ? %v", err))
-		STARTFINISH = -1
-		return
+		return fmt.Errorf("impossible to initialize the user: %w", err)
 	}
-
 	a.user = userLocal
 	Log.Infos("User Initialized")
+	return nil
+}
 
+func (a *App) initAPI() error {
 	userApi, err := GESLogin(a.user.Username, a.user.Password)
-
 	if err != nil {
-		Log.Error(fmt.Sprintf("Impossible to initialize the API part %v", err))
-		STARTFINISH = -1
-		return
+		return fmt.Errorf("impossible to initialize the API part: %w", err)
 	}
-
 	a.api = userApi
 	Log.Infos("API connection Initialized")
+	return nil
+}
+
+func (a *App) handleStartupError(step string, err error) error {
+	a.startupStatus = StatusFailed
+	Log.Error(fmt.Sprintf("Startup failed during %s: %v", step, err))
+	return err
+}
+
+func (a *App) startBackgroundTasks() {
 	year := GetCurrentYear()
 	monday, saturday := GetWeekDates()
 
-	// Global refresh needs the date and the year
-	// Date are for the week to refresh the schedule
-	// Year is to refresh the grades
-	STARTFINISH = 1
-
 	Log.Infos("Launching go routines")
-	go a.runEveryXMinutes(ctx, 60, func() {
-		// Votre tâche périodique ici
+	go a.runEveryXMinutes(a.ctx, 60, func() {
 		msg, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
-		//msg, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
 		if err != nil {
-			Log.Error(fmt.Sprintf("Impossible to to a Global Refresh on Startup : %v", err))
-			STARTFINISH = -1
-			return
+			Log.Error(fmt.Sprintf("Global Refresh failed: %v", err))
+		} else {
+			Log.Infos(msg)
 		}
-		Log.Infos(msg)
 	})
 
-	go a.runEveryXMinutes(ctx, 7, func() {
+	go a.runEveryXMinutes(a.ctx, 7, func() {
 		monday2 := monday.Format("2006-01-02")
 		saturday2 := saturday.Format("2006-01-02")
-		_, err := a.RefreshAgenda(&monday2, &saturday2)
-		if err != nil {
-			return
+		if _, err := a.RefreshAgenda(&monday2, &saturday2); err != nil {
+			Log.Error(fmt.Sprintf("Agenda Refresh failed: %v", err))
 		}
 	})
 }
@@ -156,8 +178,8 @@ func (a *App) Cleanup() {
 
 // -------------------------------------------------------------------------- //
 
-func (a *App) GetStartStatus() int {
-	return STARTFINISH
+func (a *App) GetStartStatus() StartupStatus {
+	return a.startupStatus
 }
 
 // -------------------------------------------------------------------------- //
@@ -202,19 +224,6 @@ func (a *App) WriteLogFile(filePath string, content string) error {
 
 // -------------------------------------------------------------------------- //
 
-/*func (a *App) GetPageContent(page string) (string, error) {
-	page = strings.Split(page, ".html")[0]
-	Log.Infos("frontend/" + page + ".html")
-	content, err := os.ReadFile("frontend/" + page + ".html")
-	if err != nil {
-		Log.Error(fmt.Sprintf("Impossible to get the content of the page %d : %v", page, err))
-		return "", err
-	}
-	return string(content), nil
-}*/
-
-// -------------------------------------------------------------------------- //
-
 func (a *App) InitDiscordRPC() error {
 	err := client.Login("1196836862447329351")
 	if err != nil {
@@ -229,7 +238,7 @@ func (a *App) InitDiscordRPC() error {
 		Buttons: []*client.Button{
 			{
 				Label: "Obtenez le logiciel",
-				Url:   "https://github.com/Spatulox/AlternativMygesClient/releases",
+				Url:   "https://github.com/Spatulox/MyGesClient/releases",
 			},
 		},
 	})
