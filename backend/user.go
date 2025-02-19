@@ -24,7 +24,7 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 
 	if err != nil {
 		Log.Error("Impossible to connect to Myges")
-		return createErrorMessage("Impossible to connect to MyGes, bad username or password"), err
+		return createMessage("Impossible to connect to MyGes, bad username or password"), err
 	}
 
 	a.api = userApi
@@ -45,14 +45,14 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 	user, err := CreateUser(a.db, username, password)
 	if !user {
 		Log.Error(fmt.Sprintf("Impossible to save your info in local DB : %v", err))
-		return createErrorMessage("Impossible to save your info in local DB"), err
+		return createMessage("Impossible to save your info in local DB"), err
 	}
 
 	// Get the local user
 	userLocal, err := GetUser(a.db)
 	if err != nil {
 		Log.Error(fmt.Sprintf("Impossible to get your local infos %v", err))
-		return createErrorMessage("Impossible to get your local infos"), err
+		return createMessage("Impossible to get your local infos"), err
 	}
 	a.user = userLocal
 	Log.Infos("Your datas have beed correctely saved")
@@ -63,11 +63,11 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 	refresh, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
 	//refresh, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
 	if err != nil {
-		return createErrorMessage("Error when fetching your datas :/"), err
+		return createMessage("Error when fetching your datas :/"), err
 	}
 	println(refresh)
 
-	return createErrorMessage("Your datas have been correctely saved"), nil
+	return createMessage("Your datas have been correctely saved"), nil
 }
 
 func (a *App) GetUserData() (*UserSettings, error) {
@@ -106,7 +106,7 @@ func (a *App) GetProfile() (string, error) {
 	a.profileMutex.Lock()
 	if a.isFetchingProfile {
 		a.profileMutex.Unlock()
-		return createErrorMessage("Waiting for the previous profile fetch to end"), errors.New("profile fetch already in progress")
+		return createMessage("Waiting for the previous profile fetch to end"), errors.New("profile fetch already in progress")
 	}
 	a.isFetchingProfile = true
 	a.profileMutex.Unlock()
@@ -121,7 +121,7 @@ func (a *App) GetProfile() (string, error) {
 
 	api := a.api
 	if api == nil {
-		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil for RefreshProfile")
+		return createMessage("Internal error"), fmt.Errorf("GESapi instance is nil for RefreshProfile")
 	}
 
 	return api.GetProfile() // Retourne le profil via GESapi
@@ -130,7 +130,7 @@ func (a *App) GetProfile() (string, error) {
 func (a *App) GetYears() (string, error) {
 	api := a.api
 	if api == nil {
-		return createErrorMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
+		return createMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
 	}
 	return api.GetYears()
 }

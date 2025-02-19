@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func createErrorMessage(message string) string {
+func createMessage(message string) string {
 	return fmt.Sprintf("{\"message\":\"%s\"}", message)
 }
 
@@ -42,22 +42,22 @@ func (a *App) globalRefresh(year string, start string, end string) (string, erro
 	if err != nil {
 		Log.Error("Impossible to refresh the schedule")
 		Log.Error(err.Error())
-		//return createErrorMessage("Impossible to refresh the schedule :/"), err
+		//return createMessage("Impossible to refresh the schedule :/"), err
 	}
 	_, err = a.RefreshGrades(year)
 	if err != nil {
 		Log.Error("Impossible to refresh grades")
 		Log.Error(err.Error())
-		//return createErrorMessage("Impossible to refresh grade :/"), err
+		//return createMessage("Impossible to refresh grade :/"), err
 	}
 	_, err = a.RefreshAbsences(year)
 	if err != nil {
 		Log.Error("Impossible to refresh absences")
 		Log.Error(err.Error())
-		//return createErrorMessage("Impossible to refresh the profile :/"), err
+		//return createMessage("Impossible to refresh the profile :/"), err
 	}
 
-	return createErrorMessage("Refresh finished !"), nil
+	return createMessage("Refresh finished !"), nil
 }
 
 // ------------------------------------------------ //
