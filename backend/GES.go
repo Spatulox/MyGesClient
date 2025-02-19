@@ -40,8 +40,7 @@ func (a *App) globalRefresh(year string, start string, end string) (string, erro
 	var wg sync.WaitGroup
 	errChan := make(chan error, 3)
 
-	//wg.Add(3)
-	wg.Add(1)
+	wg.Add(3)
 
 	// Fonction helper pour gérer les erreurs
 	handleError := func(operation string, err error) {
