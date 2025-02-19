@@ -4,12 +4,18 @@ import {getYear} from "../JS/functions";
 
 export async function absences(){
     try{
-        const year = getYear()
-        const absence = await GetAbsences(year.toString())
-        console.log(absence)
-
         const tableBody = document.querySelector('#coursesTable tbody');
         tableBody.innerHTML = ""
+
+        const year = getYear()
+        let absence = await GetAbsences(year.toString())
+        if(!absence){
+            absence = await GetAbsences((year - 1).toString())
+            if (!absence) {
+                return
+            }
+        }
+        console.log(absence)
 
         absence.forEach(course => {
             const row = document.createElement('tr');

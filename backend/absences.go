@@ -6,6 +6,7 @@ import (
 	. "MyGesClient/structures"
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 func (a *App) ReturnRefreshAbsencesState() bool {
@@ -37,12 +38,23 @@ func (a *App) RefreshAbsences(year string) ([]LocalAbsences, error) {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshGrades")
 	}
 
-	grades, err := api.GetAbsences(year)
+	absences, err := api.GetAbsences(year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
 	}
 
-	SaveAbsencesToDB(grades, a.db)
+	// Curr year, but if your begin the school year in 2024, you need to request 2024 grades for 2025 year grades
+	if absences == "null" {
+		yearInt, _ := strconv.Atoi(year)
+		yearInt = yearInt - 1
+		year = strconv.Itoa(yearInt)
+		absences, err = api.GetAbsences(year) // Curr year -1
+		if absences == "null" {
+			return []LocalAbsences{}, nil
+		}
+	}
+
+	SaveAbsencesToDB(absences, a.db)
 
 	userAbs, err := GetDBUserAbsences(year, a.db)
 	if err != nil {
