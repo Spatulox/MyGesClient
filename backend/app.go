@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/hugolgst/rich-go/client"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	_ "modernc.org/sqlite"
 	"net/http"
 	"os"
@@ -93,26 +94,44 @@ func (a *App) runEveryXMinutes(ctx context.Context, x time.Duration, f func()) {
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 
-func (a *App) Startup(ctx context.Context) error {
+func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 	a.startupStatus = StatusInProgress
+	errour := 0
 
 	if err := a.initDB(); err != nil {
-		return a.handleStartupError("DB initialization", err)
+		a.handleStartupError("DB initialization", err)
+		errour += 1
 	}
 
 	if err := a.initUser(); err != nil {
-		return a.handleStartupError("User initialization", err)
+		a.handleStartupError("User initialization", err)
+		errour += 10
 	}
 
 	if err := a.initAPI(); err != nil {
-		return a.handleStartupError("API initialization", err)
+		a.handleStartupError("API initialization", err)
+		errour += 100
 	}
 
 	a.startBackgroundTasks()
 	a.startupStatus = StatusCompleted
+
+	if a.startupStatus != StatusCompleted || errour != 0 {
+		errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", errour)
+		_, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+			Type:    runtime.ErrorDialog,
+			Title:   "Erreur de démarrage",
+			Message: errorMessage,
+		})
+		if err != nil {
+			return
+		}
+		runtime.Quit(ctx)
+	}
+
 	Log.Infos("Startup completed successfully")
-	return nil
+	return
 }
 
 func (a *App) initDB() error {
@@ -148,10 +167,9 @@ func (a *App) initAPI() error {
 	return nil
 }
 
-func (a *App) handleStartupError(step string, err error) error {
+func (a *App) handleStartupError(step string, err error) {
 	a.startupStatus = StatusFailed
 	Log.Error(fmt.Sprintf("Startup failed during %s: %v", step, err))
-	return err
 }
 
 func (a *App) startBackgroundTasks() {
