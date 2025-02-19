@@ -8,6 +8,7 @@ import (
 	. "MyGesClient/time"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/hugolgst/rich-go/client"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -16,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -32,6 +34,7 @@ const (
 // App struct
 type App struct {
 	ctx                context.Context
+	year               string
 	db                 *sql.DB
 	api                *GESapi
 	user               UserSettings
@@ -114,10 +117,19 @@ func (a *App) Startup(ctx context.Context) {
 		errour += 100
 	}
 
-	a.startBackgroundTasks()
-	a.startupStatus = StatusCompleted
+	years, err := a.api.GetYears()
+	if err != nil {
+		errour += 1000
+		a.handleStartupError("Years initialization request", err)
+	}
 
-	if a.startupStatus != StatusCompleted || errour != 0 {
+	a.year, err = a.getLatestYear(years)
+	if err != nil {
+		errour += 10000
+		a.handleStartupError("Years initialization parsing", err)
+	}
+
+	if errour != 0 {
 		errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", errour)
 		_, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
 			Type:    runtime.ErrorDialog,
@@ -129,6 +141,9 @@ func (a *App) Startup(ctx context.Context) {
 		}
 		runtime.Quit(ctx)
 	}
+
+	a.startBackgroundTasks()
+	a.startupStatus = StatusCompleted
 
 	Log.Infos("Startup completed successfully")
 	return
@@ -171,6 +186,31 @@ func (a *App) handleStartupError(step string, err error) {
 	a.startupStatus = StatusFailed
 	Log.Error(fmt.Sprintf("Startup failed during %s: %v", step, err))
 }
+
+func (a *App) getLatestYear(jsonData string) (string, error) {
+	type Years struct {
+		Items []int `json:"items"`
+	}
+	var years Years
+	err := json.Unmarshal([]byte(jsonData), &years)
+	if err != nil {
+		return "0", err
+	}
+
+	if len(years.Items) == 0 {
+		return "0", fmt.Errorf("no years found in the data")
+	}
+
+	latestYear := years.Items[0]
+	for _, year := range years.Items {
+		if year > latestYear {
+			latestYear = year
+		}
+	}
+	return strconv.Itoa(latestYear), nil
+}
+
+// -------------------------------------------------------------------------- //
 
 func (a *App) startBackgroundTasks() {
 	year := GetCurrentYear()
