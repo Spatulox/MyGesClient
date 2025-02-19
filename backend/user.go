@@ -103,11 +103,20 @@ func (a *App) UpdateUserTheme(value string) (bool, error) {
 // ------------------------------------------------ //
 
 func (a *App) GetProfile() (string, error) {
-	if FETCHINGPROFILE == 1 {
-		return createErrorMessage("Waiting for the previous profile fetch to end"), errors.New("Waiting for the previous profile fetch to end")
+	a.profileMutex.Lock()
+	if a.isFetchingProfile {
+		a.profileMutex.Unlock()
+		return createErrorMessage("Waiting for the previous profile fetch to end"), errors.New("profile fetch already in progress")
 	}
-	FETCHINGPROFILE = 1
-	defer func() { FETCHINGPROFILE = 0 }()
+	a.isFetchingProfile = true
+	a.profileMutex.Unlock()
+
+	defer func() {
+		a.profileMutex.Lock()
+		a.isFetchingProfile = false
+		a.profileMutex.Unlock()
+	}()
+
 	Log.Infos("Refreshing Profile")
 
 	api := a.api
@@ -168,7 +177,7 @@ func (a *App) ConnectUser(username string, password string) (UserSettings, error
 
 	if err != nil {
 		Log.Error(fmt.Sprintf("Impossible to initialize the API part when connecting %v", err))
-		STARTFINISH = -1
+		a.startupStatus = StatusFailed
 		return UserSettings{}, err
 	}
 

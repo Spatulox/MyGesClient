@@ -8,8 +8,8 @@ import (
 	"fmt"
 )
 
-func (a *App) ReturnRefreshAbsencesState() int {
-	return FETCHINGABSENCES
+func (a *App) ReturnRefreshAbsencesState() bool {
+	return a.isFetchingAbsences
 }
 
 func (a *App) GetAbsences(year string) ([]LocalAbsences, error) {
@@ -17,11 +17,19 @@ func (a *App) GetAbsences(year string) ([]LocalAbsences, error) {
 }
 
 func (a *App) RefreshAbsences(year string) ([]LocalAbsences, error) {
-	if FETCHINGABSENCES == 1 {
-		return nil, errors.New("Waiting for the previous grades fetch to end")
+	a.absencesMutex.Lock()
+	if a.isFetchingAbsences {
+		a.absencesMutex.Unlock()
+		return nil, errors.New("waiting for the previous absences fetch to end")
 	}
-	FETCHINGABSENCES = 1
-	defer func() { FETCHINGABSENCES = 0 }()
+	a.isFetchingAbsences = true
+	a.absencesMutex.Unlock()
+
+	defer func() {
+		a.absencesMutex.Lock()
+		a.isFetchingAbsences = false
+		a.absencesMutex.Unlock()
+	}()
 	Log.Infos("Refreshing Grades")
 
 	api := a.api

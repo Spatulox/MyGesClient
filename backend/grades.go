@@ -9,8 +9,8 @@ import (
 	"fmt"
 )
 
-func (a *App) ReturnRefreshGradesState() int {
-	return FETCHINGGRADES
+func (a *App) ReturnRefreshGradesState() bool {
+	return a.isFetchingGrades
 }
 
 func (a *App) GetGrades(year string) ([]LocalGrades, error) {
@@ -21,11 +21,19 @@ func (a *App) GetGrades(year string) ([]LocalGrades, error) {
  * Refresh the Grades by asking the MyGes DB, and store it inside the LocalDB and sent back the fresh datas
  */
 func (a *App) RefreshGrades(year string) ([]LocalGrades, error) {
-	if FETCHINGGRADES == 1 {
-		return nil, errors.New("Waiting for the previous grades fetch to end")
+	a.gradesMutex.Lock()
+	if a.isFetchingGrades {
+		a.gradesMutex.Unlock()
+		return nil, errors.New("waiting for the previous grades fetch to end")
 	}
-	FETCHINGGRADES = 1
-	defer func() { FETCHINGGRADES = 0 }()
+	a.isFetchingGrades = true
+	a.gradesMutex.Unlock()
+
+	defer func() {
+		a.gradesMutex.Lock()
+		a.isFetchingGrades = false
+		a.gradesMutex.Unlock()
+	}()
 	Log.Infos("Refreshing Grades")
 
 	api := a.api

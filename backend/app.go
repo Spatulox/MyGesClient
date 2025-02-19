@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sync"
 	"time"
 )
 
@@ -29,11 +30,19 @@ const (
 
 // App struct
 type App struct {
-	ctx           context.Context
-	db            *sql.DB
-	api           *GESapi
-	user          UserSettings
-	startupStatus StartupStatus
+	ctx                context.Context
+	db                 *sql.DB
+	api                *GESapi
+	user               UserSettings
+	startupStatus      StartupStatus
+	profileMutex       sync.Mutex
+	isFetchingProfile  bool
+	gradesMutex        sync.Mutex
+	isFetchingGrades   bool
+	absencesMutex      sync.Mutex
+	isFetchingAbsences bool
+	scheduleMutex      sync.Mutex
+	isFetchingSchedule bool
 }
 
 // -------------------------------------------------------------------------- //
