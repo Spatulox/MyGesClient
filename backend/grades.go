@@ -57,7 +57,7 @@ func (a *App) RefreshGrades(year string) ([]LocalGrades, error) {
 			Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
 		}
 		if grades == "null" {
-			return nil, errors.New("No grades found")
+			return []LocalGrades{}, nil
 		}
 	}
 
