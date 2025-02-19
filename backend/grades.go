@@ -7,21 +7,20 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
 )
 
 func (a *App) ReturnRefreshGradesState() bool {
 	return a.isFetchingGrades
 }
 
-func (a *App) GetGrades(year string) ([]LocalGrades, error) {
-	return GetDBUserGrades(year, a.db)
+func (a *App) GetGrades() ([]LocalGrades, error) {
+	return GetDBUserGrades(a.year, a.db)
 }
 
 /*
  * Refresh the Grades by asking the MyGes DB, and store it inside the LocalDB and sent back the fresh datas
  */
-func (a *App) RefreshGrades(year string) ([]LocalGrades, error) {
+func (a *App) RefreshGrades() ([]LocalGrades, error) {
 	a.gradesMutex.Lock()
 	if a.isFetchingGrades {
 		a.gradesMutex.Unlock()
@@ -42,26 +41,17 @@ func (a *App) RefreshGrades(year string) ([]LocalGrades, error) {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshGrades")
 	}
 
-	grades, err := api.GetGrades(year)
+	grades, err := api.GetGrades(a.year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
 	}
 
 	// Curr year, but if your begin the school year in 2024, you need to request 2024 grades for 2025 year grades
 	if grades == "null" {
-		yearInt, _ := strconv.Atoi(year)
-		yearInt = yearInt - 1
-		year = strconv.Itoa(yearInt)
-		grades, err = api.GetGrades(year) // Curr year -1
-		if err != nil {
-			Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
-		}
-		if grades == "null" {
-			return []LocalGrades{}, nil
-		}
+		return []LocalGrades{}, nil
 	}
 
-	err = DeleteGradesForYear(a.db, year)
+	err = DeleteGradesForYear(a.db, a.year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("%v", err))
 		return nil, err
@@ -69,7 +59,7 @@ func (a *App) RefreshGrades(year string) ([]LocalGrades, error) {
 
 	SaveGradesToDB(grades, a.db)
 
-	userGrades, err := GetDBUserGrades(year, a.db)
+	userGrades, err := GetDBUserGrades(a.year, a.db)
 	if err != nil {
 		return nil, err
 	}

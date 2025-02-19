@@ -369,16 +369,16 @@ func (a *App) CheckXTimeInternetConnection(attempts int) bool {
 
 // -------------------------------------------------------------------------- //
 
-func (a *App) GetCourses(year string) (string, error) {
-	matched, err := regexp.MatchString(`^20\d{2}$`, year)
+func (a *App) GetCourses() (string, error) {
+	matched, err := regexp.MatchString(`^20\d{2}$`, a.year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("erreur lors de la vérification du format de l'année: %v", err))
 		return "", fmt.Errorf("erreur lors de la vérification du format de l'année: %v", err)
 	}
 	if !matched {
-		Log.Error(fmt.Sprintf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year))
-		return "", fmt.Errorf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year)
+		Log.Error(fmt.Sprintf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", a.year))
+		return "", fmt.Errorf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", a.year)
 	}
 
-	return a.api.GetCourses(year)
+	return a.api.GetCourses(a.year)
 }

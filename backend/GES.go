@@ -61,14 +61,14 @@ func (a *App) globalRefresh(year string, start string, end string) (string, erro
 	// Rafraîchir les notes
 	go func() {
 		defer wg.Done()
-		_, err := a.RefreshGrades(year)
+		_, err := a.RefreshGrades()
 		handleError("grades", err)
 	}()
 
 	// Rafraîchir les absences
 	go func() {
 		defer wg.Done()
-		_, err := a.RefreshAbsences(year)
+		_, err := a.RefreshAbsences()
 		handleError("absences", err)
 	}()
 

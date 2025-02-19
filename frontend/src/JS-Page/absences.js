@@ -7,14 +7,7 @@ export async function absences(){
         const tableBody = document.querySelector('#coursesTable tbody');
         tableBody.innerHTML = ""
 
-        const year = getYear()
-        let absence = await GetAbsences(year.toString())
-        if(!absence){
-            absence = await GetAbsences((year - 1).toString())
-            if (!absence) {
-                return
-            }
-        }
+        let absence = await GetAbsences()
         console.log(absence)
 
         absence.forEach(course => {

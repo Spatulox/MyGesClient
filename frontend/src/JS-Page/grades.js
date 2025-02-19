@@ -10,14 +10,6 @@ export async function grades() {
 
     let year = getYear();
     let gradeTmp = await GetGrades(year.toString());
-    if (!gradeTmp) {
-        gradeTmp = await GetGrades((year - 1).toString());
-        if (!gradeTmp) {
-            gradesList1.innerHTML = "Nothing to display"
-            gradesList2.innerHTML = "Nothing to display"
-            return
-        }
-    }
 
     function populateGrades(gradesList, grades) {
         gradesList.innerHTML = ''; // Nettoyer la liste existante
