@@ -132,6 +132,7 @@ func (a *App) DeconnectUser() error {
 	return DeconnectUser(a.db)
 }
 
+// Update the local password, but check the new right password in myges
 func (a *App) UpdateUserPassword(username string, password string) (bool, error) {
 
 	// Check the api if this is the right informations
