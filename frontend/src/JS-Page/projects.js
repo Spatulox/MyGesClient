@@ -7,7 +7,7 @@ export async function projects(){
     const loadingProject = document.getElementById("loadingProject")
     try{
         const year = getYear()
-        const mygesProjects = await GetProjects(year.toString())
+        const mygesProjects = await GetProjects()
         let profile = await GetProfile()
         profile = await JSON.parse(profile)
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
