@@ -6,7 +6,6 @@ export async function projects(){
     let laStill = stillPopup("Recherche de vos projets..")
     const loadingProject = document.getElementById("loadingProject")
     try{
-        const year = getYear()
         const mygesProjects = await GetProjects()
         let profile = await GetProfile()
         profile = await JSON.parse(profile)
@@ -26,6 +25,7 @@ function populateData(data, lastname, firstname) {
     groupsContainer.innerHTML = ""
 
     let courseGroup = 0
+    console.log(data.items)
     data.items.forEach(course => {
         courseGroup++
         const groupElement = document.createElement('div');
@@ -42,6 +42,7 @@ function populateData(data, lastname, firstname) {
         if(groupId !== 0){
             // Create informations of the project when joined
             groupElement.id = `group-element-id${groupId}`
+            console.log(groupElement, course, groupId)
             createGroupInformations(groupElement, course, groupId)
         } else {
             // Create a list of Groups
@@ -103,10 +104,10 @@ function createGroupInformations(groupElement, values, group_id){
         name: '',
         users: []
     };
-    values.groups.forEach((group) => {
+    for (const group of values.groups) {
         if (group.project_group_id === group_id) {
             groupInfo.name = group.group_name;
-            if (Array.isArray(group.project_group_students)) {
+            if (group.project_group_students && Array.isArray(group.project_group_students)) {
                 group.project_group_students.forEach(student => {
                     groupInfo.users.push({
                         classe: student.classe,
@@ -115,8 +116,9 @@ function createGroupInformations(groupElement, values, group_id){
                     });
                 });
             }
+            break; // Quitte la boucle dès qu'on a trouvé le bon groupe
         }
-    });
+    }
 
     const groupInfoDiv = document.createElement('div');
     groupInfoDiv.className = 'group-info';
