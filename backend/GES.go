@@ -3,6 +3,7 @@ package backend
 import (
 	. "MyGesClient/log"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -36,28 +37,57 @@ func checkDateFormat(date string) (string, error) {
  * Refresh the local DB by asking the MyGes DB, and store it inside the LocalDB
  */
 func (a *App) globalRefresh(year string, start string, end string) (string, error) {
-	/*start2 := "2024-09-23"
-	end2 := "2024-09-28"*/
-	_, err := a.RefreshAgenda(&start, &end)
-	if err != nil {
-		Log.Error("Impossible to refresh the schedule")
-		Log.Error(err.Error())
-		//return createMessage("Impossible to refresh the schedule :/"), err
-	}
-	_, err = a.RefreshGrades(year)
-	if err != nil {
-		Log.Error("Impossible to refresh grades")
-		Log.Error(err.Error())
-		//return createMessage("Impossible to refresh grade :/"), err
-	}
-	_, err = a.RefreshAbsences(year)
-	if err != nil {
-		Log.Error("Impossible to refresh absences")
-		Log.Error(err.Error())
-		//return createMessage("Impossible to refresh the profile :/"), err
+	var wg sync.WaitGroup
+	errChan := make(chan error, 3)
+
+	//wg.Add(3)
+	wg.Add(1)
+
+	// Fonction helper pour gérer les erreurs
+	handleError := func(operation string, err error) {
+		if err != nil {
+			Log.Error(fmt.Sprintf("Impossible to refresh %s", operation))
+			Log.Error(err.Error())
+			errChan <- fmt.Errorf("%s: %w", operation, err)
+		}
 	}
 
-	return createMessage("Refresh finished !"), nil
+	// Rafraîchir l'agenda
+	go func() {
+		defer wg.Done()
+		_, err := a.RefreshAgenda(&start, &end)
+		handleError("schedule", err)
+	}()
+
+	// Rafraîchir les notes
+	go func() {
+		defer wg.Done()
+		_, err := a.RefreshGrades(year)
+		handleError("grades", err)
+	}()
+
+	// Rafraîchir les absences
+	go func() {
+		defer wg.Done()
+		_, err := a.RefreshAbsences(year)
+		handleError("absences", err)
+	}()
+
+	// Attendre que toutes les goroutines terminent
+	wg.Wait()
+	close(errChan)
+
+	// Collecter toutes les erreurs
+	var errors []error
+	for err := range errChan {
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return createMessage("Refresh partially completed with errors"), fmt.Errorf("multiple errors occurred: %v", errors)
+	}
+
+	return createMessage("Refresh finished successfully!"), nil
 }
 
 // ------------------------------------------------ //
