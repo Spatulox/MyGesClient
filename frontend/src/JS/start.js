@@ -2,7 +2,7 @@ import {
     GetRegisteredUsers,
     GetUserData,
     InitDiscordRPC,
-    UpdateDiscordRPC,
+    UpdateDiscordRPC
 } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
 import {initCreateEvent} from "./createEvents";
