@@ -1,6 +1,7 @@
 build/bin
 build/log
 node_modules
+node_modules_windows
 node_modules_old
 frontend/dist
 frontend/wailsjs
