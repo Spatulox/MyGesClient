@@ -102,44 +102,61 @@ func (a *App) Startup(ctx context.Context) {
 	a.startupStatus = StatusInProgress
 	errour := 0
 
+	const (
+		ErrDBInit         = 1
+		ErrUserInit       = 10
+		ErrAPIInit        = 100
+		ErrYearsRequest   = 1000
+		ErrYearsParsing   = 10000
+	)
+
 	if err := a.initDB(); err != nil {
 		a.handleStartupError("DB initialization", err)
-		errour += 1
+		errour += ErrDBInit
 	}
 
 	if err := a.initUser(); err != nil {
 		a.handleStartupError("User initialization", err)
-		errour += 10
+		errour += ErrUserInit
 	}
 
 	if err := a.initAPI(); err != nil {
 		a.handleStartupError("API initialization", err)
-		errour += 100
+		errour += ErrAPIInit
 	}
 
 	years, err := a.api.GetYears()
 	if err != nil {
-		errour += 1000
+		errour += ErrYearsRequest
 		a.handleStartupError("Years initialization request", err)
 	}
 
 	a.year, err = a.getLatestYear(years)
 	if err != nil {
-		errour += 10000
+		errour += ErrYearsParsing
 		a.handleStartupError("Years initialization parsing", err)
 	}
 
 	if errour != 0 {
-		errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", errour)
-		_, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
-			Type:    runtime.ErrorDialog,
-			Title:   "Erreur de démarrage",
-			Message: errorMessage,
-		})
-		if err != nil {
-			return
+
+		allowedErrors := ErrYearsParsing | ErrAPIInit | ErrUserInit
+
+		// Vérifiez si les erreurs actuelles sont uniquement celles autorisées
+		if errour & ^allowedErrors == 0 {
+			// Les seules erreurs présentes sont celles autorisées, l'application peut démarrer
+			fmt.Println("Starting app without critic errors (No internet or no account)")
+		} else {
+			errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", errour)
+			_, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+				Type:    runtime.ErrorDialog,
+				Title:   "Erreur de démarrage",
+				Message: errorMessage,
+			})
+			if err != nil {
+				return
+			}
+			runtime.Quit(ctx)
 		}
-		runtime.Quit(ctx)
 	}
 
 	a.startBackgroundTasks()
