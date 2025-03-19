@@ -2,8 +2,8 @@ package backend
 
 import "fmt"
 
-func (a *App) GetProjects(year string) (string, error) {
-	return a.api.GetProjects(year)
+func (a *App) GetProjects() (string, error) {
+	return a.api.GetProjects(a.year)
 }
 
 func (a *App) GetProjectById(id int64) (string, error) {

@@ -294,6 +294,36 @@ func (ges *GESapi) GetProject(id int64) (string, error) {
 	return convertToJSON(result)
 }
 
+func (ges *GESapi) GetNews() (string, error) {
+	url := "/me/news"
+	result, err := ges.get(url)
+	if err != nil {
+		fmt.Printf("Stack trace:\n%+v\n", err)
+		return errMessage, err
+	}
+	return convertToJSON(result)
+}
+
+func (ges *GESapi) GetYearClasses(year string) (string, error) {
+	url := fmt.Sprintf("/me/%s/classes", year)
+	result, err := ges.get(url)
+	if err != nil {
+		fmt.Printf("Stack trace:\n%+v\n", err)
+		return errMessage, err
+	}
+	return convertToJSON(result)
+}
+
+func (ges *GESapi) GetYearTeacher(year string) (string, error) {
+	url := fmt.Sprintf("/me/%s/teachers", year)
+	result, err := ges.get(url)
+	if err != nil {
+		fmt.Printf("Stack trace:\n%+v\n", err)
+		return errMessage, err
+	}
+	return convertToJSON(result)
+}
+
 func (ges *GESapi) JoinProjectGroup(projectRcId int64, projectId int64, projectGroupId int64) (string, error) {
 	url := fmt.Sprintf("/me/courses/%d/projects/%d/groups/%d", projectRcId, projectId, projectGroupId)
 	result, err := ges.post(url, nil)

@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-func (a *App) ReturnRefreshScheduleState() int {
-	return FETCHINGSCHEDULE
+func (a *App) ReturnRefreshScheduleState() bool {
+	return a.isFetchingSchedule
 }
 
 /*
@@ -50,12 +50,19 @@ func (a *App) GetAgenda(start *string, end *string) ([]LocalAgenda, error) {
  * Refresh the Schedule bu asking the MyGes DB, and store it inside the LocalDB and send back the fresh datas
  */
 func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
-	if FETCHINGSCHEDULE == 1 {
-		return nil, errors.New("Waiting for the previous schedule fetch to end")
+	a.scheduleMutex.Lock()
+	if a.isFetchingSchedule {
+		a.scheduleMutex.Unlock()
+		return nil, errors.New("waiting for the previous schedule fetch to end")
 	}
-	FETCHINGSCHEDULE = 1
-	defer func() { FETCHINGSCHEDULE = 0 }()
-	Log.Infos("Refreshing Schedule")
+	a.isFetchingSchedule = true
+	a.scheduleMutex.Unlock()
+
+	defer func() {
+		a.scheduleMutex.Lock()
+		a.isFetchingSchedule = false
+		a.scheduleMutex.Unlock()
+	}()
 
 	var startDate, endDate string
 	var startInt, endInt error

@@ -4,12 +4,11 @@ import {getYear} from "../JS/functions";
 
 export async function absences(){
     try{
-        const year = getYear()
-        const absence = await GetAbsences(year.toString())
-        console.log(absence)
-
         const tableBody = document.querySelector('#coursesTable tbody');
         tableBody.innerHTML = ""
+
+        let absence = await GetAbsences()
+        console.log(absence)
 
         absence.forEach(course => {
             const row = document.createElement('tr');

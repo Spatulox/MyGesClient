@@ -9,8 +9,7 @@ export async function courses(){
     const courseGrid = document.getElementById('courseGrid');
     let mygescourses
     try{
-        const year = getYear()
-        mygescourses = await GetCourses(year.toString())
+        mygescourses = await GetCourses()
 
         if(!mygescourses){
             popup("Impossible de lister vos Cours")

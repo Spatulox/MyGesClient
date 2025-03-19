@@ -14,26 +14,6 @@ import (
 
 // ------------------------------------------------ //
 
-/*func InitDBConnexion() (*sql.DB, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, fmt.Errorf("erreur lors de l'obtention du répertoire de travail: %v", err)
-	}
-
-	println("Current working directory:", cwd)
-
-	if err := createDB(); err != nil {
-		return nil, err
-	}
-
-	db, err := sql.Open("sqlite", "./db.sqlite")
-	if err != nil {
-		fmt.Printf("Error opening database: %v\n", err)
-		return nil, err
-	}
-	return db, nil
-}*/
-
 func InitDBConnexion() (*sql.DB, error) {
 	appDataPath, err := os.UserConfigDir()
 	if err != nil {
