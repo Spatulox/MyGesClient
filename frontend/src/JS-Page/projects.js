@@ -83,7 +83,7 @@ function getGroupIdIfInside(groups, lastname, firstname){
 
         const students = group.project_group_students;
         if (!Array.isArray(students)) {
-            console.log("project_group_students is not an array for group:", group.project_group_id);
+            //console.log("project_group_students is not an array for group:", group.project_group_id);
             continue;
         }
 
@@ -181,13 +181,16 @@ function createGroupInformations(groupElement, values, group_id){
     const filesList = document.createElement('ul');
     filesList.className = 'project-files';
 
-    values.project_files.forEach(file => {
-        console.log(file)
-        const li = document.createElement('li');
-        const date = new Date(file.pf_crea_date);
-        li.textContent = `${file.pf_title} (${date.toLocaleDateString()})`;
-        filesList.appendChild(li);
-    });
+    
+    if (values.hasOwnProperty('project_files') && values.project_files) {
+        values.project_files.forEach(file => {
+            console.log(file)
+            const li = document.createElement('li');
+            const date = new Date(file.pf_crea_date);
+            li.textContent = `${file.pf_title} (${date.toLocaleDateString()})`;
+            filesList.appendChild(li);
+        });
+    }
 
     groupInfoDiv.appendChild(filesList);
 
@@ -208,6 +211,9 @@ function createGroupInformations(groupElement, values, group_id){
 
     groupInfoDiv.appendChild(logsList);
 
+    // Sananes va me tuer
+    // Mais après, c'est pas de ma faute, y'a pas de sécurité serveur...
+    // Donc si je met un bouton, ca veut dire que je peux quitter/rejoindre des groupes imposés :/
     if(!values.project_type_group.includes("Imposé")){
         const button = document.createElement("button")
         button.classList.add("btn")
@@ -223,7 +229,7 @@ function createGroupInformations(groupElement, values, group_id){
                 }
             } catch (e) {
                 console.log(e)
-                popup("Ue erreur est survenue")
+                popup("Une erreur est survenue")
             }
         })
         groupInfoDiv.appendChild(button)
