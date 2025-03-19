@@ -304,6 +304,26 @@ func (ges *GESapi) GetNews() (string, error) {
 	return convertToJSON(result)
 }
 
+func (ges *GESapi) GetBanners() (string, error) {
+	url := "/me/news/banners"
+	result, err := ges.get(url)
+	if err != nil {
+		fmt.Printf("Stack trace:\n%+v\n", err)
+		return errMessage, err
+	}
+	return convertToJSON(result)
+}
+
+func (ges *GESapi) GetNewsPage(page string) (string, error) {
+	url := fmt.Sprintf("/me/news?page=%s", page)
+	result, err := ges.get(url)
+	if err != nil {
+		fmt.Printf("Stack trace:\n%+v\n", err)
+		return errMessage, err
+	}
+	return convertToJSON(result)
+}
+
 func (ges *GESapi) GetYearClasses(year string) (string, error) {
 	url := fmt.Sprintf("/me/%s/classes", year)
 	result, err := ges.get(url)
