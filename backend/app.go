@@ -10,9 +10,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/hugolgst/rich-go/client"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-	_ "modernc.org/sqlite"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -20,6 +17,10 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/hugolgst/rich-go/client"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+	_ "modernc.org/sqlite"
 )
 
 type StartupStatus int
@@ -103,11 +104,11 @@ func (a *App) Startup(ctx context.Context) {
 	errour := 0
 
 	const (
-		ErrDBInit         = 1
-		ErrUserInit       = 10
-		ErrAPIInit        = 100
-		ErrYearsRequest   = 1000
-		ErrYearsParsing   = 10000
+		ErrDBInit       = 1
+		ErrUserInit     = 10
+		ErrAPIInit      = 100
+		ErrYearsRequest = 1000
+		ErrYearsParsing = 10000
 	)
 
 	if err := a.initDB(); err != nil {
