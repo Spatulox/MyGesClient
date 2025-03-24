@@ -299,6 +299,8 @@ func (a *App) startBackgroundTasks() {
 			Log.Error(fmt.Sprintf("Agenda Refresh failed: %v", err))
 		}
 	})
+
+	// Fait une autre boucle pour renew GesAPI token
 }
 
 // -------------------------------------------------------------------------- //
