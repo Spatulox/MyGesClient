@@ -12,7 +12,8 @@ import {grades} from "../JS-Page/grades";
 import {events, stopDisplayingEvents} from "../JS-Page/events";
 import {account} from "../JS-Page/account";
 import {courses} from "../JS-Page/courses";
-import {projects} from "../JS-Page/projects";
+//import {projects} from "../JS-Page/projects";
+import {projects} from "../JS-Page/projectstest.js";
 import {absences} from "../JS-Page/absences";
 
 let leDocToShow = document.getElementById("weirdPlace")

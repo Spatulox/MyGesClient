@@ -1,7 +1,8 @@
 import {popup, stillPopup, stopStillPopup} from "../JS/popups";
 import {getYear, scrollMainPart} from "../JS/functions";
 import {GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup} from "../../wailsjs/go/backend/App";
-export async function projects(){
+/*export async function projects(){
+
     scrollMainPart()
     let laStill = stillPopup("Recherche de vos projets..")
     const loadingProject = document.getElementById("loadingProject")
@@ -17,7 +18,7 @@ export async function projects(){
         loadingProject.style.display = "none"
     }
     stopStillPopup(laStill)
-}
+}*/
 
 
 function populateData(data, lastname, firstname) {
