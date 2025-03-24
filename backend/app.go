@@ -29,6 +29,8 @@ const (
 	StatusNotStarted StartupStatus = iota
 	StatusInProgress
 	StatusCompleted
+	StatusIncompleteNoUsers
+	StatusIncompleteNoInternet
 	StatusFailed
 )
 
@@ -170,13 +172,47 @@ func (a *App) Startup(ctx context.Context) {
 			}
 			runtime.Quit(ctx)
 		}
+
+		if errour&ErrUserInit != 0 {
+			a.startupStatus = StatusIncompleteNoUsers
+			Log.Infos("No Users")
+			Log.Infos("Startup incomplete.")
+		} else {
+			a.startupStatus = StatusIncompleteNoInternet
+			Log.Infos("No Internet")
+			Log.Infos("Startup incomplete, searching for internet...")
+
+			// Search for internet
+			go func() {
+				ticker := time.NewTicker(30 * time.Second)
+				defer ticker.Stop()
+
+				for {
+					select {
+					case <-ctx.Done():
+						Log.Infos("Application context cancelled, stopping internet check")
+						return
+					case <-ticker.C:
+						if a.CheckInternetConnection() {
+							if err := a.initAPI(); err == nil {
+								a.startBackgroundTasks()
+								a.startupStatus = StatusCompleted
+								Log.Infos("Internet connection restored, startup completed")
+								return
+							} else {
+								a.handleStartupError("API initialization", err)
+							}
+						}
+					}
+				}
+			}()
+
+		}
+	} else {
+		a.startBackgroundTasks()
+		a.startupStatus = StatusCompleted
+		Log.Infos("Startup completed successfully")
 	}
-
-	a.startBackgroundTasks()
-	a.startupStatus = StatusCompleted
-
-	Log.Infos("Startup completed successfully")
-	return
 }
 
 func (a *App) initDB() error {
