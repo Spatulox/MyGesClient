@@ -182,7 +182,7 @@ function createGroupInformations(groupElement, values, group_id){
     filesList.className = 'project-files';
 
     
-    if (values.hasOwnProperty('project_files') && values.project_files) {
+    if (values.hasOwnProperty('project_files') && values.project_files != null) {
         values.project_files.forEach(file => {
             console.log(file)
             const li = document.createElement('li');
