@@ -91,15 +91,6 @@ export async function deconnectionFromMyges(){
         return
     }
 
-    /*let users
-    try{
-        users = await GetRegisteredUsers()
-    } catch (e) {
-        console.log(e)
-        popup("Une erreur est survenue : "+e.toString())
-        return
-    }*/
-
     changeTitle("Créer un compte")
     changeLoginButtonName("Créer un compte")
     showDropDownMenu(true)
@@ -111,9 +102,6 @@ export async function deconnectionFromMyges(){
 
     console.log("Starting the connexion form")
 
-    /*if (users && users.length > 0) {
-        createDropDownMenu(users)
-    }*/
     await openConnexion()
     loadPageGo("cya")
 }
