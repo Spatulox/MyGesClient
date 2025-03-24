@@ -23,7 +23,7 @@ MyGesClient vous offre une vue d'ensemble de votre vie étudiante :
 - Menu intuitif : Navigation simplifiée à travers l'application
 - Tableau de bord récapitulatif : Vue d'ensemble de vos informations importantes
 - Gestion d'événements locaux : Ajoutez vos propres rappels pour les contrôles, rendus, etc.
-- Projets de groupe : Visualisez et gérez vos projets pédagogiques MyGes
+- Projets : Visualisez et gérez vos projets pédagogiques MyGes
     - Rejoignez ou quittez des groupes
     - Consultez les informations des projets
 <br>
