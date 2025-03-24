@@ -4,6 +4,7 @@ import (
 	. "MyGesClient/backend"
 	. "MyGesClient/log"
 	"embed"
+
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -26,7 +27,8 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		OnStartup: app.Startup,
+		OnStartup:  app.Startup,
+		OnShutdown: app.Shutdown,
 		Bind: []interface{}{
 			app,
 		},
@@ -35,7 +37,4 @@ func main() {
 	if err != nil {
 		Log.Error(err.Error())
 	}
-
-	Log.Infos("Closing App")
-	defer app.Cleanup()
 }

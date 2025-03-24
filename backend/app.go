@@ -167,6 +167,14 @@ func (a *App) Startup(ctx context.Context) {
 	return
 }
 
+func (a *App) Shutdown(ctx context.Context) {
+	Log.Infos("App is shutting down...")
+	if a.db != nil {
+		Log.Infos("Closing DB connexion")
+		a.db.Close()
+	}
+}
+
 func (a *App) initDB() error {
 	var err error
 	a.db, err = InitDBConnexion()
@@ -251,14 +259,6 @@ func (a *App) startBackgroundTasks() {
 			Log.Error(fmt.Sprintf("Agenda Refresh failed: %v", err))
 		}
 	})
-}
-
-// -------------------------------------------------------------------------- //
-
-func (a *App) Cleanup() {
-	if a.db != nil {
-		a.db.Close()
-	}
 }
 
 // -------------------------------------------------------------------------- //
