@@ -17,11 +17,16 @@ import {absences} from "../JS-Page/absences";
 
 let leDocToShow = document.getElementById("weirdPlace")
 
-export async function loadPageGo(string, event = null){
+function renameMainTitle(string){
+    document.getElementById("headerTitle").innerText = string
+}
+
+export async function loadPageGo(string, event){
 
     let currPage
     try{
         currPage = event?.srcElement.innerText ? event.srcElement.innerText : "Accueil"
+        currPage = capitalizeFirstLetter(currPage)
         leDocToShow.style.display = "none"
         leDocToShow = document.getElementById(string.split(".html")[0])
         leDocToShow.style.display = "inherit"
@@ -31,7 +36,7 @@ export async function loadPageGo(string, event = null){
     }
 
     try{
-        UpdateDiscordRPC("Unofficial MyGes Client", capitalizeFirstLetter(currPage))
+        UpdateDiscordRPC("Unofficial MyGes Client", currPage)
     } catch (e) {
         console.log(e)
     }
@@ -42,30 +47,44 @@ async function updatePages(pages){
         switch (pages){
             case 'account':
                 account()
+            case 'softwareAccount':
+                renameMainTitle("Compte")
                 break;
             case 'courses':
                 courses()
+                renameMainTitle("Cours")
                 break;
             case 'dashboard':
                 dashboard()
+                renameMainTitle("Accueil")
                 break;
             case 'events':
                 events()
+                renameMainTitle("Évènements")
                 break;
             case 'grades':
                 grades()
+                renameMainTitle("Notes")
                 break;
             case 'schedule':
                 schedule()
+                renameMainTitle("Agenda")
                 break;
             case 'projects' :
                 projects()
+                renameMainTitle("Projets")
                 break;
             case 'absences' :
                 absences()
+                renameMainTitle("Absences")
+                break;
+            case 'credits' :
+                absences()
+                renameMainTitle("Crédit")
                 break;
             default:
-                console.log("Default option in switch case when loading page ??")
+                renameMainTitle("Accueil")
+                //console.log("Default option in switch case when loading page ??")
                 break;
         }
     } catch (e) {
