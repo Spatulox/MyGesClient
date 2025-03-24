@@ -8,8 +8,28 @@ let bgConnexion
 document.addEventListener('DOMContentLoaded', () => {
     loginContainer = document.getElementsByClassName('login-container')[0]
     bgConnexion =document.getElementsByClassName("bg-connexion")[0]
-    //initializeDropDownMenu()
 })
+
+export function showUsernameField(bool = true){
+    const username = document.getElementById("username")
+    const usernameLabel = document.getElementById("username-label")
+    if(bool){
+        username.style.display = "block"
+        usernameLabel.style.display = "block"
+        return
+    }
+    usernameLabel.style.display = "none"
+    username.style.display = "none"
+}
+
+function toggleSelect(e) {
+    console.log("coucou")
+    const customSelect = document.querySelector('.custom-select');
+    const selectItems = customSelect.querySelector('.select-items');
+    e.stopPropagation();
+    selectItems.classList.toggle('select-hide');
+    this.classList.toggle('select-arrow-active');
+}
 
 export function initializeDropDownMenu(){
     console.log("Initialize drop down menu")
@@ -17,14 +37,8 @@ export function initializeDropDownMenu(){
     const selectSelected = customSelect.querySelector('.select-selected');
     const selectItems = customSelect.querySelector('.select-items');
 
-    function toggleSelect(e) {
-        e.stopPropagation();
-        selectItems.classList.toggle('select-hide');
-        this.classList.toggle('select-arrow-active');
-    }
-
-    selectSelected.removeEventListener("click", toggleSelect)
-    selectSelected.addEventListener("click", toggleSelect)
+    selectSelected.removeEventListener("click", toggleSelect);
+    selectSelected.addEventListener("click", toggleSelect);
 
     function handleItemClick(e) {
         if (this.innerHTML !== "Créer un compte") {
@@ -34,7 +48,7 @@ export function initializeDropDownMenu(){
         } else {
             changeLoginButtonName("Créer un compte");
             changeTitle("Créer un compte");
-            showUsernameField();
+            showUsernameField(true);
         }
 
         e.stopPropagation();
@@ -77,6 +91,15 @@ export async function deconnectionFromMyges(){
         return
     }
 
+    /*let users
+    try{
+        users = await GetRegisteredUsers()
+    } catch (e) {
+        console.log(e)
+        popup("Une erreur est survenue : "+e.toString())
+        return
+    }*/
+
     changeTitle("Créer un compte")
     changeLoginButtonName("Créer un compte")
     showDropDownMenu(true)
@@ -88,25 +111,25 @@ export async function deconnectionFromMyges(){
 
     console.log("Starting the connexion form")
 
-    let users
-    try{
-        users = await GetRegisteredUsers()
-    } catch (e) {
-        console.log(e)
-        popup("Une erreur est survenue : "+e.toString())
-        return
-    }
-
-    if (users && users.length > 0) {
+    /*if (users && users.length > 0) {
         createDropDownMenu(users)
-    }
-
-    openConnexion()
+    }*/
+    await openConnexion()
     loadPageGo("cya")
-    initializeDropDownMenu()
 }
 
-export function openConnexion(){
+export async function openConnexion(){
+
+    try{
+        // If there already a user in the DB add the list
+        const users = await GetRegisteredUsers()
+        if (users && users.length > 0) {
+            createDropDownMenu(users)
+        }
+    } catch (e) {
+        console.log(e)
+    }
+
     loginContainer.classList.remove("goesUp")
     loginContainer.classList.add("activeAnim")
     bgConnexion.classList.add("active")
@@ -114,6 +137,7 @@ export function openConnexion(){
         loginContainer.classList.add("active")
         loginContainer.classList.remove("activeAnim")
     }, 1500)
+
 }
 
 export function closeConnexion(){
@@ -192,18 +216,6 @@ export function hideConnectionError(){
     connexion_error.style.display = "none"
 }
 
-export function showUsernameField(bool = true){
-    const username = document.getElementById("username")
-    const usernameLabel = document.getElementById("username-label")
-    if(bool){
-        username.style.display = "block"
-        usernameLabel.style.display = "block"
-        return
-    }
-    usernameLabel.style.display = "none"
-    username.style.display = "none"
-}
-
 export function createDropDownMenu(users){
     const connexionSelectField = document.getElementById("select-connexion")
 
@@ -215,9 +227,9 @@ export function createDropDownMenu(users){
         div.innerHTML = user.Username;
         connexionSelectField.appendChild(div);
     });
-
-    initializeDropDownMenu()
     showDropDownMenu(true)
+    showUsernameField(true);
+    initializeDropDownMenu()
 
 }
 

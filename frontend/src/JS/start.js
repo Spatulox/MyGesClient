@@ -40,17 +40,7 @@ export async function start(){
             changeLoginButtonName("Créer un compte")
             showButtonCancelConnection(false)
 
-            try{
-                // If there already a user in the DB add the list
-                const users = await GetRegisteredUsers()
-                if (users && users.length > 0) {
-                    createDropDownMenu(users)
-                }
-            } catch (e) {
-                console.log(e)
-            }
-
-            openConnexion()
+            await openConnexion()
             stopStillPopup(laStill)
             return
         }
