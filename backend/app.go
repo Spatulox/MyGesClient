@@ -29,6 +29,8 @@ const (
 	StatusNotStarted StartupStatus = iota
 	StatusInProgress
 	StatusCompleted
+	StatusIncompleteNoUsers
+	StatusIncompleteNoInternet
 	StatusFailed
 )
 
@@ -126,16 +128,28 @@ func (a *App) Startup(ctx context.Context) {
 		errour += ErrAPIInit
 	}
 
-	years, err := a.api.GetYears()
-	if err != nil {
-		errour += ErrYearsRequest
-		a.handleStartupError("Years initialization request", err)
-	}
+	if a.api != nil {
+		years, err := a.api.GetYears()
+		if err != nil {
+			a.handleStartupError("Years initialization request", err)
+			year, err := GetLastYearInDB(a.db)
+			if err != nil {
+				errour += ErrYearsRequest
+			}
+			a.year = year
 
-	a.year, err = a.getLatestYear(years)
-	if err != nil {
-		errour += ErrYearsParsing
-		a.handleStartupError("Years initialization parsing", err)
+		} else {
+			a.year, err = a.getLatestYear(years)
+			if err != nil {
+				errour += ErrYearsParsing
+				a.handleStartupError("Years initialization parsing", err)
+			}
+		}
+
+		boolean, err := UpdateUserLastYear(a.db, a.year)
+		if !boolean || err != nil {
+			Log.Error("Error : Impossible to update the last year for the user : %v", err)
+		}
 	}
 
 	if errour != 0 {
@@ -158,13 +172,47 @@ func (a *App) Startup(ctx context.Context) {
 			}
 			runtime.Quit(ctx)
 		}
+
+		if errour&ErrUserInit != 0 {
+			a.startupStatus = StatusIncompleteNoUsers
+			Log.Infos("No Users")
+			Log.Infos("Startup incomplete.")
+		} else {
+			a.startupStatus = StatusIncompleteNoInternet
+			Log.Infos("No Internet")
+			Log.Infos("Startup incomplete, searching for internet...")
+
+			// Search for internet
+			go func() {
+				ticker := time.NewTicker(30 * time.Second)
+				defer ticker.Stop()
+
+				for {
+					select {
+					case <-ctx.Done():
+						Log.Infos("Application context cancelled, stopping internet check")
+						return
+					case <-ticker.C:
+						if a.CheckInternetConnection() {
+							if err := a.initAPI(); err == nil {
+								a.startBackgroundTasks()
+								a.startupStatus = StatusCompleted
+								Log.Infos("Internet connection restored, startup completed")
+								return
+							} else {
+								a.handleStartupError("API initialization", err)
+							}
+						}
+					}
+				}
+			}()
+
+		}
+	} else {
+		a.startBackgroundTasks()
+		a.startupStatus = StatusCompleted
+		Log.Infos("Startup completed successfully")
 	}
-
-	a.startBackgroundTasks()
-	a.startupStatus = StatusCompleted
-
-	Log.Infos("Startup completed successfully")
-	return
 }
 
 func (a *App) initDB() error {
@@ -231,12 +279,12 @@ func (a *App) getLatestYear(jsonData string) (string, error) {
 // -------------------------------------------------------------------------- //
 
 func (a *App) startBackgroundTasks() {
-	year := GetCurrentYear()
+
 	monday, saturday := GetWeekDates()
 
 	Log.Infos("Launching go routines")
 	go a.runEveryXMinutes(a.ctx, 60, func() {
-		msg, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+		msg, err := a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
 		if err != nil {
 			Log.Error(fmt.Sprintf("Global Refresh failed: %v", err))
 		} else {
@@ -251,6 +299,8 @@ func (a *App) startBackgroundTasks() {
 			Log.Error(fmt.Sprintf("Agenda Refresh failed: %v", err))
 		}
 	})
+
+	// Fait une autre boucle pour renew GesAPI token
 }
 
 // -------------------------------------------------------------------------- //

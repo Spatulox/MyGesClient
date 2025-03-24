@@ -6,4 +6,5 @@ type UserSettings struct {
 	Password string
 	Theme    string
 	EULA     bool
+	Year     string
 }

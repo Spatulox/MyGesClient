@@ -8,7 +8,6 @@ export async function absences(){
         tableBody.innerHTML = ""
 
         let absence = await GetAbsences()
-        console.log(absence)
 
         absence.forEach(course => {
             const row = document.createElement('tr');

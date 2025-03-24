@@ -67,7 +67,7 @@ export function initGradesDisplay(grade){
     gradeElement.className = 'grade-item';
 
     const gradesHtml = grade.grades != null ? grade.grades.join(', ') : "";
-    const examHtml = grade.exam != null ? grade.exam.join(', ') : "";
+    const examHtml = grade.exam != null ? grade.exam : "";
 
     // Enlever le préfixe "S1 -" ou "S2 -" du nom du cours
     const courseName = grade.course.replace(/^S[12] - /, '');

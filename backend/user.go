@@ -7,9 +7,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
+	. "MyGesClient/structures"
+
+	. "MyGesClient/db"
 )
-import . "MyGesClient/structures"
-import . "MyGesClient/db"
 
 // Function called by the front end
 // ------------------------------------------------ //
@@ -46,6 +48,22 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 	if !user {
 		Log.Error(fmt.Sprintf("Impossible to save your info in local DB : %v", err))
 		return createMessage("Impossible to save your info in local DB"), err
+	}
+
+	years, err := a.api.GetYears()
+	if err != nil {
+		Log.Error(fmt.Sprintf("Error : impossible to get the latest year for the user%v", err))
+		return "", err
+	}
+	a.year, err = a.getLatestYear(years)
+	if err != nil {
+		Log.Error("Error : impossible to parse the latest year for the user : %v", err)
+		return "", err
+	}
+
+	boolean, err := UpdateUserLastYear(a.db, a.year)
+	if !boolean || err != nil {
+		Log.Error("Error : Impossible to update the last year for the user : %v", err)
 	}
 
 	// Get the local user
