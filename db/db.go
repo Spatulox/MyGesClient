@@ -7,9 +7,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "modernc.org/sqlite"
 	"os"
 	"path/filepath"
+	"strconv"
+
+	_ "modernc.org/sqlite"
 )
 
 // ------------------------------------------------ //
@@ -85,11 +87,22 @@ func UpdateUserPassword(db *sql.DB, username string, password string) (bool, err
 
 // ------------------------------------------------ //
 
+func UpdateUserLastYear(db *sql.DB, year string) (bool, error) {
+	_, err := db.Exec("UPDATE USER SET last_year = ? WHERE selected = true", year)
+	if err != nil {
+		return false, fmt.Errorf("Erreur lors de l'update de l'année de l'utilisateurs : %w", err)
+	}
+	return true, nil
+}
+
+// ------------------------------------------------ //
+
 func GetUser(db *sql.DB) (UserSettings, error) {
 	var user UserSettings
-	query := `SELECT user_id, username, password, theme, eula FROM USER WHERE selected = true`
-	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Password, &user.Theme, &user.EULA)
+	query := `SELECT user_id, username, password, theme, eula, last_year FROM USER WHERE selected = true`
+	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Password, &user.Theme, &user.EULA, &user.Year)
 	if err != nil {
+		Log.Error(fmt.Sprintf("1 %v", err))
 		return UserSettings{}, err
 	}
 	return user, nil
@@ -97,10 +110,24 @@ func GetUser(db *sql.DB) (UserSettings, error) {
 
 // ------------------------------------------------ //
 
+func GetLastYearInDB(db *sql.DB) (string, error) {
+	var year string
+	query := `SELECT last_year FROM USER WHERE selected = true`
+	err := db.QueryRow(query).Scan(&year)
+	if err != nil {
+		Log.Error(fmt.Sprintf("2 %v", err))
+		return "1970", err
+	}
+	return year, nil
+}
+
+// ------------------------------------------------ //
+
 func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
-	query := `SELECT user_id, username, password, theme, eula FROM USER` // WHERE selected = 0`
+	query := `SELECT user_id, username, password, theme, eula, last_year FROM USER` // WHERE selected = 0`
 	rows, err := db.Query(query)
 	if err != nil {
+		Log.Error(fmt.Sprintf("3 %v", err))
 		return nil, err
 	}
 	defer rows.Close()
@@ -108,7 +135,7 @@ func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
 	var users []UserSettings
 	for rows.Next() {
 		var user UserSettings
-		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Theme, &user.EULA)
+		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Theme, &user.EULA, &user.Year)
 		if err != nil {
 			return nil, err
 		}
@@ -221,10 +248,22 @@ func DeleteOldData(db *sql.DB) bool {
 		return false
 	}
 
+	// Prepare year date
+	yearStr, err := GetLastYearInDB(db)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Error when retrieving the last year from DB for the user : %w", err))
+		return false
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Error when asting year str => int : %w", err))
+		return false
+	}
+	year -= 1
+
 	// Delete Grades
 	selectGradeValueQuery := `SELECT note_id FROM NOTES WHERE year <= ? AND user_id = ?`
-	year := GetCurrentYear()
-	year -= 1
 
 	_, err = db.Exec(selectGradeValueQuery, year, user.ID)
 	if err != nil {

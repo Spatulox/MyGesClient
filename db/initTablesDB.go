@@ -4,10 +4,11 @@ import (
 	. "MyGesClient/log"
 	"database/sql"
 	"fmt"
-	"github.com/labstack/gommon/log"
-	_ "modernc.org/sqlite"
 	"os"
 	"path/filepath"
+
+	"github.com/labstack/gommon/log"
+	_ "modernc.org/sqlite"
 )
 
 // To store the user of the application
@@ -17,7 +18,8 @@ const USER = `CREATE TABLE USER (
     password TEXT NOT NULL,
     theme TEXT NOT NULL DEFAULT 'dark',
     eula BOOLEAN NOT NULL DEFAULT 0,
-    selected BOOLEAN NOT NULL DEFAULT 0
+    selected BOOLEAN NOT NULL DEFAULT 0,
+	last_year TEXT NOT NULL DEFAULT '1970'
 );`
 
 // To store the schedule of the user

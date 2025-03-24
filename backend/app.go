@@ -126,16 +126,28 @@ func (a *App) Startup(ctx context.Context) {
 		errour += ErrAPIInit
 	}
 
-	years, err := a.api.GetYears()
-	if err != nil {
-		errour += ErrYearsRequest
-		a.handleStartupError("Years initialization request", err)
-	}
+	if a.api != nil {
+		years, err := a.api.GetYears()
+		if err != nil {
+			a.handleStartupError("Years initialization request", err)
+			year, err := GetLastYearInDB(a.db)
+			if err != nil {
+				errour += ErrYearsRequest
+			}
+			a.year = year
 
-	a.year, err = a.getLatestYear(years)
-	if err != nil {
-		errour += ErrYearsParsing
-		a.handleStartupError("Years initialization parsing", err)
+		} else {
+			a.year, err = a.getLatestYear(years)
+			if err != nil {
+				errour += ErrYearsParsing
+				a.handleStartupError("Years initialization parsing", err)
+			}
+		}
+
+		boolean, err := UpdateUserLastYear(a.db, a.year)
+		if !boolean || err != nil {
+			Log.Error("Error : Impossible to update the last year for the user : %v", err)
+		}
 	}
 
 	if errour != 0 {
@@ -231,12 +243,12 @@ func (a *App) getLatestYear(jsonData string) (string, error) {
 // -------------------------------------------------------------------------- //
 
 func (a *App) startBackgroundTasks() {
-	year := GetCurrentYear()
+
 	monday, saturday := GetWeekDates()
 
 	Log.Infos("Launching go routines")
 	go a.runEveryXMinutes(a.ctx, 60, func() {
-		msg, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+		msg, err := a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
 		if err != nil {
 			Log.Error(fmt.Sprintf("Global Refresh failed: %v", err))
 		} else {
