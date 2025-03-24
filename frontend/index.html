@@ -12,6 +12,10 @@
     <link rel="stylesheet" type="text/css" href="./src/CSS/addEvent.css">
     <link rel="stylesheet" type="text/css" href="./src/CSS/login-register.css">
 
+    <link rel="stylesheet" type="text/css" href="./src/CSS/projects.css">
+
+    <!--<link rel="stylesheet" type="text/css" href="./src/CSS/testCss.css">-->
+
     <script type="module" src="./src/JS/loadPages.js" defer></script>
     <script type="module" src="./src/JS/login-register.js" defer></script>
     <script type="module" src="./src/JS/start.js" defer></script>
@@ -316,7 +320,28 @@
                 <!--Groups project-->
                 <div id="projects" style="display: none">
                     <img src="./src/assets/images/circle-loading.gif" id="loadingProject" alt="loading...">
-                    <div id="courses-container"></div>
+                    <div id="courses-container">
+
+                        <div class="project-list">
+                            <div class="project-list-header">Projets à rejoindre</div>
+                            <div id="projecttojoin" ></div>
+                            <div class="project-item" id="projecttojoin">
+                            </div>
+                            <div class="project-details" id="projecttojoindetails">
+                            </div>
+                        </div>
+                        
+                    
+                        <div class="project-list">
+                            <div class="project-list-header">Mes Projets</div>
+                            <div id="myproject" ></div>
+                            <!--<div class="project-item">
+                            </div>
+                            <div class="project-details" id="myprojectdetails">
+                            </div>-->
+                        </div>
+
+                    </div>
                 </div>
                 <!--MyGes Account-->
                 <div id="account" style="display: none">
