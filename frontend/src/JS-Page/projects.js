@@ -101,7 +101,7 @@ function populateData(projects, name, firstname){
                 "Date de Présentation": new Date(pdate_presentation).toLocaleDateString(),
                 "Type de sujet": ptype,
                 "Type de groupe": ptype_group,
-                "maxMembers": pmax_student,
+                "Membres maximum": pmax_student,
                 "Présentation": ptype_hearing_presentation,
                 "Type de présentation": ptype_presentation,
                 "Durée de présentation": ppresentation_duration != 0 ? `${ppresentation_duration} minutes` : "",
