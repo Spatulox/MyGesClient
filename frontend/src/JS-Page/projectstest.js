@@ -1,8 +1,9 @@
 import { stillPopup, stopStillPopup, popup } from "../JS/popups";
 import {GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup} from "../../wailsjs/go/backend/App";
+import { scrollMainPart } from "../JS/functions";
 
 export async function projects(){
-
+    scrollMainPart()
     const projectItem = document.getElementById('projecttojoin');
     projectItem.innerHTML = ""
 
@@ -15,8 +16,6 @@ export async function projects(){
         const mygesProjects = await GetProjects()
         let profile = await GetProfile()
         profile = await JSON.parse(profile)
-        /*console.log(mygesProjects)
-        console.log(profile)*/
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         loadingProject.style.display = "none"
     } catch (e) {
@@ -45,7 +44,7 @@ function populateData(projects, name, firstname){
         const pmax_student = project.project_max_student_group
         const ppersonnal_work = project.project_personal_work
         const ppresentation_duration = project.project_presentation_duration
-        const psubject = project.project_teaching_goals
+        let psubject = project.project_teaching_goals
         const pdetailed = project.project_detail_plan
         
         const ptype_hearing_presentation = project.project_hearing_presentation // =>a huis clos
@@ -54,32 +53,33 @@ function populateData(projects, name, firstname){
         const ptype_group = project.project_type_group
         
         const plogs = project.project_group_logs
-        let plog_out = []
-        if(plogs && plogs.length > 0){
-            plog_out = plogs.map(log => {
-                const date = new Date(log.pgl_date);
-                return `${date.toLocaleString()} - ${log.pgl_describe}`;
-            })
-        }
-
-
-        const pfiles = project.project_files
-        let pfiles_out = []
-        if(pfiles){
-            pfiles_out = pfiles.map(file => {
-               return `${file.pf_title}.${file.pf_file.split(".")[1]}`;
-            })
-        }
-        
-        let pgoup_user_out = []
-        if(pgoup_user && pgoup_user.length > 0){
-            pgoup_user_out = pgoup_user.map(file => {
-                return `${file.classe} - ${file.firstname} ${file.name}`;
-            })
-        }
-
 
         if(groupId !== 0){
+
+            let plog_out = []
+            if(plogs && plogs.length > 0){
+                plog_out = plogs.map(log => {
+                    const date = new Date(log.pgl_date);
+                    return `${date.toLocaleDateString()} - ${log.pgl_describe}`;
+                })
+            }
+
+
+            const pfiles = project.project_files
+            let pfiles_out = []
+            if(pfiles){
+                pfiles_out = pfiles.map(file => {
+                return `${file.pf_title}.${file.pf_file.split(".")[1]}`;
+                })
+            }
+            
+            let pgoup_user_out = []
+            if(pgoup_user && pgoup_user.length > 0){
+                pgoup_user_out = pgoup_user.map(file => {
+                    return `${file.classe} - ${file.firstname} ${file.name}`;
+                })
+            }
+
             let status = "in-time"
             if (pdate_presentation && new Date(pdate_presentation) < new Date()){
                 status = "outdated"
@@ -89,20 +89,47 @@ function populateData(projects, name, firstname){
             addMyProjectDetails({
                 "Sujet": psubject,
                 "Détails":pdetailed,
-                "Date de Présentation": new Date(pdate_presentation),
+                "Date de Présentation": new Date(pdate_presentation).toLocaleDateString(),
                 "Type de sujet": ptype,
                 "Type de groupe": ptype_group,
-                "Présentation": ptype_hearing_presentation,
-                "Durée de présentation": `${ppresentation_duration} minutes`,
-                "Travail personnel estimé": `${ppersonnal_work} heures`,
-                "Type de présentation": ptype_presentation,
-                "members": pgoup_user_out,
                 "maxMembers": pmax_student,
+                "Présentation": ptype_hearing_presentation,
+                "Type de présentation": ptype_presentation,
+                "Durée de présentation": ppresentation_duration != 0 ? `${ppresentation_duration} minutes` : "",
+                "Travail personnel estimé": ppersonnal_work != 0 ? `${ppersonnal_work} heures` : "",
+                "members": pgoup_user_out,
                 "files": pfiles_out,
                 "history": plog_out
             })
         } else {
-            //const status = pgoup_user_out.length < pmax_student ? "open" : "close"
+            let pgoups_out = []
+            if(groups && groups.length > 0){
+                pgoups_out = groups.map(group => {
+
+                    const pgroup_users = group.project_group_students
+
+                    let pgroup_users_out = []
+                    if(pgroup_users && pgroup_users.length > 0){
+                        pgroup_users_out = pgroup_users.map(file => {
+                            return `${file.classe} - ${file.firstname} ${file.name}`;
+                        })
+                    }
+
+                    let status = pgroup_users_out.length < pmax_student ? "open" : "close"
+                    if (pdate_presentation && new Date(pdate_presentation) < new Date()){
+                        status = "outdated"
+                    }
+
+                    return { 
+                        "name":group.group_name,
+                        "members":pgroup_users_out,
+                        "status":status
+                    };
+                })
+            }
+            psubject = psubject.length > 89 ? psubject.slice(0, 86) + "..." : psubject;
+            addProjectToJoin(pname, pprof, psubject)
+            addGroupsToProjectToJoin(pgoups_out)
         }
     })
 
@@ -159,33 +186,40 @@ function getGroupIdIfInside(groups, lastname, firstname){
 
 function addProjectToJoin(projectName, professorName, subject) {
     const projectItem = document.getElementById('projecttojoin');
-    projectItem.innerHTML += `
+    const div =document.createElement("div")
+    div.classList.add("project-item")
+
+    div.innerHTML += `
         <span class="project-name">${projectName}</span>
         <span class="project-info">${professorName} - ${subject}</span>
     `;
+    projectItem.appendChild(div)
 }
 
 function addGroupsToProjectToJoin(groups) {
-    const projectDetails = document.getElementById('projecttojoindetails');
-    let groupsHTML = '';
+    const projectDetails = document.getElementById('projecttojoin');
+    const div =document.createElement("div")
+    div.classList.add("project-details")
     
+    let groupsHTML = '';
     groups.forEach(group => {
         groupsHTML += `
             <div class="group">
                 <div class="group-info">
                     <div class="group-name">${group.name}<span class="status-label status-${group.status.toLowerCase()}">${group.status}</span></div>
-                    <div class="group-members">${group.members.join(', ')}</div>
+                    <div class="group-members">${group.members.join(' | ')}</div>
                 </div>
                 <button class="join-button">Rejoindre le groupe</button>
             </div>
         `;
     });
     
-    projectDetails.innerHTML += `
+    div.innerHTML += `
         <div class="project-groups">
             ${groupsHTML}
         </div>
     `;
+    projectDetails.appendChild(div)
 }
 
 
