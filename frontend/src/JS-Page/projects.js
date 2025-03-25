@@ -5,7 +5,7 @@ import { scrollMainPart } from "../JS/functions";
 export async function projects(){
     scrollMainPart()
 
-    let laStill = stillPopup("Recherche de vos projets..")
+    let laStill = stillPopup("Actualisation de vos projets..")
     const loadingProject = document.getElementById("loadingProject")
     try{
         const mygesProjects = await GetProjects()
