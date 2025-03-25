@@ -56,13 +56,12 @@ function populateData(projects, name, firstname){
         let psubject = project.project_teaching_goals
         const pdetailed = project.project_detail_plan
         
-        const ptype_hearing_presentation = project.project_hearing_presentation // =>a huis clos
+        const ptype_hearing_presentation = project.project_hearing_presentation
         const ptype_presentation = project.project_type_presentation
         const ptype = project.project_type_subject
         const ptype_group = project.project_type_group
         
         const plogs = project.project_group_logs
-        console.log(groupId)
         if(groupId){
 
             let plog_out = []
