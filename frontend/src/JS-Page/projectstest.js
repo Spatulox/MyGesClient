@@ -104,7 +104,7 @@ function populateData(projects, name, firstname){
                 "members": pgoup_user_out,
                 "files": pfiles_out,
                 "history": plog_out
-            }, prc_id, pproject_id, groupId)
+            }, status, prc_id, pproject_id, groupId)
         } else {
             let pgoups_out = []
             if(groups && groups.length > 0){
@@ -241,26 +241,27 @@ function addGroupsToProjectToJoin(groups) {
         // Ajouter le nom et les membres à l'information du groupe
         groupInfoDiv.appendChild(groupNameDiv);
         groupInfoDiv.appendChild(groupMembersDiv);
-        
-        // Créer et configurer le bouton de rejoindre
-        const joinButton = document.createElement('button');
-        joinButton.className = 'join-button';
-        joinButton.textContent = 'Rejoindre le groupe';
-        joinButton.addEventListener('click', async (event) => {
-            event.stopPropagation();
-            try{
-                if(await JoinProjectGroup(group.rc_id, group.project_id, group.id)){
-                    popup("Groupe rejoind")
-                }
-            } catch (e) {
-                console.log(e)
-                popup("Une erreur est survenue")
-            }
-        });
-    
-        // Assembler tous les éléments
         groupDiv.appendChild(groupInfoDiv);
-        groupDiv.appendChild(joinButton);
+
+        if (group.status != "close" && group.status != "outdated"){
+            // Créer et configurer le bouton de rejoindre
+            const joinButton = document.createElement('button');
+            joinButton.className = 'join-button';
+            joinButton.textContent = 'Rejoindre le groupe';
+            joinButton.addEventListener('click', async (event) => {
+                event.stopPropagation();
+                try{
+                    if(await JoinProjectGroup(group.rc_id, group.project_id, group.id)){
+                        popup("Groupe rejoind")
+                    }
+                } catch (e) {
+                    console.log(e)
+                    popup("Une erreur est survenue")
+                }
+            });
+            groupDiv.appendChild(joinButton);
+        }
+    
         project_groups.appendChild(groupDiv)
     });
 
@@ -288,7 +289,7 @@ function addMyProject(projectName, groupName, professorName, subject, status) {
     projectItem.appendChild(div);
 }
 
-function addMyProjectDetails(details, rc_id, project_id, groupId) {
+function addMyProjectDetails(details, status, rc_id, project_id, groupId) {
     const projectDetails = document.getElementById("myproject");
     const div = document.createElement("div");
     div.classList.add("project-details");
@@ -367,22 +368,23 @@ function addMyProjectDetails(details, rc_id, project_id, groupId) {
 
     div.appendChild(historySection);
 
-    // Créer le bouton "Quitter le groupe"
-    const leaveButton = document.createElement('button');
-    leaveButton.textContent = 'Quitter le groupe';
-    leaveButton.className = 'leave-button';
-    leaveButton.addEventListener("click", async (event) => {
-        event.stopPropagation();
-        try {
-            if (await QuitProjectGroup(rc_id, project_id, groupId)) {
-                popup("Groupe quitté");
+    if (status != "outdated" && details["Type de groupe"] != "Imposé"){
+        // Créer le bouton "Quitter le groupe"
+        const leaveButton = document.createElement('button');
+        leaveButton.textContent = 'Quitter le groupe';
+        leaveButton.className = 'leave-button';
+        leaveButton.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            try {
+                if (await QuitProjectGroup(rc_id, project_id, groupId)) {
+                    popup("Groupe quitté");
+                }
+            } catch (e) {
+                console.log(e);
+                popup("Une erreur est survenue");
             }
-        } catch (e) {
-            console.log(e);
-            popup("Une erreur est survenue");
-        }
-    });
-
-    div.appendChild(leaveButton);
+        });
+        div.appendChild(leaveButton);
+    }
     projectDetails.appendChild(div);
 }
