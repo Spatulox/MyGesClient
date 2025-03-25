@@ -1,16 +1,5 @@
-:root {
-    --accent: #5865f2;
-    --background-primary: #36393f;
-    --background-secondary: #2f3136;
-    --background-tertiary: #202225;
-    --header-primary: #fff;
-    --header-secondary: #b9bbbe;
-    --interactive-active: #fff;
-    --interactive-hover: #dcddde;
-    --interactive-normal: #b9bbbe;
-    --text-muted: #72767d;
-    --text-normal: #dcddde;
-}
+@import 'variables.css';
+
 
 #projects{
     margin-bottom: 20px;
@@ -29,7 +18,7 @@
 #projects .history-section {
     margin-bottom: 24px;
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--background-secondary);
+    border-bottom: 1px solid var(--discord);
 }
 
 #projects .details-section:last-of-type,
@@ -42,7 +31,7 @@
 }
 
 #projects .section-title {
-    color: var(--header-secondary);
+    color: var(--text-secondary-color);
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 12px;
@@ -83,7 +72,7 @@
 }
   
 #projects .files-title, #projects .history-title, #projects .members-title {
-    color: var(--header-secondary);
+    color: var(--text-secondary-color);
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 8px;
@@ -91,7 +80,7 @@
   
 #projects .group {
     align-items: center;
-    background-color: var(--background-secondary);
+    background-color: var(--discord);
     border-radius: 4px;
     display: flex;
     justify-content: space-between;
@@ -109,7 +98,7 @@
 }
   
 #projects .group-name {
-    color: var(--header-secondary);
+    color: var(--text-secondary-color);
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 4px;
@@ -121,7 +110,7 @@
 }
   
 #projects .join-button, #projects .leave-button {
-    background-color: var(--accent);
+    background-color: var(--hover-color);
     border: none;
     border-radius: 3px;
     color: #fff;
@@ -146,7 +135,7 @@
 }
   
 #projects .project-details {
-    background-color: var(--background-primary);
+    background-color: var(--discord-dark);
     display: none;
     padding: 16px;
     margin: 20px;
@@ -170,7 +159,7 @@
   
 #projects .project-item {
     align-items: center;
-    border-top: 1px solid var(--background-tertiary);
+    border-top: 1px solid var(--discord-lightlight);
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -179,19 +168,19 @@
 }
   
 #projects .project-item:hover {
-    background-color: var(--background-primary);
+    background-color: var(--discord-dark);
 }
   
 #projects .project-list {
-    background-color: var(--background-secondary);
+    background-color: var(--discord);
     border-radius: 8px;
     margin-bottom: 20px;
     overflow: hidden;
 }
   
 #projects .project-list-header {
-    background-color: var(--background-primary);
-    color: var(--header-primary);
+    background-color: var(--discord-dark);
+    color: var(--text-color);
     font-size: 18px;
     font-weight: 600;
     padding: 12px 16px;
