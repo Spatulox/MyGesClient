@@ -31,7 +31,7 @@ export async function projects(){
 
 function populateData(projects, name, firstname){
     if (!projects.hasOwnProperty("items")){
-        popup("Une erreur est survenue")
+        popup("Pas de projets trouvé")
         return
     }
     projects.items.forEach(project => {
@@ -256,11 +256,13 @@ function addGroupsToProjectToJoin(groups) {
             joinButton.addEventListener('click', async (event) => {
                 event.stopPropagation();
                 try{
+                    joinButton.style.opacity = 0
                     if(await JoinProjectGroup(group.rc_id, group.project_id, group.id)){
                         popup("Groupe rejoind")
                         projects()
                     }
                 } catch (e) {
+                    joinButton.style.opacity = 1
                     console.log(e)
                     popup("Une erreur est survenue")
                 }
@@ -382,11 +384,13 @@ function addMyProjectDetails(details, status, rc_id, project_id, groupId) {
         leaveButton.addEventListener("click", async (event) => {
             event.stopPropagation();
             try {
+                leaveButton.style.opacity = 0
                 if (await QuitProjectGroup(rc_id, project_id, groupId)) {
                     popup("Groupe quitté");
                     projects()
                 }
             } catch (e) {
+                leaveButton.style.opacity = 1
                 console.log(e);
                 popup("Une erreur est survenue");
             }
