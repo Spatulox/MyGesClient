@@ -4,11 +4,6 @@ import { scrollMainPart } from "../JS/functions";
 
 export async function projects(){
     scrollMainPart()
-    const projectItem = document.getElementById('projecttojoin');
-    projectItem.innerHTML = ""
-
-    const myproject = document.getElementById('myproject');
-    myproject.innerHTML = ""
 
     let laStill = stillPopup("Recherche de vos projets..")
     const loadingProject = document.getElementById("loadingProject")
@@ -16,6 +11,12 @@ export async function projects(){
         const mygesProjects = await GetProjects()
         let profile = await GetProfile()
         profile = await JSON.parse(profile)
+
+        const projectItem = document.getElementById('projecttojoin');
+        projectItem.innerHTML = ""
+        const myproject = document.getElementById('myproject');
+        myproject.innerHTML = ""
+        
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         loadingProject.style.display = "none"
     } catch (e) {
@@ -29,6 +30,10 @@ export async function projects(){
 }
 
 function populateData(projects, name, firstname){
+    if (!projects.hasOwnProperty("items")){
+        popup("Une erreur est survenue")
+        return
+    }
     projects.items.forEach(project => {
         
         // Detect if I'm already in a group for this project
@@ -253,6 +258,7 @@ function addGroupsToProjectToJoin(groups) {
                 try{
                     if(await JoinProjectGroup(group.rc_id, group.project_id, group.id)){
                         popup("Groupe rejoind")
+                        projects()
                     }
                 } catch (e) {
                     console.log(e)
@@ -378,6 +384,7 @@ function addMyProjectDetails(details, status, rc_id, project_id, groupId) {
             try {
                 if (await QuitProjectGroup(rc_id, project_id, groupId)) {
                     popup("Groupe quitté");
+                    projects()
                 }
             } catch (e) {
                 console.log(e);
