@@ -72,7 +72,6 @@ export async  function schedule(forceRefresh = false){
         }
         nextPrevActive = true
         if(JSON.stringify(bkpAgenda) === JSON.stringify(agenda) && !forceRefresh){
-            console.log("schedule4")
             return
         }
         printNothing(calendarGrid, currentWeek)
