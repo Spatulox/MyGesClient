@@ -1,14 +1,22 @@
-import {popup, stillPopup, stopStillPopup} from "../JS/popups";
-import {getYear, scrollMainPart} from "../JS/functions";
+import { stillPopup, stopStillPopup, popup } from "../JS/popups";
 import {GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup} from "../../wailsjs/go/backend/App";
+import { scrollMainPart } from "../JS/functions";
+
 export async function projects(){
     scrollMainPart()
+
     let laStill = stillPopup("Recherche de vos projets..")
     const loadingProject = document.getElementById("loadingProject")
     try{
         const mygesProjects = await GetProjects()
         let profile = await GetProfile()
         profile = await JSON.parse(profile)
+
+        const projectItem = document.getElementById('projecttojoin');
+        projectItem.innerHTML = ""
+        const myproject = document.getElementById('myproject');
+        myproject.innerHTML = ""
+        
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
         loadingProject.style.display = "none"
     } catch (e) {
@@ -17,62 +25,148 @@ export async function projects(){
         loadingProject.style.display = "none"
     }
     stopStillPopup(laStill)
+
+
 }
 
+function populateData(projects, name, firstname){
+    if (!projects.hasOwnProperty("items")){
+        popup("Une erreur est survenue")
+        return
+    }
+    projects.items.forEach(project => {
+        
+        // Detect if I'm already in a group for this project
+        const groups = project.groups
+        const pmy_group = getGroupIdIfInside(groups, name, firstname)
+        const pdate_presentation = pmy_group.date_presentation
+        const groupId = pmy_group.project_group_id
 
-function populateData(data, lastname, firstname) {
-    const groupsContainer = document.getElementById('courses-container');
-    groupsContainer.innerHTML = ""
+        const prc_id  = project.rc_id
+        const pproject_id  = project.project_id
 
-    let courseGroup = 0
-    console.log(data.items)
-    data.items.forEach(course => {
-        courseGroup++
-        const groupElement = document.createElement('div');
-        groupElement.className = 'group';
+        const pgroupname = pmy_group.group_name
+        const pgoup_user = pmy_group.project_group_students
+        const pcoursename = project.course_name
+        const pprof = project.author
+        const pname = project.name
+        const pmax_student = project.project_max_student_group
+        const ppersonnal_work = project.project_personal_work
+        const ppresentation_duration = project.project_presentation_duration
+        let psubject = project.project_teaching_goals
+        const pdetailed = project.project_detail_plan
+        
+        const ptype_hearing_presentation = project.project_hearing_presentation // =>a huis clos
+        const ptype_presentation = project.project_type_presentation
+        const ptype = project.project_type_subject
+        const ptype_group = project.project_type_group
+        
+        const plogs = project.project_group_logs
+        console.log(groupId)
+        if(groupId){
 
-        const courseTitle = document.createElement("h1")
-        courseTitle.innerHTML = course.name
-        groupElement.appendChild(courseTitle);
-
-        const para = document.createElement("p")
-        para.innerHTML = `${course.author} ・ ${course.course_name}`
-
-        let groupId = getGroupIdIfInside(course.groups, lastname, firstname)
-        if(groupId !== 0){
-            // Create informations of the project when joined
-            groupElement.id = `group-element-id${groupId}`
-            console.log(groupElement, course, groupId)
-            createGroupInformations(groupElement, course, groupId)
-        } else {
-            // Create a list of Groups
-            groupElement.appendChild(createGroupList(groupElement, course, groupId))
-            groupId = courseGroup
-            groupElement.id = `group-element-id${groupId}`
-        }
-
-        groupElement.appendChild(para);
-
-        groupElement.addEventListener("click", (event) => {
-            // Vérifier si l'élément cliqué est directement le groupElement
-            if (event.target === groupElement || event.target === courseTitle || event.target === para) {
-                const element = groupElement.querySelector('div');
-                if (element) {
-                    element.classList.toggle("active");
-                    groupElement.classList.toggle("active");
-                }
+            let plog_out = []
+            if(plogs && plogs.length > 0){
+                plog_out = plogs.map(log => {
+                    const date = new Date(log.pgl_date);
+                    return `${date.toLocaleDateString()} - ${log.pgl_describe}`;
+                })
             }
-        });
 
-        groupsContainer.appendChild(groupElement);
+
+            const pfiles = project.project_files
+            let pfiles_out = []
+            if(pfiles){
+                pfiles_out = pfiles.map(file => {
+                return `${file.pf_title}.${file.pf_file.split(".")[1]}`;
+                })
+            }
+            
+            let pgoup_user_out = []
+            if(pgoup_user && pgoup_user.length > 0){
+                pgoup_user_out = pgoup_user.map(file => {
+                    return `${file.classe} - ${file.firstname} ${file.name}`;
+                })
+            }
+
+            let status = "in-time"
+            if (pdate_presentation && new Date(pdate_presentation) < new Date()){
+                status = "outdated"
+            }
+
+            addMyProject(pname, pgroupname, pprof, pcoursename, status);
+            addMyProjectDetails({
+                "Sujet": psubject,
+                "Détails":pdetailed,
+                "Date de Présentation": new Date(pdate_presentation).toLocaleDateString(),
+                "Type de sujet": ptype,
+                "Type de groupe": ptype_group,
+                "maxMembers": pmax_student,
+                "Présentation": ptype_hearing_presentation,
+                "Type de présentation": ptype_presentation,
+                "Durée de présentation": ppresentation_duration != 0 ? `${ppresentation_duration} minutes` : "",
+                "Travail personnel estimé": ppersonnal_work != 0 ? `${ppersonnal_work} heures` : "",
+                "members": pgoup_user_out,
+                "files": pfiles_out,
+                "history": plog_out
+            }, status, prc_id, pproject_id, groupId)
+        } else {
+            let pgoups_out = []
+            if(groups && groups.length > 0){
+                pgoups_out = groups.map(group => {
+
+                    const pgroup_users = group.project_group_students
+
+                    let pgroup_users_out = []
+                    if(pgroup_users && pgroup_users.length > 0){
+                        pgroup_users_out = pgroup_users.map(file => {
+                            return `${file.classe} - ${file.firstname} ${file.name}`;
+                        })
+                    }
+
+                    let status = pgroup_users_out.length < pmax_student ? "open" : "close"
+                    if (pdate_presentation && new Date(pdate_presentation) < new Date()){
+                        status = "outdated"
+                    }
+
+                    return { 
+                        "name":group.group_name,
+                        "members":pgroup_users_out,
+                        "status":status,
+                        "id": group.project_group_id,
+                        "rc_id": prc_id,
+                        "project_id":group.project_id
+                    };
+                })
+            }
+            psubject = psubject.length > 89 ? psubject.slice(0, 86) + "..." : psubject;
+            addProjectToJoin(pname, pprof, psubject)
+            addGroupsToProjectToJoin(pgoups_out)
+        }
+    })
+
+
+    document.querySelectorAll('#courses-container .project-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const details = item.nextElementSibling;
+            
+            document.querySelectorAll('#courses-container .project-details.active').forEach(activeDetail => {
+            if (activeDetail !== details) {
+                activeDetail.classList.remove('active');
+            }
+            });
+            
+            details.classList.toggle('active');
+        });
     });
+
 }
 
-
+// Need to parse ALL THE GROUP TO DETECT IF I'M INSIDE OR NOT WELPPPPPP
 function getGroupIdIfInside(groups, lastname, firstname){
     if (!Array.isArray(groups)) {
         console.log("Groups is not an array");
-        return 0;
+        return {};
     }
 
     for (const group of groups) {
@@ -91,269 +185,213 @@ function getGroupIdIfInside(groups, lastname, firstname){
             if (student &&
                 student.firstname === firstname &&
                 student.name === lastname) {
-                return group.project_group_id;
+                return group;
             }
         }
     }
 
-    return 0;
+    return {};
 }
 
-function createGroupInformations(groupElement, values, group_id){
-    let groupInfo = {
-        name: '',
-        users: []
-    };
-    for (const group of values.groups) {
-        if (group.project_group_id === group_id) {
-            groupInfo.name = group.group_name;
-            if (group.project_group_students && Array.isArray(group.project_group_students)) {
-                group.project_group_students.forEach(student => {
-                    groupInfo.users.push({
-                        classe: student.classe,
-                        firstname: student.firstname,
-                        name: student.name
-                    });
-                });
-            }
-            break; // Quitte la boucle dès qu'on a trouvé le bon groupe
+
+// ------------ join project ------------ //
+
+function addProjectToJoin(projectName, professorName, subject) {
+    const projectItem = document.getElementById('projecttojoin');
+    const div =document.createElement("div")
+    div.classList.add("project-item")
+
+    div.innerHTML += `
+        <span class="project-name">${projectName}</span>
+        <span class="project-info">${professorName} - ${subject}</span>
+    `;
+    projectItem.appendChild(div)
+}
+
+function addGroupsToProjectToJoin(groups) {
+    const projectDetails = document.getElementById('projecttojoin');
+    const  project_groups = document.createElement("div")
+    project_groups.classList.add("project-groups")
+
+    const div =document.createElement("div")
+    div.classList.add("project-details")
+    
+    groups.forEach(group => {
+        // Créer l'élément principal du groupe
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'group';
+    
+        // Créer et configurer l'élément d'information du groupe
+        const groupInfoDiv = document.createElement('div');
+        groupInfoDiv.className = 'group-info';
+    
+        // Créer et configurer l'élément du nom du groupe
+        const groupNameDiv = document.createElement('div');
+        groupNameDiv.className = 'group-name';
+        groupNameDiv.textContent = group.name;
+    
+        // Créer et configurer l'élément du statut
+        const statusSpan = document.createElement('span');
+        statusSpan.className = `status-label status-${group.status.toLowerCase()}`;
+        statusSpan.textContent = group.status;
+    
+        // Ajouter le statut au nom du groupe
+        groupNameDiv.appendChild(statusSpan);
+    
+        // Créer et configurer l'élément des membres du groupe
+        const groupMembersDiv = document.createElement('div');
+        groupMembersDiv.className = 'group-members';
+        groupMembersDiv.textContent = group.members.join(' | ');
+    
+        // Ajouter le nom et les membres à l'information du groupe
+        groupInfoDiv.appendChild(groupNameDiv);
+        groupInfoDiv.appendChild(groupMembersDiv);
+        groupDiv.appendChild(groupInfoDiv);
+
+        if (group.status != "close" && group.status != "outdated"){
+            // Créer et configurer le bouton de rejoindre
+            const joinButton = document.createElement('button');
+            joinButton.className = 'join-button';
+            joinButton.textContent = 'Rejoindre le groupe';
+            joinButton.addEventListener('click', async (event) => {
+                event.stopPropagation();
+                try{
+                    if(await JoinProjectGroup(group.rc_id, group.project_id, group.id)){
+                        popup("Groupe rejoind")
+                        projects()
+                    }
+                } catch (e) {
+                    console.log(e)
+                    popup("Une erreur est survenue")
+                }
+            });
+            groupDiv.appendChild(joinButton);
+        }
+    
+        project_groups.appendChild(groupDiv)
+    });
+
+    div.appendChild(project_groups)
+    projectDetails.appendChild(div)
+}
+
+
+// ----------- My projects --------------- //
+
+function addMyProject(projectName, groupName, professorName, subject, status) {
+
+    const projectItem = document.getElementById("myproject")
+    const div = document.createElement("div")
+    div.classList.add("project-item")
+
+    div.innerHTML = `
+        <div class="project-main-info">
+            <span class="project-name">${projectName}<span class="status-label status-${status.toLowerCase()}">${status}</span></span>
+            <span class="group-name">${groupName}</span>
+        </div>
+        <span class="project-info">${professorName} - ${subject}</span>
+    `;
+    
+    projectItem.appendChild(div);
+}
+
+function addMyProjectDetails(details, status, rc_id, project_id, groupId) {
+    const projectDetails = document.getElementById("myproject");
+    const div = document.createElement("div");
+    div.classList.add("project-details");
+
+    // Créer les détails non-array
+    for (const [key, value] of Object.entries(details)) {
+        if (!Array.isArray(value) && value !== "") {
+            const detailRow = document.createElement("div");
+            detailRow.classList.add("detail-row");
+
+            const label = document.createElement("span");
+            label.classList.add("detail-label");
+            label.textContent = `${key}:`;
+
+            const valueSpan = document.createElement("span");
+            valueSpan.classList.add("detail-value");
+            valueSpan.textContent = value;
+
+            detailRow.appendChild(label);
+            detailRow.appendChild(valueSpan);
+            div.appendChild(detailRow);
         }
     }
 
-    const groupInfoDiv = document.createElement('div');
-    groupInfoDiv.className = 'group-info';
+    // Créer la section des membres
+    const membersSection = document.createElement("div");
+    membersSection.classList.add("members-section");
 
-    const groupTitle = document.createElement('h2');
-    groupTitle.textContent = groupInfo.name + ` | ${groupInfo.users.length}/${values.project_max_student_group}`;
-    if(groupInfo.users.length === values.project_max_student_group){
-        groupTitle.innerHTML = groupInfo.name + " | <span class='underline' style='color: #b10202'>Complet</span>"
-    }
-    groupInfoDiv.appendChild(groupTitle);
+    const membersTitle = document.createElement("h3");
+    membersTitle.classList.add("section-title");
+    membersTitle.textContent = `Membres du groupe (${details.members.length}/${details.maxMembers})`;
+    membersSection.appendChild(membersTitle);
 
-    const projectDetails = document.createElement('div');
-    projectDetails.className = 'project-details';
-
-    const detailsArray = [
-        { label: 'Sujet', value: values.project_teaching_goals },
-        { label: 'Type de sujet', value: values.project_type_subject },
-        { label: 'Type de groupe', value: values.project_type_group },
-        { label: 'Présentation', value: values.project_hearing_presentation },
-        { label: 'Durée de présentation', value: `${values.project_presentation_duration} minutes` },
-        { label: 'Travail personnel estimé', value: `${values.project_personal_work} heures` },
-        { label: 'Type de présentation', value: values.project_type_presentation }
-    ];
-
-    detailsArray.forEach(detail => {
-        const p = document.createElement('p');
-        const strong = document.createElement('strong');
-        strong.textContent = `${detail.label}: `;
-        p.appendChild(strong);
-        p.appendChild(document.createTextNode(detail.value));
-        projectDetails.appendChild(p);
+    details.members.forEach(member => {
+        const memberDiv = document.createElement("div");
+        memberDiv.classList.add("member");
+        memberDiv.textContent = member;
+        membersSection.appendChild(memberDiv);
     });
 
-    groupInfoDiv.appendChild(projectDetails);
+    div.appendChild(membersSection);
 
-    const membersTitle = document.createElement('h3');
-    membersTitle.textContent = 'Membres du groupe :';
-    groupInfoDiv.appendChild(membersTitle);
+    // Créer la section des fichiers
+    const filesSection = document.createElement("div");
+    filesSection.classList.add("files-section");
 
-    const span = document.createElement("span")
-    span.innerHTML = `Min : ${values.project_min_student_group} / Max : ${values.project_max_student_group}`
-    groupInfoDiv.appendChild(span)
+    const filesTitle = document.createElement("h3");
+    filesTitle.classList.add("section-title");
+    filesTitle.textContent = "Fichiers du projet";
+    filesSection.appendChild(filesTitle);
 
-    const membersList = document.createElement('ul');
-    membersList.className = 'group-members';
-
-    groupInfo.users.forEach(user => {
-        const li = document.createElement('li');
-        li.textContent = `${user.firstname} ${user.name} (${user.classe})`;
-        membersList.appendChild(li);
+    details.files.forEach(file => {
+        const fileDiv = document.createElement("div");
+        fileDiv.classList.add("file");
+        fileDiv.textContent = file;
+        filesSection.appendChild(fileDiv);
     });
 
-    groupInfoDiv.appendChild(membersList);
+    div.appendChild(filesSection);
 
-    // Ajout de la section des fichiers du projet
-    const filesTitle = document.createElement('h3');
-    filesTitle.innerHTML = 'Fichiers du projet : <span class="tooltip-trigger">(A récupérer sur MyGes)<span class="tooltip">L\'API actuellement utilisée ne donne pas accès au téléchargement des fichiers</span></span>';
-    groupInfoDiv.appendChild(filesTitle);
+    // Créer la section de l'historique
+    const historySection = document.createElement("div");
+    historySection.classList.add("history-section");
 
-    const filesList = document.createElement('ul');
-    filesList.className = 'project-files';
+    const historyTitle = document.createElement("h3");
+    historyTitle.classList.add("section-title");
+    historyTitle.textContent = "Historique";
+    historySection.appendChild(historyTitle);
 
-    
-    if (values.hasOwnProperty('project_files') && values.project_files) {
-        values.project_files.forEach(file => {
-            console.log(file)
-            const li = document.createElement('li');
-            const date = new Date(file.pf_crea_date);
-            li.textContent = `${file.pf_title} (${date.toLocaleDateString()})`;
-            filesList.appendChild(li);
-        });
-    }
-
-    groupInfoDiv.appendChild(filesList);
-
-    // Ajout de la section des logs du groupe
-    const logsTitle = document.createElement('h3');
-    logsTitle.textContent = 'Historique du groupe :';
-    groupInfoDiv.appendChild(logsTitle);
-
-    const logsList = document.createElement('ul');
-    logsList.className = 'group-logs';
-
-    values.project_group_logs.forEach(log => {
-        const li = document.createElement('li');
-        const date = new Date(log.pgl_date);
-        li.textContent = `${date.toLocaleString()} - ${log.pgl_describe}`;
-        logsList.appendChild(li);
+    details.history.forEach(entry => {
+        const historyEntry = document.createElement("div");
+        historyEntry.classList.add("history-entry");
+        historyEntry.textContent = entry;
+        historySection.appendChild(historyEntry);
     });
 
-    groupInfoDiv.appendChild(logsList);
+    div.appendChild(historySection);
 
-    // Sananes va me tuer
-    // Mais après, c'est pas de ma faute, y'a pas de sécurité serveur...
-    // Donc si je met un bouton, ca veut dire que je peux quitter/rejoindre des groupes imposés :/
-    if(!values.project_type_group.includes("Imposé")){
-        const button = document.createElement("button")
-        button.classList.add("btn")
-        button.classList.add("btn-delete")
-        button.innerHTML = "Quitter"
-        button.addEventListener("click", async (e)=>{
-            e.stopPropagation()
-            try{
-                if(await QuitProjectGroup(values.rc_id, values.project_id, group_id)){
-                    popup("Groupe quitté")
-                    document.getElementById("courses-container").innerHTML = ""
+    if (status != "outdated" && details["Type de groupe"] != "Imposé"){
+        // Créer le bouton "Quitter le groupe"
+        const leaveButton = document.createElement('button');
+        leaveButton.textContent = 'Quitter le groupe';
+        leaveButton.className = 'leave-button';
+        leaveButton.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            try {
+                if (await QuitProjectGroup(rc_id, project_id, groupId)) {
+                    popup("Groupe quitté");
                     projects()
                 }
             } catch (e) {
-                console.log(e)
-                popup("Une erreur est survenue")
+                console.log(e);
+                popup("Une erreur est survenue");
             }
-        })
-        groupInfoDiv.appendChild(button)
+        });
+        div.appendChild(leaveButton);
     }
-
-
-    groupElement.appendChild(groupInfoDiv)
-}
-
-
-
-function createGroupList(groupElement, values){
-
-    let groupList = []
-    let groupInfo
-    values.groups.forEach((group) => {
-        let groupUsers = []
-        groupInfo = {}
-        if (Array.isArray(group.project_group_students)) {
-            group.project_group_students.forEach(student => {
-                groupUsers.push({
-                    firstname: student.firstname,
-                    name: student.name
-                });
-            });
-        }
-
-        groupInfo = {
-            "name": group.group_name,
-            "id": group.project_group_id,
-            "person": groupUsers
-        }
-
-        groupList.push(groupInfo)
-
-    });
-    let div = document.createElement("div")
-    div.classList.add("random-div-class-for-groups")
-    groupList.forEach((groupCard)=>{
-        div.appendChild(createGroupCard(groupCard, values.rc_id, values.project_id))
-    })
-    return div
-
-}
-
-
-function createGroupCard(data, rc_id, project_id){
-    const div = document.createElement("div")
-    div.classList.add("container")
-
-    div.addEventListener("click", ()=>{
-        div.classList.toggle("active")
-    })
-
-    // Create group name container
-    const groupNameContainer = document.createElement('div');
-    groupNameContainer.className = 'group-name-container';
-
-    // Create group name element
-    const groupName = document.createElement('div');
-    groupName.className = 'group-name';
-    groupName.textContent = data.name;
-
-    // Create join button
-    const joinButton = document.createElement('button');
-    joinButton.className = 'join-button';
-    joinButton.textContent = 'Rejoindre';
-    joinButton.addEventListener('click', async (event) => {
-        event.stopPropagation();
-        groupName.classList.toggle("active")
-        try{
-            if(await JoinProjectGroup(rc_id, project_id, data.id)){
-                popup("Groupe rejoind")
-                document.getElementById("courses-container").innerHTML = ""
-                projects()
-            }
-        } catch (e) {
-            console.log(e)
-            popup("Une erreur est survenue")
-        }
-        // Logique pour rejoindre le groupe
-    });
-
-    // Append group name and join button to the container
-    groupNameContainer.appendChild(groupName);
-    groupNameContainer.appendChild(joinButton);
-
-    // Append group name container to main div
-    div.appendChild(groupNameContainer);
-
-    // Create member list
-    const memberList = document.createElement('ul');
-    memberList.className = 'member-list';
-
-    // Populate member list
-    data.person.forEach(member => {
-        const memberItem = document.createElement('li');
-        memberItem.className = 'member';
-
-        const avatar = document.createElement('div');
-        avatar.className = 'avatar';
-        avatar.textContent = member.firstname.charAt(0);
-
-        const memberInfo = document.createElement('div');
-        memberInfo.className = 'member-info';
-
-        const memberName = document.createElement('div');
-        memberName.className = 'member-name';
-        memberName.textContent = member.firstname;
-
-        const memberFullname = document.createElement('div');
-        memberFullname.className = 'member-fullname';
-        memberFullname.textContent = member.name;
-
-        // Append elements to the DOM
-        memberInfo.appendChild(memberName);
-        memberInfo.appendChild(memberFullname);
-
-        memberItem.appendChild(avatar);
-        memberItem.appendChild(memberInfo);
-
-        memberList.appendChild(memberItem);
-    });
-
-    div.appendChild(memberList)
-    return div
+    projectDetails.appendChild(div);
 }

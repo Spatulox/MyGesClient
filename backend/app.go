@@ -215,6 +215,14 @@ func (a *App) Startup(ctx context.Context) {
 	}
 }
 
+func (a *App) Shutdown(ctx context.Context) {
+	Log.Infos("App is shutting down...")
+	if a.db != nil {
+		Log.Infos("Closing DB connexion")
+		a.db.Close()
+	}
+}
+
 func (a *App) initDB() error {
 	var err error
 	a.db, err = InitDBConnexion()
@@ -301,14 +309,6 @@ func (a *App) startBackgroundTasks() {
 	})
 
 	// Fait une autre boucle pour renew GesAPI token
-}
-
-// -------------------------------------------------------------------------- //
-
-func (a *App) Cleanup() {
-	if a.db != nil {
-		a.db.Close()
-	}
 }
 
 // -------------------------------------------------------------------------- //
