@@ -6,7 +6,7 @@ export async function projects(){
     scrollMainPart()
 
     let laStill = stillPopup("Actualisation de vos projets..")
-    const loadingProject = document.getElementById("loadingProject")
+    //const loadingProject = document.getElementById("loadingProject")
     try{
         const mygesProjects = await GetProjects()
         let profile = await GetProfile()
@@ -18,11 +18,11 @@ export async function projects(){
         myproject.innerHTML = ""
         
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
-        loadingProject.style.display = "none"
+        //loadingProject.style.display = "none"
     } catch (e) {
         console.log(e)
         popup(e.toString())
-        loadingProject.style.display = "none"
+        //loadingProject.style.display = "none"
     }
     stopStillPopup(laStill)
 
@@ -98,7 +98,7 @@ function populateData(projects, name, firstname){
             addMyProjectDetails({
                 "Sujet": psubject,
                 "Détails":pdetailed,
-                "Date de Présentation": new Date(pdate_presentation).toLocaleDateString(),
+                "Date de Présentation": pdate_presentation ? new Date(pdate_presentation).toLocaleDateString() : "",
                 "Type de sujet": ptype,
                 "Type de groupe": ptype_group,
                 "Membres maximum": pmax_student,
