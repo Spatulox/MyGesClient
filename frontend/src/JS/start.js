@@ -17,6 +17,13 @@ import {
 } from "./login-register";
 import {capitalizeFirstLetter, hasCommonClass} from "./functions";
 import {deleteOldData, eulaShow} from "./index_events";
+import { grades } from "../JS-Page/grades";
+import { absences } from "../JS-Page/absences";
+import { account } from "../JS-Page/account";
+import { events } from "../JS-Page/events";
+import { courses } from "../JS-Page/courses";
+import { schedule } from "../JS-Page/schedule";
+import { projects } from "../JS-Page/projects";
 
 let initializedStart = false
 
@@ -70,6 +77,7 @@ export async function start(){
         try{
             connectDiscord()
             loadPageGo("dashboard.html")
+            initAllPages()
         } catch (e) {
             console.log(e)
             popup(e.toString())
@@ -81,6 +89,16 @@ export async function start(){
         return
     }
     stopStillPopup(laStill)
+}
+
+async function initAllPages(){
+    schedule()
+    grades()
+    events()
+    absences()
+    courses()
+    projects()
+    account()
 }
 
 async function connectDiscord(){
