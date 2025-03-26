@@ -32,6 +32,7 @@ export async function start(){
         await initializeLoadPage()
         await initCreateEvent()
         await initializeCredits()
+        await initializeScheduleModal()
         initializedStart = true
     }
 
@@ -77,7 +78,7 @@ export async function start(){
         try{
             connectDiscord()
             loadPageGo("dashboard.html")
-            initAllPages()
+            //initAllPages()
         } catch (e) {
             console.log(e)
             popup(e.toString())
@@ -92,7 +93,7 @@ export async function start(){
 }
 
 async function initAllPages(){
-    schedule()
+    //schedule()
     grades()
     events()
     absences()
@@ -156,4 +157,53 @@ async function initializeCredits(){
     deconnectionFromMygesId.addEventListener("click", ()=>{
         deconnectionFromMyges()
     })
+}
+
+async function initializeScheduleModal(){
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalInfo = document.getElementById('modal-info');
+    const closeBtn = document.getElementsByClassName('close')[0];
+
+    const courseInfo = {
+        'cours-maths': {
+            title: 'Mathématiques',
+            info: 'Salle 101, Professeur: M. Dupont'
+        },
+        'cours-physique': {
+            title: 'Physique',
+            info: 'Salle 202, Professeur: Mme Martin'
+        },
+        'cours-francais': {
+            title: 'Français',
+            info: 'Salle 303, Professeur: M. Dubois'
+        },
+        'cours-anglais': {
+            title: 'Anglais',
+            info: 'Salle 404, Professeur: Mme Smith'
+        },
+        'cours-sport': {
+            title: 'Sport',
+            info: 'Gymnase, Professeur: M. Lefèvre'
+        },
+        'cours-histoire': {
+            title: 'Histoire',
+            info: 'Salle 505, Professeur: Mme Moreau'
+        },
+        'cours-biologie': {
+            title: 'Biologie',
+            info: 'Salle 606, Professeur: M. Petit'
+        }
+    };
+
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+
 }
