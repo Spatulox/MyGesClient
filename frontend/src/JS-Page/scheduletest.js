@@ -247,6 +247,14 @@ function printScheduleTitle(monday, saturday) {
 
     const title = document.getElementById("week");
     title.textContent = `🗓️ ${mondayDay} ${mondayParts[0]} ${capitalizeFirstLetter(mondayMonth)} au ${saturdayDay} ${saturdayParts[0]} ${capitalizeFirstLetter(saturdayMonth)} 🗓️`;
+
+
+    document.getElementById("lun-day").innerHTML = " " + mondayParts[0]++
+    document.getElementById("mar-day").innerHTML = " " + mondayParts[0]++
+    document.getElementById("mer-day").innerHTML = " " + mondayParts[0]++
+    document.getElementById("jeu-day").innerHTML = " " + mondayParts[0]++
+    document.getElementById("ven-day").innerHTML = " " + mondayParts[0]++
+    document.getElementById("sam-day").innerHTML = " " + mondayParts[0]
 }
 
 // -------------------- switch Week -------------------- //
