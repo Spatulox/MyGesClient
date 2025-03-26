@@ -11,7 +11,7 @@ export async function schedule(forceRefresh = false){
     const monday = currentMonday
     const sunday = getSundayFromMonday(currentMonday)
 
-    updateSchedule(monday, sunday, forceRefresh)
+    await updateSchedule(monday, sunday, forceRefresh)
 }
 
 async function getSchedule(monday, saturday, forceRefresh){
