@@ -1,3 +1,5 @@
+@import 'variables.css';
+
 #schedule {
     transform: translateY(-30px);
 }
@@ -25,7 +27,7 @@
 
 #schedule .nav-btn {
     background-color: #7289da;
-    color: white;
+    color: var(--policeColor);
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
@@ -69,7 +71,7 @@
 
 #schedule .event {
     background-color: #7289da;
-    color: white;
+    color: var(--policeColor);
     padding: 5px;
     border-radius: 3px;
     font-size: 14px;
@@ -85,43 +87,44 @@
     pointer-events: none;
 }
 
-#schedule .modal-event {
+#mainPart > .modal-event {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
     background-color: rgba(0,0,0,0.4);
 }
 
-#schedule .modal-content-event {
+#mainPart > .modal-event > .modal-content-event {
     background-color: #2f3136;
     padding: 20px;
     width: 80%;
     max-width: 500px;
     border-radius: 8px;
-    
-    position: absolute;
-    left: 57%;
+    position: fixed;
+    left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    color: var(--policeColor);
 }
 
 
-#schedule .close {
-    color: #aaa;
+
+
+#mainPart > .modal-event > .modal-content-event > .close {
+    color: var(--text-muted);
     float: right;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
 }
 
-#schedule .close:hover,
-#schedule .close:focus {
-    color: #fff;
+#mainPart > .modal-event > .modal-content-event > .close:hover,
+#mainPart > .modal-event > .modal-content-event > .close:focus {
+    color: var(--policeColor);
     text-decoration: none;
     cursor: pointer;
 }
