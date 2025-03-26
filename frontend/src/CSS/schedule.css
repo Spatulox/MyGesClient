@@ -72,14 +72,29 @@
 #schedule .event {
     background-color: #7289da;
     color: var(--policeColor);
-    padding: 5px;
+    padding: 10px;
     border-radius: 3px;
     font-size: 14px;
     cursor: pointer;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     overflow: auto;
+    border: 1px solid #5865f2;
+}
+
+#schedule .event h3{
+    margin: 0;
+}
+
+#schedule .event-time {
+    color: var(--policeColor);
+    text-decoration: underline;
+    font-size: 0.9em;
+    align-self: flex-start;
+    margin: 0;
+    margin-bottom: 5px;
 }
 
 #schedule .event.empty {
