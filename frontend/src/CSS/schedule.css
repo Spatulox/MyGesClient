@@ -26,12 +26,16 @@
 }
 
 #schedule .nav-btn {
-    background-color: #7289da;
+    background-color: var(--highlight-color);
     color: var(--policeColor);
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
+}
+
+#schedule .nav-btn:hover {
+    background-color: var(--hover-color);
 }
 
 #schedule .weekdays {
@@ -70,7 +74,7 @@
 }
 
 #schedule .event {
-    background-color: #7289da;
+    background-color: var(--highlight-color);
     color: var(--policeColor);
     padding: 10px;
     border-radius: 3px;
@@ -81,7 +85,7 @@
     align-items: center;
     justify-content: flex-start;
     overflow: auto;
-    border: 1px solid #5865f2;
+    border: 1px solid var(--hover-color);
 }
 
 #schedule .event h3{
