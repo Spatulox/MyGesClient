@@ -266,7 +266,7 @@ export async function changeWeek(direction, forceRefresh = false) {
 }
 
 document.getElementById("prev-week").addEventListener("click", async () => {
-    const stillPop = stillPopup("Chargement de la semaine prochaine")
+    const stillPop = stillPopup("Chargement de la semaine précédente")
 
     hideScheduleButtons()
     
