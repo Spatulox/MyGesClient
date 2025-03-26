@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="./src/CSS/addEvent.css">
     <link rel="stylesheet" type="text/css" href="./src/CSS/login-register.css">
 
+    <link rel="stylesheet" type="text/css" href="./src/CSS/schedule.css">
     <link rel="stylesheet" type="text/css" href="./src/CSS/projects.css">
 
     <!--<link rel="stylesheet" type="text/css" href="./src/CSS/testCss.css">-->
@@ -190,18 +191,57 @@
                 </div>
                 <!--Schedule-->
                 <div id="schedule" style="display: none">
-                    <div id="allContainerSchedule" class="flex flexAround wrap box">
-                        <div class="container-schedule">
-                            <div class="main-content-schedule">
-                                <div class="calendar-header">
-                                    <button id="prev-week">&lt;</button>
-                                    <h2 id="current-week"></h2>
-                                    <button id="next-week">&gt;</button>
-                                </div>
-                                <div id="calendar-grid"></div>
+                    <div class="calendar">
+                        <div class="header">
+                            <button class="nav-btn">&lt;</button>
+                            <h1 id="week">Semaine du 24 au 29 Mars 2025</h1>
+                            <button class="nav-btn">&gt;</button>
+                        </div>
+                        <div class="weekdays">
+                            <div>Heure</div>
+                            <div>Lun</div>
+                            <div>Mar</div>
+                            <div>Mer</div>
+                            <div>Jeu</div>
+                            <div>Ven</div>
+                            <div>Sam</div>
+                        </div>
+                        <div class="timetable">
+                            <div class="hour-column">
+                                <div class="hour">8h00</div>
+                                <div class="hour">9h45</div>
+                                <div class="hour">11h30</div>
+                                <div class="hour">13h00</div>
+                                <div class="hour">14h00</div>
+                                <div class="hour">15h45</div>
+                                <div class="hour">17h30</div>
+                                <div class="hour">19h15</div>
+                                <div class="hour">21h00</div>
+                            </div>
+                            <div class="day-column" id="monday">
+                            </div>
+                            <div class="day-column" id="tuesday">
+                            </div>
+                            <div class="day-column" id="wednesday">
+                            </div>
+                            <div class="day-column" id="thursday">
+                            </div>
+                            <div class="day-column" id="friday">
+                            </div>
+                            <div class="day-column" id="saturday">
+                                <!-- Samedi vide -->
                             </div>
                         </div>
                     </div>
+                
+                    <div id="modal-event" class="modal-event">
+                        <div class="modal-content-event">
+                            <span class="close">&times;</span>
+                            <h2 id="modal-title"></h2>
+                            <p id="modal-info"></p>
+                        </div>
+                    </div>
+
                     <div class="discord-container">
                         <h1 class="title">Paris Locations</h1>
                         <div class="location-list">
