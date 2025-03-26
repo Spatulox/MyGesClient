@@ -44,12 +44,8 @@ Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
 > - Deconnexion => Reconnexion : Problème d'intance nil car mal réinitialisée ?
 > - Light mode => Horrible
 > - Lier un event à un cours ?
-> - Supprimer les absences avant de les réenregistrer en BDD
-> - Resigner le calendrier
 > - Ajouter les évènements au calendrier
 > - Quand on créer l'event, ca ne rafaichit pas la page event instant
-> - Quand on launch l'app, la date de la semaine ne s'affiche pas lorsqu'il n'y a pas de cours
-> - Improve launching perf
 > - Rien de plus planifié
 
 <br><br><hr>
