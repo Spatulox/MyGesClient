@@ -7,7 +7,7 @@ import {
     getMonday,
     getSaturday,
 } from "../JS/functions";
-import {updateSchedule} from "./schedule";
+import {updateScheduleDashboard} from "./schedule";
 import {initGradesDisplay} from "./grades";
 import {stillPopup, stopStillPopup, popup} from "../JS/popups";
 
@@ -46,7 +46,7 @@ async function handleButtonClick(direction) {
         document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)"
 
         if (agenda) {
-            await updateSchedule(agenda, htmlElement);
+            await updateScheduleDashboard(agenda, htmlElement);
             document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)"
         } else {
             printDate(htmlElement);
