@@ -118,6 +118,33 @@ export function getSaturday() {
     return today;
 }
 
+export function getSundayFromMonday(currentMonday){
+    const currentSunday = new Date(currentMonday);
+    currentSunday.setDate(currentMonday.getDate() + 6);
+    return currentSunday
+}
+
+// ------------------------------------------------ //
+
+export function getSunday() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+
+    // Calculer l'offset pour atteindre le prochain Dimanche
+    const offset = dayOfWeek === 0 ? 0 : (7 - dayOfWeek);
+
+    // Calculer le Dimanche
+    today.setDate(today.getDate() + offset);
+    today.setHours(23, 59, 59, 999); // Réinitialiser l'heure à la fin de la journée
+
+    return today;
+}
+
+export function toLocalHourString(date_hour){
+    return date_hour.toLocaleTimeString('fr-FR', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' })
+}
+
+
 // ------------------------------------------------ //
 
 export function wait(seconds) {

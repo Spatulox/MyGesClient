@@ -22,7 +22,7 @@ import { absences } from "../JS-Page/absences";
 import { account } from "../JS-Page/account";
 import { events } from "../JS-Page/events";
 import { courses } from "../JS-Page/courses";
-import { schedule } from "../JS-Page/schedule";
+import { changeWeek, hideScheduleButtons, schedule, showScheduleButtons } from "../JS-Page/scheduletest";
 import { projects } from "../JS-Page/projects";
 
 let initializedStart = false
@@ -32,6 +32,7 @@ export async function start(){
         await initializeLoadPage()
         await initCreateEvent()
         await initializeCredits()
+        await initializeSchedulePart()
         initializedStart = true
     }
 
@@ -77,7 +78,7 @@ export async function start(){
         try{
             connectDiscord()
             loadPageGo("dashboard.html")
-            initAllPages()
+            //initAllPages()
         } catch (e) {
             console.log(e)
             popup(e.toString())
@@ -92,7 +93,7 @@ export async function start(){
 }
 
 async function initAllPages(){
-    schedule()
+    //schedule()
     grades()
     events()
     absences()
@@ -156,4 +157,34 @@ async function initializeCredits(){
     deconnectionFromMygesId.addEventListener("click", ()=>{
         deconnectionFromMyges()
     })
+}
+
+async function initializeSchedulePart(){
+    const modal = document.getElementById('modal');
+    const forceRefreshButton = document.getElementById("force-refresh")
+    const forceNowButton = document.getElementById("force-now")
+    const closeBtn = document.getElementsByClassName('close')[0];
+
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    forceRefreshButton.addEventListener("click", async ()=>{
+        hideScheduleButtons()
+        try{await changeWeek(0, true)}catch(e){console.log(e)}
+        showScheduleButtons()
+    })
+
+    forceNowButton.addEventListener("click", async ()=>{
+        hideScheduleButtons()
+        try{await schedule(true)}catch(e){console.log(e)}
+        showScheduleButtons()
+    })
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+
 }
