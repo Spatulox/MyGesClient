@@ -5,6 +5,7 @@
 }
 
 #schedule .calendar {
+    width: 90%;
     max-width: 1300px;
     margin: 0px auto;
     margin-bottom: 30px;
