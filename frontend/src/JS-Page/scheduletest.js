@@ -298,25 +298,31 @@ document.getElementById("next-week").addEventListener("click", async () => {
 export function showScheduleButtons(){
     const prevButton = document.getElementById("prev-week");
     const nextButton = document.getElementById("next-week");
+    const nowButton = document.getElementById("force-now");
     const refreshButton = document.getElementById("force-refresh");
 
     prevButton.style.opacity = 1;
     nextButton.style.opacity = 1;
+    nowButton.style.opacity = 1;
     refreshButton.style.opacity = 1;
     prevButton.style.pointerEvents = 'auto';
     nextButton.style.pointerEvents = 'auto';
+    nowButton.style.pointerEvents = 'auto';
     refreshButton.style.pointerEvents = 'auto';
 }
 
 export function hideScheduleButtons(){
     const prevButton = document.getElementById("prev-week");
     const nextButton = document.getElementById("next-week");
+    const nowButton = document.getElementById("force-now");
     const refreshButton = document.getElementById("force-refresh");
     
     prevButton.style.opacity = 0;
     nextButton.style.opacity = 0;
+    nowButton.style.opacity = 0;
     refreshButton.style.opacity = 0;
     prevButton.style.pointerEvents = 'none';
     nextButton.style.pointerEvents = 'none';
+    nowButton.style.pointerEvents = 'none';
     refreshButton.style.pointerEvents = 'none';
 }

@@ -22,7 +22,7 @@ import { absences } from "../JS-Page/absences";
 import { account } from "../JS-Page/account";
 import { events } from "../JS-Page/events";
 import { courses } from "../JS-Page/courses";
-import { changeWeek, hideScheduleButtons, showScheduleButtons } from "../JS-Page/scheduletest";
+import { changeWeek, hideScheduleButtons, schedule, showScheduleButtons } from "../JS-Page/scheduletest";
 import { projects } from "../JS-Page/projects";
 
 let initializedStart = false
@@ -162,6 +162,7 @@ async function initializeCredits(){
 async function initializeSchedulePart(){
     const modal = document.getElementById('modal');
     const forceRefreshButton = document.getElementById("force-refresh")
+    const forceNowButton = document.getElementById("force-now")
     const closeBtn = document.getElementsByClassName('close')[0];
 
     closeBtn.onclick = function() {
@@ -171,6 +172,12 @@ async function initializeSchedulePart(){
     forceRefreshButton.addEventListener("click", async ()=>{
         hideScheduleButtons()
         try{await changeWeek(0, true)}catch(e){console.log(e)}
+        showScheduleButtons()
+    })
+
+    forceNowButton.addEventListener("click", async ()=>{
+        hideScheduleButtons()
+        try{await schedule(true)}catch(e){console.log(e)}
         showScheduleButtons()
     })
 
