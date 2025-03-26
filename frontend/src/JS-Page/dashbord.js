@@ -7,7 +7,7 @@ import {
     getMonday,
     getSaturday,
 } from "../JS/functions";
-import {updateScheduleDashboard} from "./schedule";
+import {updateScheduleDashboard} from "./schedule_old_still_used";
 import {initGradesDisplay} from "./grades";
 import {stillPopup, stopStillPopup, popup} from "../JS/popups";
 

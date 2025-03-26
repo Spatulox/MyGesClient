@@ -22,7 +22,7 @@ import { absences } from "../JS-Page/absences";
 import { account } from "../JS-Page/account";
 import { events } from "../JS-Page/events";
 import { courses } from "../JS-Page/courses";
-import { changeWeek, hideScheduleButtons, schedule, showScheduleButtons } from "../JS-Page/scheduletest";
+import { changeWeek, hideScheduleButtons, schedule, showScheduleButtons } from "../JS-Page/schedule";
 import { projects } from "../JS-Page/projects";
 
 let initializedStart = false
