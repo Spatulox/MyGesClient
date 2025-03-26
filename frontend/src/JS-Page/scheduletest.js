@@ -5,7 +5,6 @@ import { stillPopup, stopStillPopup } from "../JS/popups";
 let currentMonday;
 
 export async function schedule(forceRefresh = false){
-    console.log(forceRefresh)
     scrollMainPart()
     currentMonday = getMonday()
     const monday = currentMonday
@@ -24,7 +23,6 @@ async function getSchedule(monday, saturday, forceRefresh){
                 still = stillPopup("Rafraichissement forcé")
             }
             try{agenda = await RefreshAgenda(`${monday}`, `${saturday}`)}catch(e){console.log(e)}
-            console.log(agenda)
             stopStillPopup(still)
         }
         return agenda
