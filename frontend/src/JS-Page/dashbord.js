@@ -99,7 +99,7 @@ export async function dashboard(){
 async function handleAgenda(htmlElement) {
     return getTodayAgendaPlusDay().then((agenda) => {
         if (agenda) {
-            updateSchedule(agenda, htmlElement);
+            updateScheduleDashboard(agenda, htmlElement);
             document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)";
         } else {
             printDate(htmlElement);
