@@ -40,7 +40,7 @@ function initSchedule(){
     })
 }
 
-export async  function schedule(forceRefresh = false){
+export async function schedule(forceRefresh = false){
 
     // Avoid useless API request and html overwrite
     if(thisWeekAlreadyFetched){

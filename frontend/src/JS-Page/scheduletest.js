@@ -1,30 +1,41 @@
 import { GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
-import { capitalizeFirstLetter, getDateInfo, getSundayFromMonday, /*getMonday, getSunday,*/ scrollMainPart, toLocalHourString } from "../JS/functions";
-import { popup, stillPopup, stopStillPopup } from "../JS/popups";
+import { capitalizeFirstLetter, getDateInfo, getSundayFromMonday, getMonday, scrollMainPart, toLocalHourString } from "../JS/functions";
+import { stillPopup, stopStillPopup } from "../JS/popups";
 
 let currentMonday;
 
 export async function schedule(forceRefresh = false){
+    console.log(forceRefresh)
     scrollMainPart()
     currentMonday = getMonday()
     const monday = currentMonday
     const sunday = getSundayFromMonday(currentMonday)
 
-    updateSchedule(monday, sunday)
+    updateSchedule(monday, sunday, forceRefresh)
 }
 
-async function getSchedule(monday, saturday){
-    clearSchedule()
-    let agenda = await GetAgenda(`${monday}`, `${saturday}`)
-    if(!agenda){
-        return await RefreshAgenda(`${monday}`, `${saturday}`)
+async function getSchedule(monday, saturday, forceRefresh){
+    try{
+        clearSchedule()
+        let agenda = await GetAgenda(`${monday}`, `${saturday}`)
+        let still
+        if(!agenda || forceRefresh){
+            if(forceRefresh){
+                still = stillPopup("Rafraichissement forcé")
+            }
+            try{agenda = await RefreshAgenda(`${monday}`, `${saturday}`)}catch(e){console.log(e)}
+            console.log(agenda)
+            stopStillPopup(still)
+        }
+        return agenda
+    } catch(e){
+        console.log(e)
     }
-    return agenda
 }
 
-async function updateSchedule(monday, sunday){
+async function updateSchedule(monday, sunday, forceRefresh){
     printScheduleTitle(monday, sunday)
-    const agenda = await getSchedule(monday.toISOString().split("T")[0], sunday.toISOString().split("T")[0])
+    const agenda = await getSchedule(monday.toISOString().split("T")[0], sunday.toISOString().split("T")[0], forceRefresh)
     if(agenda){
         agenda.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
     }
@@ -240,48 +251,24 @@ function printScheduleTitle(monday, saturday) {
     title.textContent = `🗓️ ${mondayDay} ${mondayParts[0]} ${capitalizeFirstLetter(mondayMonth)} au ${saturdayDay} ${saturdayParts[0]} ${capitalizeFirstLetter(saturdayMonth)} 🗓️`;
 }
 
-function getMonday(){
-    //const dateDebut = new Date(2025, 3, 14);
-    const dateDebut = new Date(2025, 1, 17); // cours heure bizarre
-    //const dateDebut = new Date(2025, 0, 20); // cours heure bizarre2
-    //const dateDebut = new Date(2025, 2, 17); // Cours avec des salles attitrée
-    //const dateDebut = new Date(2025, 5, 9); // cours Samedi
-    return dateDebut;
-    return timestampDebut
-}
-
-function getSunday(){
-    //const dateFin = new Date(2025, 3, 19, 20, 0, 0);
-    const dateFin = new Date(2025, 1, 23, 20, 0, 0); // Cours à des heures bizarre
-    //const dateFin = new Date(2025, 0, 26, 20, 0, 0); // Cours à des heures bizarre2
-    //const dateFin = new Date(2025, 2, 23, 20, 0, 0); // Cours avec des salles attitrée
-    //const dateFin = new Date(2025, 5, 15, 20, 0, 0); // Cours samedi
-    return dateFin;
-    return timestampFin
-}
-
-
-
-
 // -------------------- switch Week -------------------- //
 
-async function changeWeek(direction) {
-    // direction: -1 pour semaine précédente, 1 pour semaine suivante
-    currentMonday.setDate(currentMonday.getDate() + direction * 7); // Ajuste le lundi
+export async function changeWeek(direction, forceRefresh = false) {
+
+    if(!currentMonday){
+        currentMonday = getMonday()
+    }
+
+    currentMonday.setDate(currentMonday.getDate() + direction * 7);
     const currentSunday = getSundayFromMonday(currentMonday)
 
-    await updateSchedule(currentMonday, currentSunday)
+    await updateSchedule(currentMonday, currentSunday, forceRefresh)
 }
 
 document.getElementById("prev-week").addEventListener("click", async () => {
-    const stillPop = stillPopup("Chargement")
-    const prevButton = document.getElementById("prev-week");
-    const nextButton = document.getElementById("next-week");
-    
-    prevButton.style.opacity = 0;
-    nextButton.style.opacity = 0;
-    prevButton.style.pointerEvents = 'none';
-    nextButton.style.pointerEvents = 'none';
+    const stillPop = stillPopup("Chargement de la semaine prochaine")
+
+    hideScheduleButtons()
     
     try{
         await changeWeek(-1);
@@ -289,22 +276,14 @@ document.getElementById("prev-week").addEventListener("click", async () => {
         console.log(e)
     }
     
-    prevButton.style.opacity = 1;
-    nextButton.style.opacity = 1;
-    prevButton.style.pointerEvents = 'auto';
-    nextButton.style.pointerEvents = 'auto';
+    showScheduleButtons()
     stopStillPopup(stillPop)
 });
 
 document.getElementById("next-week").addEventListener("click", async () => {
-    const stillPop = stillPopup("Chargement")
-    const prevButton = document.getElementById("prev-week");
-    const nextButton = document.getElementById("next-week");
-    
-    prevButton.style.opacity = 0;
-    nextButton.style.opacity = 0;
-    prevButton.style.pointerEvents = 'none';
-    nextButton.style.pointerEvents = 'none';
+    const stillPop = stillPopup("Chargement de la semaine prochaine")
+
+    hideScheduleButtons()
     
     try{
         await changeWeek(1);
@@ -312,9 +291,32 @@ document.getElementById("next-week").addEventListener("click", async () => {
         console.log(e)
     }
     
-    prevButton.style.opacity = 1;
-    nextButton.style.opacity = 1;
-    prevButton.style.pointerEvents = 'auto';
-    nextButton.style.pointerEvents = 'auto';
+    showScheduleButtons()
     stopStillPopup(stillPop)
 });
+
+export function showScheduleButtons(){
+    const prevButton = document.getElementById("prev-week");
+    const nextButton = document.getElementById("next-week");
+    const refreshButton = document.getElementById("force-refresh");
+
+    prevButton.style.opacity = 1;
+    nextButton.style.opacity = 1;
+    refreshButton.style.opacity = 1;
+    prevButton.style.pointerEvents = 'auto';
+    nextButton.style.pointerEvents = 'auto';
+    refreshButton.style.pointerEvents = 'auto';
+}
+
+export function hideScheduleButtons(){
+    const prevButton = document.getElementById("prev-week");
+    const nextButton = document.getElementById("next-week");
+    const refreshButton = document.getElementById("force-refresh");
+    
+    prevButton.style.opacity = 0;
+    nextButton.style.opacity = 0;
+    refreshButton.style.opacity = 0;
+    prevButton.style.pointerEvents = 'none';
+    nextButton.style.pointerEvents = 'none';
+    refreshButton.style.pointerEvents = 'none';
+}

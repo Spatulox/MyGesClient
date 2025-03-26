@@ -22,7 +22,7 @@ import { absences } from "../JS-Page/absences";
 import { account } from "../JS-Page/account";
 import { events } from "../JS-Page/events";
 import { courses } from "../JS-Page/courses";
-import { schedule } from "../JS-Page/schedule";
+import { changeWeek, hideScheduleButtons, showScheduleButtons } from "../JS-Page/scheduletest";
 import { projects } from "../JS-Page/projects";
 
 let initializedStart = false
@@ -32,7 +32,7 @@ export async function start(){
         await initializeLoadPage()
         await initCreateEvent()
         await initializeCredits()
-        await initializeScheduleModal()
+        await initializeSchedulePart()
         initializedStart = true
     }
 
@@ -159,46 +159,20 @@ async function initializeCredits(){
     })
 }
 
-async function initializeScheduleModal(){
+async function initializeSchedulePart(){
     const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalInfo = document.getElementById('modal-info');
+    const forceRefreshButton = document.getElementById("force-refresh")
     const closeBtn = document.getElementsByClassName('close')[0];
-
-    const courseInfo = {
-        'cours-maths': {
-            title: 'Mathématiques',
-            info: 'Salle 101, Professeur: M. Dupont'
-        },
-        'cours-physique': {
-            title: 'Physique',
-            info: 'Salle 202, Professeur: Mme Martin'
-        },
-        'cours-francais': {
-            title: 'Français',
-            info: 'Salle 303, Professeur: M. Dubois'
-        },
-        'cours-anglais': {
-            title: 'Anglais',
-            info: 'Salle 404, Professeur: Mme Smith'
-        },
-        'cours-sport': {
-            title: 'Sport',
-            info: 'Gymnase, Professeur: M. Lefèvre'
-        },
-        'cours-histoire': {
-            title: 'Histoire',
-            info: 'Salle 505, Professeur: Mme Moreau'
-        },
-        'cours-biologie': {
-            title: 'Biologie',
-            info: 'Salle 606, Professeur: M. Petit'
-        }
-    };
 
     closeBtn.onclick = function() {
         modal.style.display = 'none';
     }
+
+    forceRefreshButton.addEventListener("click", async ()=>{
+        hideScheduleButtons()
+        try{await changeWeek(0, true)}catch(e){console.log(e)}
+        showScheduleButtons()
+    })
 
     window.onclick = function(event) {
         if (event.target == modal) {
