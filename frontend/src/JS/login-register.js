@@ -1,4 +1,4 @@
-import {loadPageGo} from "./loadPages";
+import {loadPageGo, setIsPossibleToSwitchTabs} from "./loadPages";
 import {popup} from "./popups";
 import {DeconnectUser, GetRegisteredUsers} from "../../wailsjs/go/backend/App";
 
@@ -23,7 +23,6 @@ export function showUsernameField(bool = true){
 }
 
 function toggleSelect(e) {
-    console.log("coucou")
     const customSelect = document.querySelector('.custom-select');
     const selectItems = customSelect.querySelector('.select-items');
     e.stopPropagation();
@@ -82,12 +81,19 @@ export async function changeLoginPassword(button = true){
 }
 
 export async function deconnectionFromMyges(){
+    loadPageGo("cya")
     console.log("Déconnexion")
+    setIsPossibleToSwitchTabs(false)
+    const message_cya = document.getElementById("message-cya")
+    message_cya.innerText = "Stopping app"
     try{
         await DeconnectUser()
+        message_cya.innerText = "Launching app"
     } catch (e) {
         console.log(e)
         popup("Impossible de vous déconnecter")
+        loadPageGo("softwareAccount")
+        setIsPossibleToSwitchTabs(true)
         return
     }
 
@@ -103,7 +109,7 @@ export async function deconnectionFromMyges(){
     console.log("Starting the connexion form")
 
     await openConnexion()
-    loadPageGo("cya")
+    setIsPossibleToSwitchTabs(true)
 }
 
 export async function openConnexion(){

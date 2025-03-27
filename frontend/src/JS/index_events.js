@@ -3,7 +3,7 @@
 // Functions
 
 import {popup, stillPopup, stopStillPopup} from "./popups";
-import {closeConnexion, hideConnectionError, shakeConnexion, showConnectionError} from "./login-register";
+import {changeLoginButtonName, closeConnexion, hideConnectionError, shakeConnexion, showConnectionError} from "./login-register";
 import {
     ConnectUser,
     DeleteOldData,
@@ -177,15 +177,10 @@ encryptBtn.addEventListener("click", ()=>{
 
 
 function loadingConnectionButton(oldInnerHtmlLoginBtn, bool = true){
-    const loginBtn = document.getElementById('buttonConnection');
     if(bool){
-        /*loginBtn.innerHTML = "<img src='../../src/assets/images/circle-loading.gif' alt='loading' width='30px'>"*/
-        loginBtn.innerHTML = "Loading..."
-        loginBtn.style.padding = "2px"
+        changeLoginButtonName("Loading...")
     } else {
-        loginBtn.innerHTML = oldInnerHtmlLoginBtn
-        loginBtn.style.display = "block"
-        loginBtn.style.padding = ""
+        changeLoginButtonName(oldInnerHtmlLoginBtn)
     }
 }
 
