@@ -51,7 +51,6 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 		Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
 	}
 
-	// Curr year, but if your begin the school year in 2024, you need to request 2024 grades for 2025 year grades
 	if grades == "null" {
 		return []LocalGrades{}, nil
 	}
@@ -62,8 +61,10 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 		return nil, err
 	}
 
+	Log.Infos("Saving Grades")
 	SaveGradesToDB(grades, a.db)
 
+	Log.Infos("Getting Grades from local DB")
 	userGrades, err := GetDBUserGrades(a.year, a.db)
 	if err != nil {
 		return nil, err
