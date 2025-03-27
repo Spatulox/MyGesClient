@@ -1,5 +1,4 @@
 import {
-    GetRegisteredUsers,
     GetUserData,
     InitDiscordRPC,
     UpdateDiscordRPC
@@ -11,11 +10,11 @@ import {popup, stillPopup, stopStillPopup} from './popups'
 import {
     changeLoginButtonName, changeLoginPassword,
     changeTitle,
-    createDropDownMenu, deconnectionFromMyges,
+    deconnectionFromMyges,
     openConnexion,
     showButtonCancelConnection
 } from "./login-register";
-import {capitalizeFirstLetter, hasCommonClass} from "./functions";
+import { hasCommonClass} from "./functions";
 import {deleteOldData, eulaShow} from "./index_events";
 import { grades } from "../JS-Page/grades";
 import { absences } from "../JS-Page/absences";
@@ -123,9 +122,17 @@ start()
 
 async function initializeLoadPage(){
     let loadingPageButton = document.getElementsByClassName("loadPage")
+    const modal = document.getElementById('modal-event');
 
     Array.from(loadingPageButton).forEach((button) =>{
-        button.addEventListener("click", async (event)=>{
+        button.addEventListener("click", async (event) =>{
+            modal.style.display = 'none';
+
+            Array.from(loadingPageButton).forEach((but) => {
+                but.classList.remove("active")
+            })
+
+            button.classList.add("active")
             try{
                 await loadPageGo(button.dataset.idpage + "")
             } catch (e) {
@@ -133,7 +140,6 @@ async function initializeLoadPage(){
             }
         })
     } )
-
 }
 
 async function initializeCredits(){
