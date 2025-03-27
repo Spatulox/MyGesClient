@@ -129,7 +129,7 @@ func (a *App) UpdateUserTheme(value string) (bool, error) {
 func (a *App) GetProfile() (string, error) {
 
 	if a.getAPI() == nil {
-		return createMessage("Internal error"), fmt.Errorf("GESapi instance is nil for RefreshProfile")
+		return createMessage("Internal error"), fmt.Errorf("Impossible to retrieve your profile no internet connexion")
 	}
 
 	a.profileMutex.Lock()
