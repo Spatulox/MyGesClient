@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+
+	. "MyGesClient/structures"
+
+	. "MyGesClient/log"
 )
-import . "MyGesClient/structures"
-import . "MyGesClient/log"
 
 type gradesResponse struct {
 	Result []Grades `json:"items"`
@@ -180,6 +182,6 @@ func GetDBUserGrades(year string, db *sql.DB) ([]LocalGrades, error) {
 		return nil, err
 	}
 
-	Log.Infos("INFO : Fetched Grades")
+	Log.Infos("INFO : Local Fetched Grades")
 	return grades, nil
 }
