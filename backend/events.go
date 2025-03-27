@@ -10,6 +10,8 @@ import (
 func (a *App) SaveEvents(name string, description *string, startDate string, endDate string, color string) error {
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 	Log.Infos("Saving Events")
 	err := SaveEventDB(a.db, name, description, startDate, endDate, color)
 	if err != nil {
@@ -25,6 +27,8 @@ func (a *App) GetEvents() ([]Event, error) {
 	Log.Infos("Get events")
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 	return GetEventDB(a.db)
 }
 
@@ -39,12 +43,16 @@ func (a *App) GetAllEvents() ([]Event, error) {
 	Log.Infos("Get all events")
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 	return GetAllEventDB(a.db)
 }
 
 func (a *App) DeleteEvent(eventId int) bool {
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 	_, err := DeleteEvent(a.db, eventId)
 	if err != nil {
 		Log.Error(fmt.Sprintf("%v", err))

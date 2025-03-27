@@ -48,6 +48,7 @@ type App struct {
 	year               string
 	db                 *sql.DB
 	dbMutex            sync.Mutex
+	dbWg               sync.WaitGroup
 	api                *GESapi
 	apiRWMutex         sync.RWMutex
 	user               UserSettings
@@ -227,6 +228,11 @@ func (a *App) Startup(ctx context.Context) {
 
 func (a *App) Shutdown(ctx context.Context) {
 	Log.Infos("App is shutting down...")
+
+	Log.Infos("Waiting for DB processus")
+	a.dbWg.Wait()
+	Log.Infos("DB OK")
+
 	if a.db != nil {
 		Log.Infos("Closing DB connexion")
 		a.db.Close()

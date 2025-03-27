@@ -16,6 +16,8 @@ func (a *App) ReturnRefreshGradesState() bool {
 func (a *App) GetGrades() ([]LocalGrades, error) {
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 	return GetDBUserGrades(a.year, a.db)
 }
 
@@ -59,6 +61,8 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 
 	err = DeleteGradesForYear(a.db, a.year)
 	if err != nil {

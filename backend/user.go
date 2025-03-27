@@ -40,6 +40,8 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 	// Create the local user
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 
 	Log.Debug(fmt.Sprintf("CheckUserExist"))
 	res, err := CheckUserExist(a.db, username)

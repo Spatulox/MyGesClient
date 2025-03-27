@@ -44,6 +44,8 @@ func (a *App) GetAgenda(start *string, end *string) ([]LocalAgenda, error) {
 
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 	return GetDBUserAgenda(a.db, startDateStr, endDateStr)
 }
 
@@ -110,6 +112,8 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 	if agenda != "" {
 		// ---- Delete all data in AGENDA ---- //
 		_, err = deleteAgendaData(startDate, endDate, a.db)

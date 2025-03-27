@@ -16,6 +16,8 @@ func (a *App) ReturnRefreshAbsencesState() bool {
 func (a *App) GetAbsences() ([]LocalAbsences, error) {
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 	return GetDBUserAbsences(a.year, a.db)
 }
 
@@ -56,6 +58,8 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
 
 	err = DeleteAbsencesForYear(a.db, a.year)
 	if err != nil {
