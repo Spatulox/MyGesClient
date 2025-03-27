@@ -12,7 +12,6 @@ export async function projects(){
     scrollMainPart()
 
     let laStill = stillPopup("Actualisation de vos projets..")
-    //const loadingProject = document.getElementById("loadingProject")
     try{
         const mygesProjects = await GetProjects()
         let profile = await GetProfile()
@@ -24,18 +23,16 @@ export async function projects(){
         myproject.innerHTML = ""
         
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
-        //loadingProject.style.display = "none"
     } catch (e) {
         console.log(e)
         popup(e.toString())
-        //loadingProject.style.display = "none"
     }
     stopStillPopup(laStill)
     isStillRunning = false
 }
 
 function populateData(projects, name, firstname){
-    if (!projects.hasOwnProperty("items")){
+    if (projects && !projects.hasOwnProperty("items")){
         popup("Pas de projets trouvé")
         return
     }

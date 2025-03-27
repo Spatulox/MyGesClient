@@ -1,7 +1,8 @@
 import {
     GetUserData,
     InitDiscordRPC,
-    UpdateDiscordRPC
+    UpdateDiscordRPC,
+    GetStartupStatus
 } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
 import {initCreateEvent} from "./createEvents";
@@ -26,6 +27,18 @@ import { projects } from "../JS-Page/projects";
 
 let initializedStart = false
 
+const StartupStatus = {
+    StatusNotStarted: 0,
+    StatusInProgress: 1,
+    StatusCompleted: 2,
+    StatusIncompleteNoUsers: 3,
+    StatusIncompleteNoInternet: 4,
+    StatusFailed: 5
+  };
+  
+  // Pour s'assurer que l'objet ne peut pas être modifié
+  Object.freeze(StartupStatus);
+
 export async function start(){
     if(!initializedStart){
         await initializeLoadPage()
@@ -41,6 +54,7 @@ export async function start(){
     // - Apply the Theme
     const laStill = stillPopup("Login...")
     try {
+
         let user = await GetUserData();
         if (user === null || !user.Password) {
             changeTitle("Créer un compte")
@@ -77,6 +91,11 @@ export async function start(){
         try{
             connectDiscord()
             loadPageGo("dashboard.html")
+
+            // Need to wait the full start of the app
+            while (await GetStartupStatus() === StartupStatus.StatusInProgress) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
             initAllPages()
         } catch (e) {
             console.log(e)
@@ -93,10 +112,10 @@ export async function start(){
 
 async function initAllPages(){
     schedule()
-    //grades()
+    grades()
     events()
-    //absences()
-    //courses()
+    absences()
+    courses()
     projects()
     account()
 }

@@ -74,6 +74,10 @@ func NewApp() *App {
 
 // -------------------------------------------------------------------------- //
 
+func (a *App) GetStartupStatus() StartupStatus {
+	return a.startupStatus
+}
+
 func (a *App) CheckOpenDb() bool {
 	if a.db == nil {
 		Log.Error("Not connected to DB")
@@ -268,6 +272,7 @@ func (a *App) initAPI() error {
 	if err != nil {
 		return fmt.Errorf("impossible to initialize the API part: %w", err)
 	}
+	Log.Infos(fmt.Sprintf("USER API initalize : %v", userApi))
 	a.setAPI(userApi)
 	Log.Infos("API connection Initialized")
 	return nil
