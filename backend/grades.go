@@ -21,6 +21,11 @@ func (a *App) GetGrades() ([]LocalGrades, error) {
  * Refresh the Grades by asking the MyGes DB, and store it inside the LocalDB and sent back the fresh datas
  */
 func (a *App) RefreshGrades() ([]LocalGrades, error) {
+
+	if a.getAPI() == nil {
+		return []LocalGrades{}, fmt.Errorf("GES instance is nil")
+	}
+
 	a.gradesMutex.Lock()
 	if a.isFetchingGrades {
 		a.gradesMutex.Unlock()
@@ -36,7 +41,7 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 	}()
 	Log.Infos("Refreshing Grades")
 
-	api := a.api
+	api := a.getAPI()
 	if api == nil {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshGrades")
 	}

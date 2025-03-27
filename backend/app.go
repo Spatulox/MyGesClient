@@ -34,12 +34,21 @@ const (
 	StatusFailed
 )
 
+const (
+	ErrDBInit       = 1
+	ErrUserInit     = 10
+	ErrAPIInit      = 100
+	ErrYearsRequest = 1000
+	ErrYearsParsing = 10000
+)
+
 // App struct
 type App struct {
 	ctx                context.Context
 	year               string
 	db                 *sql.DB
 	api                *GESapi
+	apiRWMutex         sync.RWMutex
 	user               UserSettings
 	startupStatus      StartupStatus
 	profileMutex       sync.Mutex
@@ -78,6 +87,47 @@ func (a *App) CheckOpenDb() bool {
 
 // -------------------------------------------------------------------------- //
 
+// Thread safe methode to set / get the api "token"
+func (a *App) getAPI() *GESapi {
+	a.apiRWMutex.RLock()
+	defer a.apiRWMutex.RUnlock()
+	return a.api
+}
+
+func (a *App) setAPI(api *GESapi) {
+	a.apiRWMutex.Lock()
+	defer a.apiRWMutex.Unlock()
+	a.api = api
+}
+
+func (a *App) deleteAPI() {
+	a.apiRWMutex.Lock()
+	defer a.apiRWMutex.Unlock()
+	a.api = nil
+}
+
+// -------------------------------------------------------------------------- //
+// Thread safe methode to set / get the api "user"
+func (a *App) getAPIUser() UserSettings {
+	a.apiRWMutex.RLock()
+	defer a.apiRWMutex.RUnlock()
+	return a.user
+}
+
+func (a *App) setAPIUser(user UserSettings) {
+	a.apiRWMutex.Lock()
+	defer a.apiRWMutex.Unlock()
+	a.user = user
+}
+
+func (a *App) deleteAPIUser() {
+	a.apiRWMutex.Lock()
+	defer a.apiRWMutex.Unlock()
+	a.user = UserSettings{}
+}
+
+// -------------------------------------------------------------------------- //
+
 // Execute any function in parameter every x minutes
 func (a *App) runEveryXMinutes(ctx context.Context, x time.Duration, f func()) {
 	ticker := time.NewTicker(x * time.Minute)
@@ -105,14 +155,6 @@ func (a *App) Startup(ctx context.Context) {
 	a.startupStatus = StatusInProgress
 	errour := 0
 
-	const (
-		ErrDBInit       = 1
-		ErrUserInit     = 10
-		ErrAPIInit      = 100
-		ErrYearsRequest = 1000
-		ErrYearsParsing = 10000
-	)
-
 	if err := a.initDB(); err != nil {
 		a.handleStartupError("DB initialization", err)
 		errour += ErrDBInit
@@ -128,28 +170,9 @@ func (a *App) Startup(ctx context.Context) {
 		errour += ErrAPIInit
 	}
 
-	if a.api != nil {
-		years, err := a.api.GetYears()
-		if err != nil {
-			a.handleStartupError("Years initialization request", err)
-			year, err := GetLastYearInDB(a.db)
-			if err != nil {
-				errour += ErrYearsRequest
-			}
-			a.year = year
-
-		} else {
-			a.year, err = a.getLatestYear(years)
-			if err != nil {
-				errour += ErrYearsParsing
-				a.handleStartupError("Years initialization parsing", err)
-			}
-		}
-
-		boolean, err := UpdateUserLastYear(a.db, a.year)
-		if !boolean || err != nil {
-			Log.Error("Error : Impossible to update the last year for the user : %v", err)
-		}
+	if err := a.initYear(); err != nil {
+		a.handleStartupError("API initialization", err)
+		errour += ErrYearsRequest
 	}
 
 	if errour != 0 {
@@ -193,15 +216,29 @@ func (a *App) Startup(ctx context.Context) {
 						Log.Infos("Application context cancelled, stopping internet check")
 						return
 					case <-ticker.C:
+						Log.Infos("Cheking internet connection")
 						if a.CheckInternetConnection() {
-							if err := a.initAPI(); err == nil {
+							var errApi, errYear error
+
+							if errApi = a.initAPI(); errApi == nil {
+								Log.Infos("Internet connection restored, initAPI OK")
+							} else {
+								a.handleStartupError("API initialization", errApi)
+							}
+
+							if errYear = a.initYear(); errYear == nil {
+								Log.Infos("Internet connection restored, initYear OK")
+							} else {
+								a.handleStartupError("API initialization", errYear)
+							}
+
+							if errApi == nil && errYear == nil {
 								a.startBackgroundTasks()
 								a.startupStatus = StatusCompleted
-								Log.Infos("Internet connection restored, startup completed")
 								return
-							} else {
-								a.handleStartupError("API initialization", err)
 							}
+						} else {
+							Log.Infos("No internet")
 						}
 					}
 				}
@@ -251,8 +288,45 @@ func (a *App) initAPI() error {
 	if err != nil {
 		return fmt.Errorf("impossible to initialize the API part: %w", err)
 	}
-	a.api = userApi
+	a.setAPI(userApi)
 	Log.Infos("API connection Initialized")
+	return nil
+}
+
+func (a *App) initYear() error {
+	api := a.getAPI()
+	if api != nil {
+		years, err := api.GetYears()
+		if err != nil {
+			a.handleStartupError("Years initialization request", err)
+			year, err := GetLastYearInDB(a.db)
+			if err != nil {
+				return fmt.Errorf("impossible to retrieve the year", err)
+			}
+			Log.Infos("Local Year Retrieved")
+			a.year = year
+
+		} else {
+			a.year, err = a.getLatestYear(years)
+			if err != nil {
+				a.handleStartupError("Years initialization parsing", err)
+				return fmt.Errorf("impossible parse the retrieved year", err)
+			}
+		}
+
+		boolean, err := UpdateUserLastYear(a.db, a.year)
+		if !boolean || err != nil {
+			Log.Error("Error : Impossible to update the last year for the user : %v", err)
+			return nil
+		}
+	} else {
+		year, err := GetLastYearInDB(a.db)
+		if err != nil {
+			return fmt.Errorf("impossible to retrieve the year", err)
+		}
+		Log.Infos("Local Year Retrieved")
+		a.year = year
+	}
 	return nil
 }
 
@@ -288,11 +362,12 @@ func (a *App) getLatestYear(jsonData string) (string, error) {
 
 func (a *App) startBackgroundTasks() {
 
-	monday, saturday := GetWeekDates()
+	monday, sunday := GetWeekDates()
 
+	// GlobalRefresh (Schedule / Grades / Absences...)
 	Log.Infos("Launching go routines")
 	go a.runEveryXMinutes(a.ctx, 60, func() {
-		msg, err := a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+		msg, err := a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), sunday.Format("2006-01-02"))
 		if err != nil {
 			Log.Error(fmt.Sprintf("Global Refresh failed: %v", err))
 		} else {
@@ -300,15 +375,39 @@ func (a *App) startBackgroundTasks() {
 		}
 	})
 
+	// RefreshingSchedule
 	go a.runEveryXMinutes(a.ctx, 7, func() {
 		monday2 := monday.Format("2006-01-02")
-		saturday2 := saturday.Format("2006-01-02")
-		if _, err := a.RefreshAgenda(&monday2, &saturday2); err != nil {
+		sunday2 := sunday.Format("2006-01-02")
+		if _, err := a.RefreshAgenda(&monday2, &sunday2); err != nil {
 			Log.Error(fmt.Sprintf("Agenda Refresh failed: %v", err))
 		}
 	})
 
-	// Fait une autre boucle pour renew GesAPI token
+	go a.runEveryXMinutes(a.ctx, 1, func() {
+		Log.Debug("Updating the MyGes connection Token")
+
+		maxChecks := 5
+		checkInterval := time.Minute
+
+		for i := 0; i < maxChecks; i++ {
+			if a.CheckInternetConnection() {
+				if err := a.initAPI(); err == nil {
+					if err := a.initYear(); err == nil {
+						return
+					} else {
+						a.handleStartupError("Year initialization error : ", err)
+					}
+				} else {
+					a.handleStartupError("API initialization error :", err)
+				}
+			}
+
+			if i < maxChecks-1 {
+				time.Sleep(checkInterval)
+			}
+		}
+	})
 }
 
 // -------------------------------------------------------------------------- //
@@ -438,6 +537,11 @@ func (a *App) CheckXTimeInternetConnection(attempts int) bool {
 // -------------------------------------------------------------------------- //
 
 func (a *App) GetCourses() (string, error) {
+
+	if a.year == "" {
+		return "", fmt.Errorf("Year is undefined")
+	}
+
 	matched, err := regexp.MatchString(`^20\d{2}$`, a.year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("erreur lors de la vérification du format de l'année: %v", err))

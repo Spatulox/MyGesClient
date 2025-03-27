@@ -29,7 +29,8 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 		return createMessage("Impossible to connect to MyGes, bad username or password"), err
 	}
 
-	a.api = userApi
+	a.setAPI(userApi)
+	api := a.getAPI()
 
 	// If correct infos
 	// Create the local user
@@ -50,7 +51,7 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 		return createMessage("Impossible to save your info in local DB"), err
 	}
 
-	years, err := a.api.GetYears()
+	years, err := api.GetYears()
 	if err != nil {
 		Log.Error(fmt.Sprintf("Error : impossible to get the latest year for the user%v", err))
 		return "", err
@@ -72,13 +73,14 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 		Log.Error(fmt.Sprintf("Impossible to get your local infos %v", err))
 		return createMessage("Impossible to get your local infos"), err
 	}
-	a.user = userLocal
+	a.setAPIUser(userLocal)
+
 	Log.Infos("Your datas have beed correctely saved")
 
 	// Doing a GlobalRefresh to hav data stored
-	year := GetCurrentYear()
+	//year := GetCurrentYear()
 	monday, saturday := GetWeekDates()
-	refresh, err := a.globalRefresh(fmt.Sprintf("%d", year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+	refresh, err := a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
 	//refresh, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
 	if err != nil {
 		return createMessage("Error when fetching your datas :/"), err
@@ -121,6 +123,11 @@ func (a *App) UpdateUserTheme(value string) (bool, error) {
 // ------------------------------------------------ //
 
 func (a *App) GetProfile() (string, error) {
+
+	if a.getAPI() == nil {
+		return createMessage("Internal error"), fmt.Errorf("GESapi instance is nil for RefreshProfile")
+	}
+
 	a.profileMutex.Lock()
 	if a.isFetchingProfile {
 		a.profileMutex.Unlock()
@@ -136,17 +143,12 @@ func (a *App) GetProfile() (string, error) {
 	}()
 
 	Log.Infos("Refreshing Profile")
-
-	api := a.api
-	if api == nil {
-		return createMessage("Internal error"), fmt.Errorf("GESapi instance is nil for RefreshProfile")
-	}
-
-	return api.GetProfile() // Retourne le profil via GESapi
+	api := a.getAPI()
+	return api.GetProfile()
 }
 
 func (a *App) GetYears() (string, error) {
-	api := a.api
+	api := a.getAPI()
 	if api == nil {
 		return createMessage("Internal error"), fmt.Errorf("GESapi instance is nil")
 	}
@@ -154,8 +156,8 @@ func (a *App) GetYears() (string, error) {
 }
 
 func (a *App) DeconnectUser() error {
-	a.api = nil
-	a.user = UserSettings{}
+	a.deleteAPI()
+	a.deleteAPIUser()
 	return DeconnectUser(a.db)
 }
 
@@ -170,7 +172,7 @@ func (a *App) UpdateUserPassword(username string, password string) (bool, error)
 		return false, fmt.Errorf("Impossible to connect to MyGes, bad username or password")
 	}
 
-	a.api = userApi
+	a.setAPI(userApi)
 
 	return UpdateUserPassword(a.db, username, password)
 }
@@ -187,11 +189,12 @@ func (a *App) ConnectUser(username string, password string) (UserSettings, error
 			Log.Error(fmt.Sprintf("Impossible to select the user : %v", err))
 			return UserSettings{}, fmt.Errorf("This user don't exist : %v", err)
 		}
-		a.user = user
+		a.setAPIUser(user)
 		return user, nil
 	}
 
-	userApi, err := GESLogin(a.user.Username, a.user.Password)
+	userApiLocal := a.getAPIUser()
+	userApi, err := GESLogin(userApiLocal.Username, userApiLocal.Password)
 
 	if err != nil {
 		Log.Error(fmt.Sprintf("Impossible to initialize the API part when connecting %v", err))
@@ -199,7 +202,7 @@ func (a *App) ConnectUser(username string, password string) (UserSettings, error
 		return UserSettings{}, err
 	}
 
-	a.api = userApi
+	a.setAPI(userApi)
 	Log.Infos("API connection Initialized")
 
 	return UserSettings{}, fmt.Errorf("Une erreur s'est produite")
