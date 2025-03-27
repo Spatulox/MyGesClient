@@ -28,9 +28,9 @@ type StartupStatus int
 const (
 	StatusNotStarted StartupStatus = iota
 	StatusInProgress
-	StatusCompleted
 	StatusIncompleteNoUsers
 	StatusIncompleteNoInternet
+	StatusCompleted
 	StatusFailed
 )
 

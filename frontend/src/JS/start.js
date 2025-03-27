@@ -30,9 +30,9 @@ let initializedStart = false
 const StartupStatus = {
     StatusNotStarted: 0,
     StatusInProgress: 1,
-    StatusCompleted: 2,
-    StatusIncompleteNoUsers: 3,
-    StatusIncompleteNoInternet: 4,
+    StatusIncompleteNoUsers: 2,
+    StatusIncompleteNoInternet: 3,
+    StatusCompleted: 4,
     StatusFailed: 5
   };
   
@@ -93,10 +93,12 @@ export async function start(){
             loadPageGo("dashboard.html")
 
             // Need to wait the full start of the app
-            while (await GetStartupStatus() === StartupStatus.StatusInProgress) {
+            let status = await GetStartupStatus()
+            while (status === StartupStatus.StatusInProgress) {
                 await new Promise(resolve => setTimeout(resolve, 100));
+                status = await GetStartupStatus()
             }
-            initAllPages()
+            initAllPages(status)
         } catch (e) {
             console.log(e)
             popup(e.toString())
@@ -110,14 +112,21 @@ export async function start(){
     stopStillPopup(laStill)
 }
 
-async function initAllPages(){
+async function initAllPages(startingStatus = -1){
+
     schedule()
-    grades()
-    events()
-    absences()
-    courses()
-    projects()
-    account()
+    switch (startingStatus) {
+        case StartupStatus.StatusCompleted:
+            projects()
+            account()
+            courses()
+        case StartupStatus.StatusIncompleteNoInternet:
+            grades()
+            events()
+            absences()
+        default:
+            break;
+    }
 }
 
 async function connectDiscord(){
