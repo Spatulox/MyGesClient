@@ -1,6 +1,5 @@
 import {popup} from "../JS/popups";
 import {GetAbsences} from "../../wailsjs/go/backend/App";
-import {getYear} from "../JS/functions";
 
 let isStillRunning = false
 
@@ -14,6 +13,10 @@ export async function absences(){
         tableBody.innerHTML = ""
 
         let absence = await GetAbsences()
+
+        if(!absence){
+            return
+        }
 
         absence.forEach(course => {
             const row = document.createElement('tr');

@@ -15,8 +15,9 @@ export async function grades() {
     const semester2Tab = document.querySelector('.tab-button[data-semester="2"]');
 
     let year = getYear();
+    let gradeTmp
     try{
-        let gradeTmp = await GetGrades(year.toString())
+        gradeTmp = await GetGrades(year.toString())
     }catch(e){
         console.log(e)
         isStillRunning = false
