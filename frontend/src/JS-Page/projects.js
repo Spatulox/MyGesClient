@@ -149,16 +149,18 @@ function populateData(projects, name, firstname){
         item.addEventListener('click', () => {
             const details = item.nextElementSibling;
             
-            document.querySelectorAll('#courses-container .project-details.active').forEach(activeDetail => {
-            if (activeDetail !== details) {
-                activeDetail.classList.remove('active');
-            }
-            });
-            
             details.classList.toggle('active');
+            if (details.classList.contains('active')) {
+                item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            document.querySelectorAll('#courses-container .project-details.active').forEach(activeDetail => {
+                if (activeDetail !== details) {
+                    activeDetail.classList.remove('active');
+                }
+            });
         });
     });
-
 }
 
 // Need to parse ALL THE GROUP TO DETECT IF I'M INSIDE OR NOT WELPPPPPP
