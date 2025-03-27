@@ -2,7 +2,13 @@ import {GetCourses} from "../../wailsjs/go/backend/App";
 import {getYear, scrollMainPart} from "../JS/functions";
 import {popup} from "../JS/popups";
 
+let isStillRunning = false
+
 export async function courses(){
+    if(isStillRunning){
+        return
+    }
+    isStillRunning = true
     scrollMainPart()
     const loading = document.getElementById("loadingCourses")
     const search = document.getElementById("search-bar-courses")
@@ -13,6 +19,7 @@ export async function courses(){
 
         if(!mygescourses){
             popup("Impossible de lister vos Cours")
+            isStillRunning = false
             return
         }
 
@@ -38,6 +45,7 @@ export async function courses(){
         mygescourses = JSON.parse(mygescourses)
         loading.style.display = "none"
     }
+    isStillRunning = false
 }
 
 // Les données seront chargées et insérées ici via JavaScript

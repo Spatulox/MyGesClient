@@ -3,14 +3,20 @@ import { capitalizeFirstLetter, getDateInfo, getSundayFromMonday, getMonday, scr
 import { stillPopup, stopStillPopup } from "../JS/popups";
 
 let currentMonday;
+let isStillRunning = false
 
 export async function schedule(forceRefresh = false){
+    if(isStillRunning){
+        return
+    }
+    isStillRunning = true
     scrollMainPart()
     currentMonday = getMonday()
     const monday = currentMonday
     const sunday = getSundayFromMonday(currentMonday)
 
     await updateSchedule(monday, sunday, forceRefresh)
+    isStillRunning = false
 }
 
 async function getSchedule(monday, saturday, forceRefresh){

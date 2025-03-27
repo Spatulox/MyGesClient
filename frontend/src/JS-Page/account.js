@@ -1,6 +1,9 @@
 import {GetProfile} from "../../wailsjs/go/backend/App";
 import {scrollMainPart} from "../JS/functions";
 import {stillPopup, stopStillPopup} from "../JS/popups";
+
+let isStillRunning = false
+
 // Fonction pour créer un élément avec des attributs et du contenu
 const createElement = (tag, attributes = {}, content = '') => {
     const element = document.createElement(tag);
@@ -64,6 +67,10 @@ const createStudentCard = (profile) => {
 
 
 export async function account() {
+    if(isStillRunning){
+        return
+    }
+    isStillRunning = true
     const target = document.getElementById("account-presentation")
 
     scrollMainPart()
@@ -112,4 +119,5 @@ export async function account() {
         stopStillPopup(laStill)
         target.innerHTML = "Une erreur c'est produite"
     }
+    isStillRunning = false
 }

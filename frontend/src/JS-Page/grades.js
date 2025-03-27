@@ -1,7 +1,13 @@
 import {GetGrades} from "../../wailsjs/go/backend/App";
 import {capitalizeFirstLetter, getYear, scrollMainPart} from "../JS/functions";
 
+let isStillRunning = false
+
 export async function grades() {
+    if(isStillRunning){
+        return
+    }
+    isStillRunning = true
     scrollMainPart()
     const gradesList1 = document.getElementById('grades-list-semester-1');
     const gradesList2 = document.getElementById('grades-list-semester-2');
@@ -9,7 +15,13 @@ export async function grades() {
     const semester2Tab = document.querySelector('.tab-button[data-semester="2"]');
 
     let year = getYear();
-    let gradeTmp = await GetGrades(year.toString());
+    try{
+        let gradeTmp = await GetGrades(year.toString())
+    }catch(e){
+        console.log(e)
+        isStillRunning = false
+        return
+    }
 
     function populateGrades(gradesList, grades) {
         gradesList.innerHTML = ''; // Nettoyer la liste existante
@@ -59,6 +71,7 @@ export async function grades() {
             document.getElementById(`grades-list-semester-${semester}`).classList.add('active');
         });
     });
+    isStillRunning = false
 }
 
 

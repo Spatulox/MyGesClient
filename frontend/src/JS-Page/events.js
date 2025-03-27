@@ -4,8 +4,14 @@ import {popup} from "../JS/popups";
 let personnalEvents
 let displayEventsId = []
 let specificEvent = false
+let isStillRunning = false
+
 export async function events(){
 
+    if(isStillRunning){
+        return
+    }
+    isStillRunning = true
     if(specificEvent){
         return
     }
@@ -17,6 +23,7 @@ export async function events(){
         personnalEvents = await GetAllEvents()
     } catch (e) {
         console.log(e)
+        isStillRunning = false
         return
     }
 
@@ -35,6 +42,8 @@ export async function events(){
     if(displayEventsId.length === 0){
         displayEventsId.push(setInterval(events, 20000))
     }
+
+    isStillRunning = false
 }
 
 function createEventElement(event) {

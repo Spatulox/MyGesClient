@@ -2,7 +2,13 @@ import {popup} from "../JS/popups";
 import {GetAbsences} from "../../wailsjs/go/backend/App";
 import {getYear} from "../JS/functions";
 
+let isStillRunning = false
+
 export async function absences(){
+    if(isStillRunning){
+        return
+    }
+    isStillRunning = true
     try{
         const tableBody = document.querySelector('#coursesTable tbody');
         tableBody.innerHTML = ""
@@ -25,4 +31,5 @@ export async function absences(){
         console.log(e)
         popup("Une erreur est survenue")
     }
+    isStillRunning = false
 }

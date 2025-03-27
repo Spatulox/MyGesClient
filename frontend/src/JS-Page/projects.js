@@ -2,7 +2,13 @@ import { stillPopup, stopStillPopup, popup } from "../JS/popups";
 import {GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup} from "../../wailsjs/go/backend/App";
 import { scrollMainPart } from "../JS/functions";
 
+let isStillRunning = false
+
 export async function projects(){
+    if(isStillRunning){
+        return
+    }
+    isStillRunning = true
     scrollMainPart()
 
     let laStill = stillPopup("Actualisation de vos projets..")
@@ -25,8 +31,7 @@ export async function projects(){
         //loadingProject.style.display = "none"
     }
     stopStillPopup(laStill)
-
-
+    isStillRunning = false
 }
 
 function populateData(projects, name, firstname){
