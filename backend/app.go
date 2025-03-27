@@ -384,7 +384,7 @@ func (a *App) startBackgroundTasks() {
 		}
 	})
 
-	go a.runEveryXMinutes(a.ctx, 1, func() {
+	go a.runEveryXMinutes(a.ctx, 60, func() {
 		Log.Debug("Updating the MyGes connection Token")
 
 		maxChecks := 5
