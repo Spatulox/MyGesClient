@@ -31,8 +31,7 @@ func GetWeekDates() (time.Time, time.Time) {
 	}
 	monday := now.AddDate(0, 0, daysUntilMonday)
 
-	// Calcul du samedi de la semaine en cours
-	saturday := monday.AddDate(0, 0, 5)
-
-	return monday, saturday
+	// Calcul du dimanche de la semaine en cours
+	sunday := monday.AddDate(0, 0, 6)
+	return monday, sunday
 }
