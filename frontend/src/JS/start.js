@@ -93,10 +93,10 @@ export async function start(){
 
 async function initAllPages(){
     schedule()
-    grades()
+    //grades()
     events()
-    absences()
-    courses()
+    //absences()
+    //courses()
     projects()
     account()
 }
