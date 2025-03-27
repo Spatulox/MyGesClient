@@ -168,6 +168,7 @@ func (a *App) DeconnectUser() error {
 // Update the local password, but check the new right password in myges
 func (a *App) UpdateUserPassword(username string, password string) (bool, error) {
 
+	// A.initUser() init the user from the DB, not from the api
 	// Check the api if this is the right informations
 	userApi, err := GESLogin(username, password)
 
@@ -177,8 +178,16 @@ func (a *App) UpdateUserPassword(username string, password string) (bool, error)
 	}
 
 	a.setAPI(userApi)
+	boolean, err := UpdateUserPassword(a.db, username, password)
 
-	return UpdateUserPassword(a.db, username, password)
+	user, err2 := GetUser(a.db)
+	if err2 != nil {
+		return false, err2
+	}
+
+	a.setAPIUser(user)
+
+	return boolean, err
 }
 
 func (a *App) GetRegisteredUsers() ([]UserSettings, error) {
