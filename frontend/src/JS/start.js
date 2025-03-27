@@ -78,7 +78,7 @@ export async function start(){
         try{
             connectDiscord()
             loadPageGo("dashboard.html")
-            //initAllPages()
+            initAllPages()
         } catch (e) {
             console.log(e)
             popup(e.toString())
@@ -93,7 +93,7 @@ export async function start(){
 }
 
 async function initAllPages(){
-    //schedule()
+    schedule()
     grades()
     events()
     absences()

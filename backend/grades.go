@@ -14,6 +14,8 @@ func (a *App) ReturnRefreshGradesState() bool {
 }
 
 func (a *App) GetGrades() ([]LocalGrades, error) {
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
 	return GetDBUserGrades(a.year, a.db)
 }
 
@@ -21,6 +23,11 @@ func (a *App) GetGrades() ([]LocalGrades, error) {
  * Refresh the Grades by asking the MyGes DB, and store it inside the LocalDB and sent back the fresh datas
  */
 func (a *App) RefreshGrades() ([]LocalGrades, error) {
+
+	if a.getAPI() == nil {
+		return []LocalGrades{}, fmt.Errorf("GES instance is nil")
+	}
+
 	a.gradesMutex.Lock()
 	if a.isFetchingGrades {
 		a.gradesMutex.Unlock()
@@ -36,7 +43,7 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 	}()
 	Log.Infos("Refreshing Grades")
 
-	api := a.api
+	api := a.getAPI()
 	if api == nil {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshGrades")
 	}
@@ -46,10 +53,12 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 		Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
 	}
 
-	// Curr year, but if your begin the school year in 2024, you need to request 2024 grades for 2025 year grades
 	if grades == "null" {
 		return []LocalGrades{}, nil
 	}
+
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
 
 	err = DeleteGradesForYear(a.db, a.year)
 	if err != nil {
@@ -57,8 +66,10 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 		return nil, err
 	}
 
+	Log.Infos("Saving Grades")
 	SaveGradesToDB(grades, a.db)
 
+	Log.Infos("Getting Grades from local DB")
 	userGrades, err := GetDBUserGrades(a.year, a.db)
 	if err != nil {
 		return nil, err

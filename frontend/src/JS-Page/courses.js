@@ -19,7 +19,7 @@ export async function courses(){
         search.addEventListener("input", ()=>{
             courseGrid.innerHTML = ""
             mygescourses.items.forEach(course => {
-                if(course.name.includes(search.value)){
+                if(course.name.toLowerCase().includes(search.value.toLowerCase())){
                     courseGrid.innerHTML += createCourseCard(course);
                 }
             });

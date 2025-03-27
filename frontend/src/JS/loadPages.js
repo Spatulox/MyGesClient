@@ -16,12 +16,20 @@ import {projects} from "../JS-Page/projects";
 import {absences} from "../JS-Page/absences";
 
 let leDocToShow = document.getElementById("weirdPlace")
+let isPossibleToSwitchTabs = true
 
 function renameMainTitle(string){
     document.getElementById("headerTitle").innerText = string
 }
 
+export async function setIsPossibleToSwitchTabs(value){
+    isPossibleToSwitchTabs = value
+}
+
 export async function loadPageGo(string, event){
+    if(!isPossibleToSwitchTabs){
+        return
+    }
 
     let currPage
     try{

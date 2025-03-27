@@ -42,7 +42,8 @@ func (a *App) GetAgenda(start *string, end *string) ([]LocalAgenda, error) {
 	startDateStr := startDate.Format("2006-01-02T15:04:05.000Z")
 	endDateStr := endDate.Format("2006-01-02T15:04:05.000Z")
 
-	//println(startDateStr, endDateStr)
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
 	return GetDBUserAgenda(a.db, startDateStr, endDateStr)
 }
 
@@ -50,6 +51,11 @@ func (a *App) GetAgenda(start *string, end *string) ([]LocalAgenda, error) {
  * Refresh the Schedule bu asking the MyGes DB, and store it inside the LocalDB and send back the fresh datas
  */
 func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
+
+	if a.getAPI() == nil {
+		return []LocalAgenda{}, fmt.Errorf("GES instance is nil")
+	}
+
 	a.scheduleMutex.Lock()
 	if a.isFetchingSchedule {
 		a.scheduleMutex.Unlock()
@@ -91,7 +97,7 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		return nil, errors.New("Impossible to parse date (start or end date in RefreshAgenda in else)")
 	}
 
-	api := a.api
+	api := a.getAPI()
 	if api == nil {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshSchedule")
 	}
@@ -102,6 +108,8 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		return nil, err
 	}
 
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
 	if agenda != "" {
 		// ---- Delete all data in AGENDA ---- //
 		_, err = deleteAgendaData(startDate, endDate, a.db)

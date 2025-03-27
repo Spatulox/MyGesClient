@@ -14,10 +14,17 @@ func (a *App) ReturnRefreshAbsencesState() bool {
 }
 
 func (a *App) GetAbsences() ([]LocalAbsences, error) {
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
 	return GetDBUserAbsences(a.year, a.db)
 }
 
 func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
+
+	if a.getAPI() == nil {
+		return []LocalAbsences{}, fmt.Errorf("GES instance is nil")
+	}
+
 	a.absencesMutex.Lock()
 	if a.isFetchingAbsences {
 		a.absencesMutex.Unlock()
@@ -31,11 +38,11 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 		a.isFetchingAbsences = false
 		a.absencesMutex.Unlock()
 	}()
-	Log.Infos("Refreshing Grades")
+	Log.Infos("Refreshing Absences")
 
-	api := a.api
+	api := a.getAPI()
 	if api == nil {
-		return nil, fmt.Errorf("GESapi instance is nil for RefreshGrades")
+		return nil, fmt.Errorf("GESapi instance is nil for RefreshAbsences")
 	}
 
 	absences, err := api.GetAbsences(a.year)
@@ -46,6 +53,9 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 	if absences == "null" {
 		return []LocalAbsences{}, nil
 	}
+
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
 
 	err = DeleteAbsencesForYear(a.db, a.year)
 	if err != nil {
