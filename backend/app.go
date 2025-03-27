@@ -47,6 +47,7 @@ type App struct {
 	ctx                context.Context
 	year               string
 	db                 *sql.DB
+	dbMutex            sync.Mutex
 	api                *GESapi
 	apiRWMutex         sync.RWMutex
 	user               UserSettings
@@ -385,7 +386,7 @@ func (a *App) startBackgroundTasks() {
 	})
 
 	go a.runEveryXMinutes(a.ctx, 60, func() {
-		Log.Debug("Updating the MyGes connection Token")
+		Log.Infos("Updating the MyGes connection Token")
 
 		maxChecks := 5
 		checkInterval := time.Minute
