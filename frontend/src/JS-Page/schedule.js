@@ -156,6 +156,8 @@ async function printSchedule(agenda, monday, saturday) {
                         courseElement.innerHTML += `<h3 ${course.room.color.Valid ? 'style="color:'+course.room.color.String+'"' : ""} >${capitalizeFirstLetter(course_name)}</h3>`;
                     }
 
+                    courseElement.innerHTML += `<p class="room">${course.room.name?.String}</p>`
+
             
                     courseElement.addEventListener('click', function() {
                         console.log(course)
