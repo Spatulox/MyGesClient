@@ -260,6 +260,11 @@
     transition: ease-in-out 0.3s;
 }
 
+#rightPart ul li.active{
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: ease-in-out 0.3s;
+}
+
 #rightPart{
     z-index: 2;
     width: var(--rightPartWidth);
