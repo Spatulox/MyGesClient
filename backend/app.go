@@ -60,6 +60,7 @@ type App struct {
 	isFetchingAbsences bool
 	scheduleMutex      sync.Mutex
 	isFetchingSchedule bool
+	stopInitIfInternet chan struct{}
 }
 
 // -------------------------------------------------------------------------- //
@@ -125,6 +126,13 @@ func (a *App) deleteAPIUser() {
 	a.apiRWMutex.Lock()
 	defer a.apiRWMutex.Unlock()
 	a.user = UserSettings{}
+}
+
+func (a *App) stopInitIfInternetFunc() {
+	if a.stopInitIfInternet != nil {
+		close(a.stopInitIfInternet)
+		a.stopInitIfInternet = nil
+	}
 }
 
 // -------------------------------------------------------------------------- //
@@ -207,43 +215,7 @@ func (a *App) Startup(ctx context.Context) {
 			Log.Infos("Startup incomplete, searching for internet...")
 
 			// Search for internet
-			go func() {
-				ticker := time.NewTicker(30 * time.Second)
-				defer ticker.Stop()
-
-				for {
-					select {
-					case <-ctx.Done():
-						Log.Infos("Application context cancelled, stopping internet check")
-						return
-					case <-ticker.C:
-						Log.Infos("Cheking internet connection")
-						if a.CheckInternetConnection() {
-							var errApi, errYear error
-
-							if errApi = a.initAPI(); errApi == nil {
-								Log.Infos("Internet connection restored, initAPI OK")
-							} else {
-								a.handleStartupError("API initialization", errApi)
-							}
-
-							if errYear = a.initYear(); errYear == nil {
-								Log.Infos("Internet connection restored, initYear OK")
-							} else {
-								a.handleStartupError("API initialization", errYear)
-							}
-
-							if errApi == nil && errYear == nil {
-								a.startBackgroundTasks()
-								a.startupStatus = StatusCompleted
-								return
-							}
-						} else {
-							Log.Infos("No internet")
-						}
-					}
-				}
-			}()
+			a.initIfInternet()
 
 		}
 	} else {
@@ -279,13 +251,14 @@ func (a *App) initUser() error {
 	if err != nil {
 		return fmt.Errorf("impossible to initialize the user: %w", err)
 	}
-	a.user = userLocal
+	a.setAPIUser(userLocal)
 	Log.Infos("User Initialized")
 	return nil
 }
 
 func (a *App) initAPI() error {
-	userApi, err := GESLogin(a.user.Username, a.user.Password)
+	userApiLocal := a.getAPIUser()
+	userApi, err := GESLogin(userApiLocal.Username, userApiLocal.Password)
 	if err != nil {
 		return fmt.Errorf("impossible to initialize the API part: %w", err)
 	}
@@ -329,6 +302,50 @@ func (a *App) initYear() error {
 		a.year = year
 	}
 	return nil
+}
+
+func (a *App) initIfInternet() {
+	ctx := a.ctx
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				Log.Infos("Application context cancelled, stopping internet check")
+				return
+			case <-a.stopInitIfInternet:
+				Log.Infos("initIfInternet goroutine stopped manually")
+				return
+			case <-ticker.C:
+				Log.Infos("Cheking internet connection")
+				if a.CheckInternetConnection() {
+					var errApi, errYear error
+
+					if errApi = a.initAPI(); errApi == nil {
+						Log.Infos("Internet connection restored, initAPI OK")
+					} else {
+						a.handleStartupError("API initialization", errApi)
+					}
+
+					if errYear = a.initYear(); errYear == nil {
+						Log.Infos("Internet connection restored, initYear OK")
+					} else {
+						a.handleStartupError("API initialization", errYear)
+					}
+
+					if errApi == nil && errYear == nil {
+						a.startBackgroundTasks()
+						a.startupStatus = StatusCompleted
+						return
+					}
+				} else {
+					Log.Infos("No internet")
+				}
+			}
+		}
+	}()
 }
 
 func (a *App) handleStartupError(step string, err error) {
