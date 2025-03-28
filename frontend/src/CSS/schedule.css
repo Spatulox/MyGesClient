@@ -98,9 +98,9 @@
     margin: 0;
 }
 
-#schedule .event p.room{
+#schedule .event .room{
     margin: 0;
-    margin-top: 5px;
+    margin-left: 10px;
 }
 
 #schedule .event-time {

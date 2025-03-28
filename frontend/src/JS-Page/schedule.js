@@ -128,41 +128,52 @@ async function printSchedule(agenda, monday, saturday) {
                     courseElement.className = 'event';
                     courseElement.setAttribute('data-info', course.agenda_id);
                     
-                    courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)}</p>`
+                    if(course.room.name?.String){
+                        courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)} <span class="room">${course.room.name?.String}</span></p>`
+                    } else {
+                        courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)}</p>`
+                    }
                     
                     const delta = courseStartDate.getTime() - possibleHoursAsDate[currentHourIndex].getTime();
                     const deltaMinutes = Math.floor(delta / (1000 * 60));
                     const courseDuration = (courseEndDate.getTime() - courseStartDate.getTime()) / (1000 * 60);
+                    
+                    const isPauseTime = courseStartDate.getUTCHours() === 13 && courseStartDate.getUTCMinutes() === 0;
+                    const standardDuration = isPauseTime ? 60 : 90;
+                    
+                    const course_name = clearAgendaName(course)
 
+                    const maxHeight = courseElement.style.height || (isPauseTime ? 60 : 90); // always 90px, height in the CSS part, line 52 in schedule.css
+                    
+                    console.log(courseDuration, standardDuration, course_name, isPauseTime)
                     // Later
+                    const translateYUp = `calc(${deltaMinutes}px ${isPauseTime ? "*1.5" : ""} + ${(courseDuration/standardDuration)-2}px)`
+                    const translateYDown = `calc(${deltaMinutes}px ${isPauseTime ? "*1.5" : ""} - ${(courseDuration/standardDuration)-2}px)`
+
+                    // Translate Y of the event
                     if(courseStartDate.getTime() > possibleHoursAsDate[currentHourIndex].getTime()){
-                        courseElement.style.transform = `translateY(${deltaMinutes}px)`
+                        courseElement.style.transform = `translateY(${translateYUp})`
                     }
                     // ealier
                     else if (courseStartDate.getTime() < possibleHoursAsDate[currentHourIndex].getTime()){
-                        courseElement.style.transform = `translateY(${deltaMinutes}px)`
+                        courseElement.style.transform = `translateY(${translateYDown})`
                     }
-
-                    const standardDuration = 90; // 1h30 en minutes
-                    const maxHeight = courseElement.style.height || 90; // always 90px, height in the CSS part, line 52 in schedule.css
-
+                    
+                    // Size of the event
                     if (courseDuration < standardDuration) {
                         const minutesDifference = standardDuration - courseDuration;
-                        courseElement.style.height = `${maxHeight - minutesDifference}%`;
+                        courseElement.style.height = `calc(${maxHeight - minutesDifference}% - ${(courseDuration/standardDuration)-2}px)`;
                     }
                     else if (courseDuration > standardDuration) {
                         const minutesDifference = courseDuration - standardDuration;
-                        courseElement.style.height = `${maxHeight + minutesDifference}%`;
+                        courseElement.style.height = `calc(${maxHeight + minutesDifference}% - ${(courseDuration%standardDuration)-2}px)`;
                     }
 
-                    const course_name = clearAgendaName(course)
                     if(course.type === "Examen"){
                         courseElement.innerHTML += `<h3 ${course.room.color.Valid ? 'style="color:'+course.room.color.String+'"' : ""} >${capitalizeFirstLetter(course_name)} - ${course.type}</h3>`;
                     } else {
                         courseElement.innerHTML += `<h3 ${course.room.color.Valid ? 'style="color:'+course.room.color.String+'"' : ""} >${capitalizeFirstLetter(course_name)}</h3>`;
                     }
-
-                    courseElement.innerHTML += `<p class="room">${course.room.name?.String}</p>`
 
             
                     courseElement.addEventListener('click', function() {
