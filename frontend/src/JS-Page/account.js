@@ -117,7 +117,11 @@ export async function account() {
     } catch (e) {
         console.log(e)
         stopStillPopup(laStill)
-        target.innerHTML = "Une erreur c'est produite"
+        target.innerHTML = `
+        <div class="width80 marginAuto flex flexCenter">
+            <div class="box witdth100">Une erreur c'est produite</div>
+        
+        </div>`
     }
     isStillRunning = false
 }

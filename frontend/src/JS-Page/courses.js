@@ -41,7 +41,12 @@ export async function courses(){
 
     } catch (e) {
         console.log(e)
-        courseGrid.innerHTML = "Une erreur c'est produite"
+        //courseGrid.innerHTML = "Une erreur c'est produite"
+        courseGrid.innerHTML = `
+        <div class="width100 marginAuto flex flexCenter">
+            <div class="box width100">Une erreur c'est produite</div>
+        
+        </div>`
         loading.style.display = "none"
     }
     isStillRunning = false
