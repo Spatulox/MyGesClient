@@ -138,18 +138,16 @@ async function printSchedule(agenda, monday, saturday) {
                     const deltaMinutes = Math.floor(delta / (1000 * 60));
                     const courseDuration = (courseEndDate.getTime() - courseStartDate.getTime()) / (1000 * 60);
                     
-                    const isPauseTime = courseStartDate.getUTCHours() === 13 && courseStartDate.getUTCMinutes() === 0;
+                    const isPauseTime = (courseStartDate.getUTCHours() >= 13) && (courseStartDate.getUTCHours() < 14);
                     const standardDuration = isPauseTime ? 60 : 90;
                     
                     const course_name = clearAgendaName(course)
 
                     const maxHeight = courseElement.style.height || (isPauseTime ? 60 : 90); // always 90px, height in the CSS part, line 52 in schedule.css
-                    
-                    console.log(courseDuration, standardDuration, course_name, isPauseTime)
+
                     // Later
                     const translateYUp = `calc(${deltaMinutes}px ${isPauseTime ? "*1.5" : ""} + ${(courseDuration/standardDuration)-2}px)`
                     const translateYDown = `calc(${deltaMinutes}px ${isPauseTime ? "*1.5" : ""} - ${(courseDuration/standardDuration)-2}px)`
-
                     // Translate Y of the event
                     if(courseStartDate.getTime() > possibleHoursAsDate[currentHourIndex].getTime()){
                         courseElement.style.transform = `translateY(${translateYUp})`
