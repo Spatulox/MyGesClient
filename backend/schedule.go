@@ -42,9 +42,9 @@ func (a *App) GetAgenda(start *string, end *string) ([]LocalAgenda, error) {
 	startDateStr := startDate.Format("2006-01-02T15:04:05.000Z")
 	endDateStr := endDate.Format("2006-01-02T15:04:05.000Z")
 
+	a.dbWg.Add(1)
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
-	a.dbWg.Add(1)
 	defer a.dbWg.Done()
 	return GetDBUserAgenda(a.db, startDateStr, endDateStr)
 }
@@ -59,17 +59,25 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 	}
 
 	a.scheduleMutex.Lock()
+	//Log.Debug("scheduleMutex locked")
 	if a.isFetchingSchedule {
+		//Log.Debug("isFetchingSchedule is true, returning early")
 		a.scheduleMutex.Unlock()
+		//Log.Debug("scheduleMutex unlocked")
 		return nil, errors.New("waiting for the previous schedule fetch to end")
 	}
 	a.isFetchingSchedule = true
+	//Log.Debug("isFetchingSchedule set to true")
 	a.scheduleMutex.Unlock()
+	//Log.Debug("scheduleMutex unlocked2")
 
 	defer func() {
+		//Log.Debug("scheduleMutex locked2")
 		a.scheduleMutex.Lock()
 		a.isFetchingSchedule = false
+		//Log.Debug("isFetchingSchedule set to false")
 		a.scheduleMutex.Unlock()
+		//Log.Debug("scheduleMutex unlocked")
 	}()
 
 	var startDate, endDate string
@@ -110,9 +118,9 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		return nil, err
 	}
 
+	a.dbWg.Add(1)
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
-	a.dbWg.Add(1)
 	defer a.dbWg.Done()
 	if agenda != "" {
 		// ---- Delete all data in AGENDA ---- //
