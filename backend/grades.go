@@ -14,9 +14,9 @@ func (a *App) ReturnRefreshGradesState() bool {
 }
 
 func (a *App) GetGrades() ([]LocalGrades, error) {
+	a.dbWg.Add(1)
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
-	a.dbWg.Add(1)
 	defer a.dbWg.Done()
 	return GetDBUserGrades(a.year, a.db)
 }
@@ -31,18 +31,27 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 	}
 
 	a.gradesMutex.Lock()
+	//Log.Debug("gradesMutex locked")
 	if a.isFetchingGrades {
+		//Log.Debug("isFetchingGrades set to true, returning early")
 		a.gradesMutex.Unlock()
+		//Log.Debug("gradesMutex unlocked")
 		return nil, errors.New("waiting for the previous grades fetch to end")
 	}
 	a.isFetchingGrades = true
+	//Log.Debug("isFetchingGrades set to true")
 	a.gradesMutex.Unlock()
+	//Log.Debug("gradesMutex unlocked2")
 
 	defer func() {
+		//Log.Debug("gradesMutex locked2")
 		a.gradesMutex.Lock()
 		a.isFetchingGrades = false
+		//Log.Debug("isFetchingGrades set to false")
 		a.gradesMutex.Unlock()
+		//Log.Debug("gradesMutex unlocked3")
 	}()
+
 	Log.Infos("Refreshing Grades")
 
 	api := a.getAPI()
@@ -59,9 +68,9 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 		return []LocalGrades{}, nil
 	}
 
+	a.dbWg.Add(1)
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
-	a.dbWg.Add(1)
 	defer a.dbWg.Done()
 
 	err = DeleteGradesForYear(a.db, a.year)

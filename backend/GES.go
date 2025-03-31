@@ -56,6 +56,7 @@ func (a *App) globalRefresh(year string, start string, end string) (string, erro
 		defer wg.Done()
 		_, err := a.RefreshAgenda(&start, &end)
 		handleError("schedule", err)
+		//Log.Debug("RefreshSchedule ok")
 	}()
 
 	// Rafraîchir les notes
@@ -63,6 +64,7 @@ func (a *App) globalRefresh(year string, start string, end string) (string, erro
 		defer wg.Done()
 		_, err := a.RefreshGrades()
 		handleError("grades", err)
+		//Log.Debug("RefreshGrades ok")
 	}()
 
 	// Rafraîchir les absences
@@ -70,9 +72,11 @@ func (a *App) globalRefresh(year string, start string, end string) (string, erro
 		defer wg.Done()
 		_, err := a.RefreshAbsences()
 		handleError("absences", err)
+		//Log.Debug("RefreshAbsences ok")
 	}()
 
 	// Attendre que toutes les goroutines terminent
+	//Log.Debug("coucou21")
 	wg.Wait()
 	close(errChan)
 
@@ -81,11 +85,11 @@ func (a *App) globalRefresh(year string, start string, end string) (string, erro
 	for err := range errChan {
 		errors = append(errors, err)
 	}
-
+	//Log.Debug("coucou")
 	if len(errors) > 0 {
 		return createMessage("Refresh partially completed with errors"), fmt.Errorf("multiple errors occurred: %v", errors)
 	}
-
+	//Log.Debug("coucou12Z")
 	return createMessage("Refresh finished successfully!"), nil
 }
 

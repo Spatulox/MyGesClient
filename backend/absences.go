@@ -14,9 +14,9 @@ func (a *App) ReturnRefreshAbsencesState() bool {
 }
 
 func (a *App) GetAbsences() ([]LocalAbsences, error) {
+	a.dbWg.Add(1)
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
-	a.dbWg.Add(1)
 	defer a.dbWg.Done()
 	return GetDBUserAbsences(a.year, a.db)
 }
@@ -28,18 +28,27 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 	}
 
 	a.absencesMutex.Lock()
+	//Log.Debug("absenceMutex locked")
 	if a.isFetchingAbsences {
+		//Log.Debug("isFetchingAbsences is true, returning early")
 		a.absencesMutex.Unlock()
+		//Log.Debug("absencesMutex unlocked")
 		return nil, errors.New("waiting for the previous absences fetch to end")
 	}
 	a.isFetchingAbsences = true
+	//Log.Debug("isFetchingAbsences set to true")
 	a.absencesMutex.Unlock()
+	//Log.Debug("absencesMutex unlocked2")
 
 	defer func() {
+		//Log.Debug("absencesMutex locked2")
 		a.absencesMutex.Lock()
 		a.isFetchingAbsences = false
+		//Log.Debug("isFetchingAbsences set to false")
 		a.absencesMutex.Unlock()
+		//Log.Debug("absencesMutex unlocked3")
 	}()
+
 	Log.Infos("Refreshing Absences")
 
 	api := a.getAPI()
@@ -49,16 +58,16 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 
 	absences, err := api.GetAbsences(a.year)
 	if err != nil {
-		Log.Error(fmt.Sprintf("Something went wrong wen fetching grades %v", err))
+		Log.Error(fmt.Sprintf("Something went wrong wen fetching absences %v", err))
 	}
 
 	if absences == "null" {
 		return []LocalAbsences{}, nil
 	}
 
+	a.dbWg.Add(1)
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
-	a.dbWg.Add(1)
 	defer a.dbWg.Done()
 
 	err = DeleteAbsencesForYear(a.db, a.year)
@@ -66,7 +75,9 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 		Log.Error(fmt.Sprintf("%v", err))
 		return nil, err
 	}
-	SaveAbsencesToDB(absences, a.db)
+	if !SaveAbsencesToDB(absences, a.db) {
+		Log.Error("impossible to save absences in the db...")
+	}
 
 	userAbs, err := GetDBUserAbsences(a.year, a.db)
 	if err != nil {
