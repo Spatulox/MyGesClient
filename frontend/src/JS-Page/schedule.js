@@ -1,4 +1,4 @@
-import { GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
+import { CheckInternetConnection, GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
 import { capitalizeFirstLetter, getDateInfo, getSundayFromMonday, getMonday, scrollMainPart, toLocalHourString, getSunday } from "../JS/functions";
 import { popup, stillPopup, stopStillPopup } from "../JS/popups";
 
@@ -25,7 +25,7 @@ async function getSchedule(monday, sunday, forceRefresh){
         clearSchedule()
         let agenda
 
-        if(currentMonday <= getMonday()){
+        if(currentMonday <= getMonday() || !CheckInternetConnection()){
             agenda = await GetAgenda(`${monday}`, `${sunday}`)
             console.log("Chargement de l'agenda enregistré...")
         }
