@@ -94,8 +94,8 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 
 	// Doing a GlobalRefresh to hav data stored
 	//year := GetCurrentYear()
-	monday, saturday := GetWeekDates()
-	_, err = a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+	monday, sunday := GetWeekDates()
+	_, err = a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), sunday.Format("2006-01-02"))
 	//refresh, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
 	if err != nil {
 		return createMessage("Error when fetching your datas :/"), err

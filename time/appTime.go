@@ -15,7 +15,7 @@ func GetTodayDate() time.Time {
 }
 
 func GetWeekDates() (time.Time, time.Time) {
-	now := time.Now()
+	now := time.Now().UTC()
 	weekday := now.Weekday()
 
 	// Si c'est dimanche, on prend la semaine suivante
