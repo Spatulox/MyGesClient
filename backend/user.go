@@ -21,57 +21,70 @@ Verifie if the user exists on myges
 */
 func (a *App) VerifyUser(username string, password string) (string, error) {
 
-	Log.Debug(fmt.Sprintf("VerifyUser"))
+	//Log.Debug(fmt.Sprintf("VerifyUser"))
 	// Check the api if this is the right informations
-	/*userApi, err := GESLogin(username, password)
+	_, err := GESLogin(username, password)
 
 	if err != nil {
 		Log.Error("Impossible to connect to Myges")
 		return createMessage("Impossible to connect to MyGes, bad username or password"), err
-	}*/
+	}
 
-	err := a.initUser()
+	/*err := a.initUser()
 	if err != nil {
 		Log.Error(fmt.Sprintf("Wrong username or password: %v", err))
 		return "", fmt.Errorf("Wrong username or password: %v", err)
-	}
+	}*/
 
 	// If correct infos
 	// Create the local user
-	a.dbMutex.Lock()
-	defer a.dbMutex.Unlock()
-	a.dbWg.Add(1)
-	defer a.dbWg.Done()
 
-	Log.Debug(fmt.Sprintf("CheckUserExist"))
+	//Log.Debug(fmt.Sprintf("CheckUserExist"))
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
 	res, err := CheckUserExist(a.db, username)
+	a.dbMutex.Unlock()
+	a.dbWg.Done()
+
 	if err != nil {
 		Log.Error(fmt.Sprintf("User already exist : %v", err))
 		return "", err
 	}
 
-	if res == true {
+	if res {
 		return "", fmt.Errorf("L'utilisateur existe déjà, impossible de créer un compte")
 	}
 
-	Log.Debug(fmt.Sprintf("CreateUser"))
+	//Log.Debug(fmt.Sprintf("CreateUser"))
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
 	user, err := CreateUser(a.db, username, password)
+	a.dbMutex.Unlock()
+	a.dbWg.Done()
 	if !user {
 		Log.Error(fmt.Sprintf("Impossible to save your info in local DB : %v", err))
 		return createMessage("Impossible to save your info in local DB"), err
 	}
 
-	Log.Debug(fmt.Sprintf("InitPart()"))
+	//Log.Debug(fmt.Sprintf("InitPart()"))
+
+	err = a.initUser()
+	if err != nil {
+		Log.Error(fmt.Sprintf("Wrong username or password: %v", err))
+		return "", fmt.Errorf("Wrong username or password: %v", err)
+	}
 
 	errour := 0
 	if err := a.initAPI(); err != nil {
 		a.handleStartupError("API initialization", err)
 		errour += ErrAPIInit
+		Log.Error("API init error")
 	}
 
 	if err := a.initYear(); err != nil {
 		a.handleStartupError("API initialization", err)
 		errour += ErrYearsRequest
+		Log.Error("YEAR init error")
 	}
 
 	if errour != 0 {
@@ -79,18 +92,16 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 		a.initIfInternet()
 	}
 
-	Log.Infos("Your datas have beed correctely saved")
-
 	// Doing a GlobalRefresh to hav data stored
 	//year := GetCurrentYear()
 	monday, saturday := GetWeekDates()
-	refresh, err := a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
+	_, err = a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), saturday.Format("2006-01-02"))
 	//refresh, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
 	if err != nil {
 		return createMessage("Error when fetching your datas :/"), err
 	}
-	println(refresh)
 
+	Log.Infos("Your datas have beed correctely saved")
 	return createMessage("Your datas have been correctely saved"), nil
 }
 
@@ -230,6 +241,6 @@ func (a *App) ConnectUser(username string, password string) (UserSettings, error
 }
 
 func (a *App) DeleteOldData() bool {
-	Log.Debug("Deleting !!!")
+	//Log.Debug("Deleting !!!")
 	return DeleteOldData(a.db)
 }
