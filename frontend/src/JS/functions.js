@@ -104,6 +104,11 @@ export function getMonday() {
 
 // ------------------------------------------------ //
 
+/**
+ * DEPRECATED
+ * PLZ USE : getSundayFromMonday
+ * @returns {Date} get the current saturday
+ */
 export function getSaturday() {
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
@@ -120,7 +125,8 @@ export function getSaturday() {
 
 export function getSundayFromMonday(currentMonday){
     const currentSunday = new Date(currentMonday);
-    currentSunday.setDate(currentMonday.getDate() + 6);
+    currentSunday.setUTCDate(currentMonday.getDate() + 6);
+    currentSunday.setUTCHours(5, 0, 0, 0)
     return currentSunday
 }
 

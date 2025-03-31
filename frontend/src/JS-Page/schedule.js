@@ -1,5 +1,5 @@
 import { GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
-import { capitalizeFirstLetter, getDateInfo, getSundayFromMonday, getMonday, scrollMainPart, toLocalHourString } from "../JS/functions";
+import { capitalizeFirstLetter, getDateInfo, getSundayFromMonday, getMonday, scrollMainPart, toLocalHourString, getSunday } from "../JS/functions";
 import { stillPopup, stopStillPopup } from "../JS/popups";
 
 let currentMonday;
@@ -19,16 +19,16 @@ export async function schedule(forceRefresh = false){
     isStillRunning = false
 }
 
-async function getSchedule(monday, saturday, forceRefresh){
+async function getSchedule(monday, sunday, forceRefresh){
     try{
         clearSchedule()
-        let agenda = await GetAgenda(`${monday}`, `${saturday}`)
+        let agenda = await GetAgenda(`${monday}`, `${sunday}`)
         let still
         if(!agenda || forceRefresh){
             if(forceRefresh){
                 still = stillPopup("Rafraichissement forcé")
             }
-            try{agenda = await RefreshAgenda(`${monday}`, `${saturday}`)}catch(e){console.log(e)}
+            try{agenda = await RefreshAgenda(`${monday}`, `${sunday}`)}catch(e){console.log(e)}
             stopStillPopup(still)
         }
         return agenda
@@ -250,29 +250,33 @@ function setupModal(){
     };
 }
 
-function printScheduleTitle(monday, saturday) {
-    const [mondayFormatted, mondayDay] = getDateInfo(monday.toLocaleDateString('fr-FR'));
-    const [saturdayFormatted, saturdayDay] = getDateInfo(saturday.toLocaleDateString('fr-FR'));
-
+function printScheduleTitle(monday, sunday) {
+    const saturday = new Date(sunday);
+    saturday.setUTCDate(saturday.getUTCDate() - 1);
+    
+    const [mondayFormatted, mondayDayName] = getDateInfo(monday.toLocaleDateString('fr-FR'));
+    const [saturdayFormatted, saturdayDayName] = getDateInfo(saturday.toLocaleDateString('fr-FR'));
     const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
-    const mondayParts = mondayFormatted.split('/');
-    const saturdayParts = saturdayFormatted.split('/');
-
-    const mondayMonth = mois[parseInt(mondayParts[1]) - 1];
-    const saturdayMonth = mois[parseInt(saturdayParts[1]) - 1];
+    // Formater les dates pour le titre
+    const mondayDay = monday.getDate();
+    const mondayMonth = mois[monday.getMonth()];
+    const saturdayDay = saturday.getDate();
+    const saturdayMonth = mois[saturday.getMonth()];
 
     const title = document.getElementById("week");
-    title.textContent = `🗓️ ${mondayDay} ${mondayParts[0]} ${capitalizeFirstLetter(mondayMonth)} au ${saturdayDay} ${saturdayParts[0]} ${capitalizeFirstLetter(saturdayMonth)} 🗓️`;
+    title.textContent = `🗓️ ${mondayDayName} ${mondayDay} ${capitalizeFirstLetter(mondayMonth)} au ${saturdayDayName} ${saturdayDay} ${capitalizeFirstLetter(saturdayMonth)} 🗓️`;
 
+    // Remplir les jours de la semaine
+    const daysElements = ["lun-day", "mar-day", "mer-day", "jeu-day", "ven-day", "sam-day"];
+    let currentDate = new Date(monday); // Clone de la date du lundi
 
-    document.getElementById("lun-day").innerHTML = " " + mondayParts[0]++
-    document.getElementById("mar-day").innerHTML = " " + mondayParts[0]++
-    document.getElementById("mer-day").innerHTML = " " + mondayParts[0]++
-    document.getElementById("jeu-day").innerHTML = " " + mondayParts[0]++
-    document.getElementById("ven-day").innerHTML = " " + mondayParts[0]++
-    document.getElementById("sam-day").innerHTML = " " + mondayParts[0]
+    for (let i = 0; i < daysElements.length; i++) {
+        document.getElementById(daysElements[i]).innerHTML = " " + currentDate.getDate();
+        currentDate.setDate(currentDate.getDate() + 1); // Passer au jour suivant
+    }
 }
+
 
 // -------------------- switch Week -------------------- //
 
@@ -284,6 +288,7 @@ export async function changeWeek(direction, forceRefresh = false) {
 
     currentMonday.setDate(currentMonday.getDate() + direction * 7);
     const currentSunday = getSundayFromMonday(currentMonday)
+    console.log(currentSunday)
 
     await updateSchedule(currentMonday, currentSunday, forceRefresh)
 }
