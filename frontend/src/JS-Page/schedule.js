@@ -1,6 +1,6 @@
 import { GetAgenda, RefreshAgenda } from "../../wailsjs/go/backend/App";
 import { capitalizeFirstLetter, getDateInfo, getSundayFromMonday, getMonday, scrollMainPart, toLocalHourString, getSunday } from "../JS/functions";
-import { stillPopup, stopStillPopup } from "../JS/popups";
+import { popup, stillPopup, stopStillPopup } from "../JS/popups";
 
 let currentMonday;
 let isStillRunning = false
@@ -20,9 +20,15 @@ export async function schedule(forceRefresh = false){
 }
 
 async function getSchedule(monday, sunday, forceRefresh){
+
     try{
         clearSchedule()
-        let agenda = await GetAgenda(`${monday}`, `${sunday}`)
+        let agenda
+
+        if(currentMonday <= getMonday()){
+            agenda = await GetAgenda(`${monday}`, `${sunday}`)
+        }
+
         let still
         if(!agenda || forceRefresh){
             if(forceRefresh){
