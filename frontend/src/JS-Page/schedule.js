@@ -27,6 +27,7 @@ async function getSchedule(monday, sunday, forceRefresh){
 
         if(currentMonday <= getMonday()){
             agenda = await GetAgenda(`${monday}`, `${sunday}`)
+            console.log("Chargement de l'agenda enregistré...")
         }
 
         let still
