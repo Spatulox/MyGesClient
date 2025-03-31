@@ -24,7 +24,7 @@ async function getSchedule(monday, sunday, forceRefresh){
     try{
         clearSchedule()
         let agenda
-
+        //  saved monday <= today monday's week || no internet connection => not refresh past/today's schedule OR get the local schedule when no internet
         if(currentMonday <= getMonday() || !CheckInternetConnection()){
             agenda = await GetAgenda(`${monday}`, `${sunday}`)
             console.log("Chargement de l'agenda enregistré...")
