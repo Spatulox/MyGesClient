@@ -88,8 +88,8 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		endDate, endInt = checkDateFormat(*end)
 
 		if startInt != nil || endInt != nil {
-			fmt.Printf("start : %s, end : %s\n", *start, *end)
-			fmt.Printf("erreur startInt %v\n erreur end int %v\n", startInt, endInt)
+			Log.Infos(fmt.Sprintf("start : %s, end : %s\n", *start, *end))
+			Log.Infos(fmt.Sprintf("erreur startInt %v\n erreur end int %v\n", startInt, endInt))
 			return nil, errors.New("Impossible to parse date (start or end date in RefreshAgenda in if)")
 		}
 
