@@ -24,12 +24,12 @@ import {hasCommonClass} from "./functions";
 const lightDark = document.getElementsByClassName('themeLightDark');
 const body = document.getElementsByTagName('body')[0]
 const buttonEula = document.getElementById('buttonEula')
+const buttonSoftwareInfo = document.getElementById('buttonSoftwareInfo')
 
 const buttonConnection = document.getElementById('buttonConnection')
 const buttonCancelConnection = document.getElementById('buttonCancelConnection')
 
 const encryptBtn = document.getElementById("encrypt-btn")
-
 
 
 // ------------ Theme events -------------- //
@@ -65,6 +65,16 @@ buttonEula.addEventListener('click', async function() {
         const eula = document.getElementById('eula')
         await UpdateUserEula()
         eula.classList.remove('active')
+    } catch (e) {
+        console.log(e)
+        popup(e.toString())
+    }
+})
+    
+buttonSoftwareInfo.addEventListener('click', async function() {
+    try{
+        const softwareInfo = document.getElementById('softwareInfo')
+        softwareInfo.classList.remove('active')
     } catch (e) {
         console.log(e)
         popup(e.toString())
@@ -189,6 +199,11 @@ function loadingConnectionButton(oldInnerHtmlLoginBtn, bool = true){
 export async function eulaShow(){
     const eula = document.getElementById('eula')
     eula.classList.add('active')
+}
+
+export async function showAppInfos(){
+    const softwareInfo = document.getElementById('softwareInfo')
+    softwareInfo.classList.add('active')
 }
 
 

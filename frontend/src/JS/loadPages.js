@@ -6,10 +6,10 @@ import {UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
 
 // Page Functions
 // They are used
-import {dashboard, stopDashboardEvents} from "../JS-Page/dashbord.js";
+import {dashboard} from "../JS-Page/dashbord.js";
 import {schedule} from "../JS-Page/schedule.js";
 import {grades} from "../JS-Page/grades";
-import {events, stopDisplayingEvents} from "../JS-Page/events";
+import {events} from "../JS-Page/events";
 import {account} from "../JS-Page/account";
 import {courses} from "../JS-Page/courses";
 import {projects} from "../JS-Page/projects";

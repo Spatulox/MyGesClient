@@ -16,7 +16,7 @@ import {
     showButtonCancelConnection
 } from "./login-register";
 import { hasCommonClass} from "./functions";
-import {deleteOldData, eulaShow} from "./index_events";
+import {deleteOldData, eulaShow, showAppInfos} from "./index_events";
 import { grades } from "../JS-Page/grades";
 import { absences } from "../JS-Page/absences";
 import { account } from "../JS-Page/account";
@@ -44,6 +44,7 @@ export async function start(){
         await initializeLoadPage()
         await initCreateEvent()
         await initializeCredits()
+        await initializeSoftwareAccount()
         await initializeSchedulePart()
         initializedStart = true
     }
@@ -171,17 +172,26 @@ async function initializeLoadPage(){
 }
 
 async function initializeCredits(){
-    const changePassword = document.getElementById("changePassword")
     const eulaShowId = document.getElementById("eulaShow")
+    const softwareInfo = document.getElementById("appVersion")
+
+    eulaShowId.addEventListener("click", ()=>{
+        eulaShow()
+    })
+
+    softwareInfo.addEventListener("click", ()=>{
+        console.log("coucou")
+        showAppInfos()
+    })
+}
+
+async function initializeSoftwareAccount(){
+    const changePassword = document.getElementById("changePassword")
     const deleteOldDataId = document.getElementById("deleteOldData")
     const deconnectionFromMygesId = document.getElementById("deconnectionFromMyges")
 
     changePassword.addEventListener("click", ()=>{
         changeLoginPassword()
-    })
-
-    eulaShowId.addEventListener("click", ()=>{
-        eulaShow()
     })
 
     deleteOldDataId.addEventListener("click", ()=>{
