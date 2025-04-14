@@ -10,7 +10,6 @@ export async function projects() {
     isStillRunning = true;
     scrollMainPart();
 
-    let laStill = stillPopup("Actualisation de vos projets..");
     try {
         const mygesProjects = await GetProjects();
 
@@ -36,7 +35,6 @@ export async function projects() {
         console.error(e);
         popup(e.toString());
     } finally {
-        stopStillPopup(laStill);
         isStillRunning = false;
     }
 }
