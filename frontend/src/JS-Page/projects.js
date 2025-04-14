@@ -1,4 +1,4 @@
-import { stillPopup, stopStillPopup, popup } from "../JS/popups";
+import { popup } from "../JS/popups";
 import {GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup} from "../../wailsjs/go/backend/App";
 import { scrollMainPart } from "../JS/functions";
 
