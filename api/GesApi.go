@@ -463,8 +463,6 @@ func (ges *GESapi) request(method, url string, requestConfig map[string]interfac
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	fmt.Printf("Decoded result: %+v\n", result)
-
 	// Getting result field
 	if resultData, ok := result["result"].([]interface{}); ok {
 		return map[string]interface{}{"items": resultData}, nil
