@@ -19,7 +19,7 @@ export async function schedule(forceRefresh = false){
     isStillRunning = false
 }
 
-async function getSchedule(monday, sunday, forceRefresh){
+export async function getSchedule(monday, sunday, forceRefresh){
 
     try{
         clearSchedule()
@@ -295,7 +295,6 @@ export async function changeWeek(direction, forceRefresh = false) {
 
     currentMonday.setDate(currentMonday.getDate() + direction * 7);
     const currentSunday = getSundayFromMonday(currentMonday)
-    console.log(currentSunday)
 
     await updateSchedule(currentMonday, currentSunday, forceRefresh)
 }

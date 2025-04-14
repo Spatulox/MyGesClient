@@ -1,113 +1,84 @@
-import {GetAgenda, GetEvents, GetGrades, RefreshAgenda, ReturnRefreshScheduleState} from "../../wailsjs/go/backend/App";
+import {GetEvents, GetGrades} from "../../wailsjs/go/backend/App";
 import {
     getYear,
     capitalizeFirstLetter,
     formatDateWithDay,
-    wait,
-    getMonday,
-    getSaturday,
 } from "../JS/functions";
-import {updateScheduleDashboard} from "./schedule_old_still_used";
-import {initGradesDisplay} from "./grades";
-import {stillPopup, stopStillPopup, popup} from "../JS/popups";
+import { initGradesDisplay } from "./grades";
+import { popup } from "../JS/popups";
+import { getSchedule } from "./schedule";
 
-let displayDashboardId = []
-let prevNextCliked = false
-let initialized = 0
-let userShowTomorrow = 0
-
-// Initialize in the recapEvent to avoid doing another function
-function initDashboard(){
-    // Avoid double initialization for no reason ?
-    if(initialized === 1){
-        return
-    }
-    initialized = 1
-    document.getElementById("backward-button").addEventListener("click", () => handleButtonClick('backward'));
-    document.getElementById("forward-button").addEventListener("click", () => handleButtonClick('forward'));
-}
-
-async function handleButtonClick(direction) {
-    if (prevNextCliked) {
-        popup(`Action en cours, veuillez patienter.`);
-        return;
-    }
-    prevNextCliked = true;
-    try {
-        const button = document.getElementById(`${direction}-button`);
-        button.classList.add('clicked');
-        setTimeout(() => button.classList.remove('clicked'), 600);
-
-        userShowTomorrow += direction === 'forward' ? 1 : -1;
-
-        const agenda = await getTodayAgendaPlusDay(direction === 'forward' ? 1 : -1, true);
-        const htmlElement = document.getElementById("schedule-content");
-
-        document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)"
-
-        if (agenda) {
-            await updateScheduleDashboard(agenda, htmlElement);
-            document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)"
-        } else {
-            printDate(htmlElement);
-        }
-    } catch (error) {
-        console.error("Erreur lors du traitement :", error);
-        popup("Une erreur est survenue. Veuillez réessayer.");
-    } finally {
-        prevNextCliked = false;
-    }
-}
+const forwardButton = document.getElementById("forward-button")
+const backwardButton = document.getElementById("backward-button")
+const htmlScheduleElement = document.getElementById("schedule-content")
+const htmlGradeElement = document.getElementById("grades-content")
+let TODAY = new Date();
+let agenda = null
 
 export async function dashboard(){
-    if(prevNextCliked){
-        return
-    }
-    const htmlElement = document.getElementById("schedule-content")
-    prevNextCliked = true
-
+    TODAY.setUTCHours(5, 0, 0, 0)
     try{
-        const htmlGradeElement = document.getElementById("grades-content")
-
-        Promise.all([
-            handleAgenda(htmlElement),
-            handleGrades(htmlGradeElement),
-            handleEvents()
-        ]).then(() => {
-
-            prevNextCliked = false
-
-            if(displayDashboardId.length === 0){
-                displayDashboardId.push(setInterval(dashboard, 10000))
-                initDashboard()
-            }
-
-        }).catch((error) => {
-            prevNextCliked = false
-            console.error("Une erreur s'est produite :", error);
-        });
-
+        handleAgenda(),
+        handleGrades(),
+        handleEvents()
     } catch (e) {
         console.log(e)
+        printDate();
         popup("Impossible de mettre à jour l'accueil..")
     }
 }
+forwardButton.addEventListener("click", async ()=> {
+
+    forwardButton.style.opacity = 0;
+    forwardButton.style.pointerEvents = 'none';
+    backwardButton.style.opacity = 0;
+    backwardButton.style.pointerEvents = 'none';
+    
+    await changeDay(1)
+    await handleAgenda()
+
+    forwardButton.style.opacity = 1;
+    forwardButton.style.pointerEvents = 'auto';
+    backwardButton.style.opacity = 1;
+    backwardButton.style.pointerEvents = 'auto';
+})
+
+backwardButton.addEventListener("click", async ()=> {
+    forwardButton.style.opacity = 0;
+    forwardButton.style.pointerEvents = 'none';
+    backwardButton.style.opacity = 0;
+    backwardButton.style.pointerEvents = 'none';
+    
+    await changeDay(-1)
+    await handleAgenda()
+
+    forwardButton.style.opacity = 1;
+    forwardButton.style.pointerEvents = 'auto';
+    backwardButton.style.opacity = 1;
+    backwardButton.style.pointerEvents = 'auto';
+})
 
 // --------------------------------------------------------------------------------------- //
 
-// Créez des fonctions pour chaque tâche
-async function handleAgenda(htmlElement) {
-    return getTodayAgendaPlusDay().then((agenda) => {
-        if (agenda) {
-            updateScheduleDashboard(agenda, htmlElement);
+async function handleAgenda() {
+    
+    const tomorrowMidnight = new Date(TODAY);
+    tomorrowMidnight.setUTCHours(22, 0, 0, 0);
+    printDate()
+    
+    let agenda_new
+    while(!agenda_new){
+        agenda_new = await getSchedule(TODAY.toISOString().split("T")[0], tomorrowMidnight.toISOString().split("T")[0]);
+        if(agenda_new && JSON.stringify(agenda) !== JSON.stringify(agenda_new)) {
+            agenda = agenda_new
+            await updateScheduleDashboard(agenda)
             document.getElementsByClassName("schedule-section")[0].style.transform = "translateY(-70px)";
-        } else {
-            printDate(htmlElement);
         }
-    });
+    }
 }
 
-function handleGrades(htmlGradeElement) {
+
+function handleGrades() {
     return GetGrades(getYear().toString()).then((grades) => {
         if (grades) {
             recapGrades(htmlGradeElement, grades);
@@ -197,108 +168,54 @@ function recapEvents(events) {
     });
 }
 
-// Fonction pour arrêter tous les intervalles
-export function stopDashboardEvents() {
-    while (displayDashboardId.length > 0) {
-        const intervalId = displayDashboardId.pop();
-        clearInterval(intervalId);
-    }
-    initialized = 0
-}
+export async function updateScheduleDashboard(agenda) {
+    htmlScheduleElement.innerHTML = `<h3>${capitalizeFirstLetter(TODAY.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
 
+    agenda.forEach(course => {
+        const courseElement = document.createElement('div');
+        courseElement.className = 'course-card';
+        let courseName = course.agenda_name.includes("S1 - ") ? course.agenda_name.split("S1 - ")[1] : (course.agenda_name.includes("S2 - ") ? course.agenda_name.split("S2 - ")[1] : course.agenda_name)
+        courseName = capitalizeFirstLetter(courseName+"")
+        courseElement.innerHTML = `
+            <h3 style="color: ${course.room.color.Valid ? course.room.color.String : "#FFFFFF"}">${courseName}</h3>
+            <p>${course.start_date.split('T')[1].substring(0, 5)} - ${course.end_date.split('T')[1].substring(0, 5)}</p>
+            <p>Prof: ${course.discipline.Teacher.teacher}</p>
+        `;
 
-function getDayWithDecalage(direction){
-    const now = new Date();
-
-    const isAfter6PM = now.getHours() >= 18;
-    const autoShowTomorrow = isAfter6PM ? 1 : 0;
-
-    if(userShowTomorrow <= -30){
-        userShowTomorrow = -30
-    }
-    if(userShowTomorrow >= 30){
-        userShowTomorrow = 30
-    }
-
-    // Créer une date pour aujourd'hui à minuit UTC
-    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    today.setUTCHours(0, 0, 0, 0);
-    today.setUTCDate(today.getUTCDate() + userShowTomorrow + autoShowTomorrow);
-
-    // Ajuster au lundi si c'est un dimanche
-    if (today.getUTCDay() === 0) { // 0 représente dimanche
-        today.setUTCDate(today.getUTCDate() + direction);
-        userShowTomorrow += direction
-    }
-
-    return today
-}
-
-async function getTodayAgendaPlusDay(direction = null, showMessage = false) {
-    const today = getDayWithDecalage(direction)
-
-    if (today.getDay() === 0) {
-        today.setDate(today.getDate() + 1);
-    }
-    // Créer une date pour aujourd'hui à 23:00 UTC
-    const todayNight = new Date(today);
-    todayNight.setUTCHours(22, 0, 0, 0);
-
-    let theStill
-    let agenda = null
-
-    try {
-        const monday = getMonday()
-        const saturday = getSaturday()
-        // Local Search
-        if(monday<= today && today <= saturday) {
-            agenda = await GetAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
+        if(course.room.name.Valid){
+            courseElement.innerHTML += `<p>Salle: ${course.room.name.String} (${course.room.campus.String})</p>`
         }
 
-        if(!agenda){
-            // Online Search
-            let count = 0
-            while(await ReturnRefreshScheduleState() === 1 && count < 3){
-                count++
-                wait(1)
-            }
-            if(showMessage){
-                /*theStill = stillPopup("Recherche de votre emploi du temps..")*/
-            }
-            agenda = await RefreshAgenda(today.toISOString().split("T")[0], todayNight.toISOString().split("T")[0])
+        courseElement.innerHTML += `<p>Type: ${course.type}</p>`
+        if(course.modality){
+            courseElement.innerHTML += `<p>Modalité: ${course.modality}</p>`
+        }
+        if(course.comment){
+            courseElement.innerHTML += `<p>Commentaire: ${course.comment}</p>`
         }
 
-    } catch (e) {
-        console.log(e)
-    }
 
-    if(theStill){
-        stopStillPopup(theStill)
-    }
-
-    return agenda
+        htmlScheduleElement.appendChild(courseElement);
+    });
 }
 
-function printDate(htmlElement){
+async function changeDay(direction) {
+    if(!TODAY){
+        TODAY = new Date()
+    }
+
+    TODAY.setUTCDate(TODAY.getUTCDate() + direction);
+    TODAY.setUTCHours(5, 0, 0, 0)
+    if(TODAY.getUTCDay() == 0){
+        TODAY.setUTCDate(TODAY.getUTCDate() + direction)
+    }
+    console.log(TODAY.toISOString())
+}
+
+function printDate(){
     try{
-        const now = new Date();
-
-        const isAfter6PM = now.getHours() >= 18;
-        const autoShowTomorrow = isAfter6PM ? 1 : 0;
-
-        // Créer une date pour aujourd'hui à minuit UTC
-        const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-        today.setUTCDate(today.getUTCDate() + userShowTomorrow + autoShowTomorrow);
-        today.setUTCHours(0, 0, 0, 0)
-
-        // Ajuster au lundi si c'est un dimanche
-        if (today.getUTCDay() === 0) { // 0 représente dimanche
-            today.setUTCDate(today.getUTCDate() + 1);
-            userShowTomorrow ++
-        }
-
-        htmlElement.innerHTML = `<h3>${capitalizeFirstLetter(today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
-        htmlElement.innerHTML += "Aucun Agenda"
+        htmlScheduleElement.innerHTML = `<h3>${capitalizeFirstLetter(TODAY.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>`;
+        htmlScheduleElement.innerHTML += "Aucun Agenda"
         document.getElementsByClassName("schedule-section")[0].style.transform = "inherit"
     } catch (e) {
         console.log(e)
