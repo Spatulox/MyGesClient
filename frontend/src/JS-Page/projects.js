@@ -3,33 +3,44 @@ import {GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup} from "../..
 import { scrollMainPart } from "../JS/functions";
 
 let isStillRunning = false
+let mygesProjectsRAM = ""
 
-export async function projects(){
-    if(isStillRunning){
-        return
-    }
-    isStillRunning = true
-    scrollMainPart()
+export async function projects() {
+    if (isStillRunning) return;
+    isStillRunning = true;
+    scrollMainPart();
 
-    let laStill = stillPopup("Actualisation de vos projets..")
-    try{
-        const mygesProjects = await GetProjects()
-        let profile = await GetProfile()
-        profile = await JSON.parse(profile)
+    let laStill = stillPopup("Actualisation de vos projets..");
+    try {
+        const mygesProjects = await GetProjects();
 
-        const projectItem = document.getElementById('projecttojoin');
-        projectItem.innerHTML = ""
-        const myproject = document.getElementById('myproject');
-        myproject.innerHTML = ""
+        // Copie profonde au lieu de référence
+        if (mygesProjectsRAM === mygesProjects) {
+            popup("No New Projects")
+            return;
+        }
+
+        let profile = await GetProfile();
+        profile = JSON.parse(profile)
         
-        populateData(JSON.parse(mygesProjects), profile.name, profile.firstname)
+        // Mise à jour avec une copie profonde
+        mygesProjectsRAM = JSON.stringify(JSON.parse(mygesProjects))
+        
+        const projectItem = document.getElementById('projecttojoin');
+        const myproject = document.getElementById('myproject');
+        projectItem.innerHTML = "";
+        myproject.innerHTML = "";
+        
+        populateData(JSON.parse(mygesProjects), profile.name, profile.firstname);
     } catch (e) {
-        console.log(e)
-        popup(e.toString())
+        console.error(e);
+        popup(e.toString());
+    } finally {
+        stopStillPopup(laStill);
+        isStillRunning = false;
     }
-    stopStillPopup(laStill)
-    isStillRunning = false
 }
+
 
 function populateData(projects, name, firstname){
     if (projects && !projects.hasOwnProperty("items")){
