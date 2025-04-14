@@ -53,8 +53,6 @@ type App struct {
 	apiRWMutex         sync.RWMutex
 	user               UserSettings
 	startupStatus      StartupStatus
-	profileMutex       sync.Mutex
-	isFetchingProfile  bool
 	gradesMutex        sync.Mutex
 	isFetchingGrades   bool
 	absencesMutex      sync.Mutex
