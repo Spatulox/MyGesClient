@@ -113,14 +113,14 @@ func initDBTables() {
 	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
-		fmt.Printf("Erreur lors de l'ouverture de la base de données: %v\n", err)
+		Log.Error(fmt.Sprintf("Erreur lors de l'ouverture de la base de données: %v\n", err))
 		return
 	}
 	defer db.Close()
 
 	// Enable foreign key
 	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
-		fmt.Printf("Erreur lors de l'activation des clé étrangère': %v\n", err)
+		Log.Error(fmt.Sprintf("Erreur lors de l'activation des clé étrangère': %v\n", err))
 		return
 	}
 

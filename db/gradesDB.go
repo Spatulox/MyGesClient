@@ -20,7 +20,7 @@ func SaveGradesToDB(grades string, db *sql.DB) {
 	var gradesResponseVar gradesResponse
 	err := json.Unmarshal([]byte(grades), &gradesResponseVar)
 	if err != nil {
-		fmt.Println("Erreur lors du décodage JSON:", err)
+		Log.Error(fmt.Sprintf("Erreur lors du décodage JSON: %v", err))
 		return
 	}
 
