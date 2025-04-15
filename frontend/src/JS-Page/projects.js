@@ -5,7 +5,7 @@ import { scrollMainPart } from "../JS/functions";
 let isStillRunning = false
 let mygesProjectsRAM = ""
 
-export async function projects() {
+export async function projects(forceRefresh = false) {
     if (isStillRunning) return;
     isStillRunning = true;
     scrollMainPart();
@@ -14,7 +14,7 @@ export async function projects() {
         const mygesProjects = await GetProjects();
 
         // Copie profonde au lieu de référence
-        if (mygesProjectsRAM === mygesProjects) {
+        if (mygesProjectsRAM === mygesProjects && !forceRefresh) {
             popup("No New Projects")
             return;
         }
@@ -271,7 +271,7 @@ function addGroupsToProjectToJoin(groups) {
                     joinButton.style.opacity = 0
                     if(await JoinProjectGroup(group.rc_id, group.project_id, group.id)){
                         popup("Groupe rejoind")
-                        projects()
+                        projects(true)
                     }
                 } catch (e) {
                     joinButton.style.opacity = 1
@@ -399,7 +399,7 @@ function addMyProjectDetails(details, status, rc_id, project_id, groupId) {
                 leaveButton.style.opacity = 0
                 if (await QuitProjectGroup(rc_id, project_id, groupId)) {
                     popup("Groupe quitté");
-                    projects()
+                    projects(true)
                 }
             } catch (e) {
                 leaveButton.style.opacity = 1
