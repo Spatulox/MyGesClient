@@ -1,0 +1,276 @@
+.add-button.initial {
+    width: 50px;
+    height: 50px;
+    transition: none !important;
+    animation: inherit !important;
+}
+
+.add-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    background-color: var(--highlight-color);
+    color: white;
+    font-size: 24px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+    z-index: 1000;
+    animation: closeButton 0.8s forwards;
+}
+
+.add-button:hover{
+    background-color: var(--hover-color);
+}
+
+.add-button.active {
+    width: 400px;
+    height: 560px;
+    font-size: inherit;
+    background-color: var(--discord-dark);
+    animation: expandButton 0.8s forwards;
+
+}
+
+.add-button.active .modal{
+    cursor: auto;
+    display: block;
+}
+
+.add-button .plus {
+    transition: all 0.3s ease-in-out;
+}
+
+.add-button.active .plus {
+    opacity: 0;
+    display: none;
+}
+
+.add-button.active .modal, .add-button.active .modal-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-overlay {
+    transform: scale(0);
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.85);
+    /*display: flex;*/
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+    pointer-events: none;
+    display: none;
+}
+
+.modal {
+    /*display: none;*/
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.modal-content {
+    /*font-family: 'Helvetica Neue', Arial, sans-serif;*/
+
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+
+    opacity: 0;
+    color: var(--text-color);
+
+    box-sizing: border-box;
+    overflow-y: auto;
+
+    scrollbar-width: none;
+
+    transition: all 0.3s ease-in-out;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    display: block;
+}
+
+.modal-overlay.active .modal {
+    background-color: var(--discord-dark);
+}
+
+.modal-overlay.active .modal-content {
+    opacity: 1;
+}
+
+
+.modal-header {
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.modal label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-align: left;
+}
+
+/*.modal */input[type="text"],
+/*.modal */input[type="password"],
+/*.modal */input[type="button"],
+/*.modal */input[type="datetime-local"],
+/*.modal */textarea {
+    width: 96%;
+    padding: 8px;
+    border: none;
+    background-color: var(--discord-light);
+    color: var(--text-color);
+    border-radius: 5px;
+}
+
+/*.modal */input[type="text"]:hover,
+/*.modal */input[type="password"]:hover,
+/*.modal */input[type="button"]:hover,
+/*.modal */input[type="datetime-local"]:hover,
+/*.modal */textarea:hover {
+   width: 96%;
+   padding: 8px;
+   border: none;
+   background-color: var(--discord-lightlight);
+   color: var(--text-color);
+   border-radius: 5px;
+}
+
+/*.modal */input[type="button"]:hover{
+    cursor: pointer;
+}
+
+.modal textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal input[type="color"] {
+    width: 100%;
+    height: 40px;
+    border: none;
+    background-color: var(--card-bg);
+    border-radius: 5px;
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn:active {
+    transform: scale(0.9);
+    transition: transform ease-in-out 0.1s;
+}
+
+.btn-cancel {
+    background-color: #747f8d;
+    color: #fff;
+    margin-right: 10px;
+}
+
+.btn-cancel:hover {
+    background-color: var(--discord-lightlight);
+}
+
+.btn-delete {
+    background-color: #b10202;
+    color: #fff;
+    margin-right: 10px;
+}
+
+.btn-delete:hover {
+    background-color: darkred;
+}
+
+.btn-create {
+    background-color: var(--highlight-color);
+    color: #fff;
+}
+
+.btn-create:hover {
+    background-color: var(--hover-color);
+}
+
+
+@keyframes expandButton {
+    0% {
+        width: 50px;
+        height: 50px;
+        bottom: 20px;
+        right: 20px;
+        transform: scale(0.3);
+    }
+    100% {
+        width: 400px;
+        height: 580px;
+        bottom: 50%;
+        right: 50%;
+        transform: scale(1) translate(50%, 50%);
+    }
+}
+
+@keyframes closeButton {
+    0% {
+        width: 400px;
+        height: 560px;
+        font-size: inherit;
+        background-color: var(--discord-dark);
+        bottom: 50%;
+        right: 50%;
+        transform: scale(1) translate(50%, 50%);
+    }
+    100% {
+        width: 50px;
+        height: 50px;
+        background-color: var(--highlight-color);
+        transform: scale(1) translate(0, 0);
+    }
+    
+}

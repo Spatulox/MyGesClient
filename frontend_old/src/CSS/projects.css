@@ -1,0 +1,218 @@
+@import 'variables.css';
+
+
+#projects{
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+#projects #courses-container{
+    width: 100%;
+    margin: 0 auto;
+}
+
+#projects .details-section,
+#projects .members-section,
+#projects .files-section,
+#projects .history-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--discord);
+}
+
+#projects .details-section:last-of-type,
+#projects .members-section:last-of-type,
+#projects .files-section:last-of-type,
+#projects .history-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+#projects .section-title {
+    color: var(--text-secondary-color);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+  
+#projects .detail-label {
+    padding-right: 5px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+  
+#projects .detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+  
+#projects .detail-value {
+    color: var(--text-normal);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow: auto;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+}
+  
+#projects .file, #projects .history-entry, #projects .member {
+    color: var(--text-normal);
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+  
+#projects .files-list, #projects .history, #projects .members-list {
+    margin-top: 16px;
+}
+  
+#projects .files-title, #projects .history-title, #projects .members-title {
+    color: var(--text-secondary-color);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+  
+#projects .group {
+    align-items: center;
+    background-color: var(--discord);
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 8px;
+}
+  
+#projects .group-info {
+    flex-grow: 1;
+}
+  
+#projects .group-members {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+  
+#projects .group-name {
+    color: var(--text-secondary-color);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+  
+#projects .history {
+    max-height: 150px;
+    overflow-y: auto;
+}
+  
+#projects .join-button, #projects .leave-button {
+    background-color: var(--hover-color);
+    border: none;
+    border-radius: 3px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 16px;
+    padding: 8px 16px;
+    transition: background-color 0.2s;
+}
+  
+#projects .join-button:hover {
+    background-color: #4752c4;
+}
+
+#projects .leave-button {
+    background-color: #ed4245;
+}
+  
+#projects .leave-button:hover {
+    background-color: #c03537;
+}
+  
+#projects .project-details {
+    background-color: var(--discord-dark);
+    display: none;
+    padding: 16px;
+    margin: 20px;
+    margin-top: 2px;
+    border-radius: 8px;
+}
+  
+#projects .project-details.active {
+    display: block;
+}
+  
+#projects .project-groups {
+    margin-bottom: 12px;
+}
+  
+#projects .project-info {
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: right;
+}
+  
+#projects .project-item {
+    align-items: center;
+    border-top: 1px solid var(--discord-lightlight);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    transition: background-color 0.2s;
+}
+  
+#projects .project-item:hover {
+    background-color: var(--discord-dark);
+}
+  
+#projects .project-list {
+    background-color: var(--discord);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+  
+#projects .project-list-header {
+    background-color: var(--discord-dark);
+    color: var(--text-color);
+    font-size: 18px;
+    font-weight: 600;
+    padding: 12px 16px;
+}
+  
+#projects .project-main-info {
+    display: flex;
+    flex-direction: column;
+}
+  
+#projects .project-name {
+    font-size: 16px;
+    font-weight: 600;
+}
+  
+#projects .status-label {
+    border-radius: 9999px;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 8px;
+    padding: 3px 6px 1px;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+#projects .status-close, #projects .status-outdated {
+    background-color: #ed4245;
+    color: #fff;
+}
+
+#projects .status-open, #projects .status-in-time {
+    background-color: #43b581;
+    color: #fff;
+}
