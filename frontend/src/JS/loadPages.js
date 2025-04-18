@@ -38,7 +38,7 @@ export async function loadPageGo(string, event){
         leDocToShow.style.display = "none"
         leDocToShow = document.getElementById(string.split(".html")[0])
         leDocToShow.style.display = "inherit"
-        updatePages(string.split(".html")[0])
+        await updatePages(string.split(".html")[0])
     } catch (e) {
         console.log(e)
     }
@@ -54,40 +54,40 @@ async function updatePages(pages){
     try{
         switch (pages){
             case 'account':
-                account()
+                await account()
             case 'softwareAccount':
                 renameMainTitle("Compte")
                 break;
             case 'courses':
-                courses()
+                await courses()
                 renameMainTitle("Cours")
                 break;
             case 'dashboard':
-                dashboard()
+                await dashboard()
                 renameMainTitle("Accueil")
                 break;
             case 'events':
-                events()
+                await events()
                 renameMainTitle("Évènements")
                 break;
             case 'grades':
-                grades()
+                await grades()
                 renameMainTitle("Notes")
                 break;
             case 'schedule':
-                schedule()
+                await schedule()
                 renameMainTitle("Agenda")
                 break;
             case 'projects' :
-                projects()
+                await projects()
                 renameMainTitle("Projets")
                 break;
             case 'absences' :
-                absences()
+                await absences()
                 renameMainTitle("Absences")
                 break;
             case 'credits' :
-                absences()
+                await absences()
                 renameMainTitle("Crédit")
                 break;
             default:
