@@ -91,7 +91,7 @@ export async function start(){
 
         try{
             connectDiscord()
-            loadPageGo("dashboard.html")
+            await loadPageGo("dashboard.html")
 
             // Need to wait the full start of the app
             let status = await GetStartupStatus()
