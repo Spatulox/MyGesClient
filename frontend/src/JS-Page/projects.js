@@ -124,7 +124,6 @@ function populateData(projects, name, firstname){
             let pgoups_out = []
             if(groups && groups.length > 0){
                 pgoups_out = groups.map(group => {
-
                     const pgroup_users = group.project_group_students
 
                     let pgroup_users_out = []
@@ -140,8 +139,10 @@ function populateData(projects, name, firstname){
                     }
 
                     return { 
+                        "type":ptype_group,
                         "name":group.group_name,
                         "members":pgroup_users_out,
+                        "max_student":pmax_student,
                         "status":status,
                         "id": group.project_group_id,
                         "rc_id": prc_id,
@@ -246,9 +247,13 @@ function addGroupsToProjectToJoin(groups) {
         const statusSpan = document.createElement('span');
         statusSpan.className = `status-label status-${group.status.toLowerCase()}`;
         statusSpan.textContent = group.status;
-    
-        // Ajouter le statut au nom du groupe
         groupNameDiv.appendChild(statusSpan);
+
+        // Créer et configurer l'élément du statut
+        const nbMemberSpan = document.createElement('span');
+        nbMemberSpan.textContent = `${group.members.length}/${group.max_student}`;
+        nbMemberSpan.style.marginLeft = "5px"
+        groupNameDiv.appendChild(nbMemberSpan);
     
         // Créer et configurer l'élément des membres du groupe
         const groupMembersDiv = document.createElement('div');
@@ -259,8 +264,7 @@ function addGroupsToProjectToJoin(groups) {
         groupInfoDiv.appendChild(groupNameDiv);
         groupInfoDiv.appendChild(groupMembersDiv);
         groupDiv.appendChild(groupInfoDiv);
-
-        if (group.status != "close" && group.status != "outdated"){
+        if (group.status != "close" && group.status != "outdated" && group.type != "Imposé"){
             // Créer et configurer le bouton de rejoindre
             const joinButton = document.createElement('button');
             joinButton.className = 'join-button';
