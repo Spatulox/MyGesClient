@@ -9,5 +9,12 @@
   "author": {
     "name": "Spatulox",
     "email": ""
+  },
+  "frontend": {
+    "dir": "frontend",
+    "install": "npm install",
+    "build": "npm run build",
+    "bridge": "",
+    "dev": "vite"
   }
 }
