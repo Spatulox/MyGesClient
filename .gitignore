@@ -16,3 +16,5 @@ db.sqlite
 MyGesClient-res.syso
 
 package-lock.json
+
+frontend/package.json.md5
