@@ -1,5 +1,6 @@
 // SaveEvent is async imported inside the loadingGoFunctionOutiseModules.js file
 import { SaveEvents } from "../../wailsjs/go/backend/App";
+import { events } from "../JS-Page/events";
 import { popup } from "./popups";
 
 export async function initCreateEvent(): Promise<void> {
@@ -82,6 +83,7 @@ export async function initCreateEvent(): Promise<void> {
                 endDate.toISOString(),
                 eventColor.value
             );
+            await events()
             popup("Évènement sauvegardé avec succès");
         } catch (err: any) {
             popup(err?.message ?? String(err));

@@ -120,7 +120,7 @@ function populateCalendar(eventv: structures.Event[]): void {
                 try {
                     if (await DeleteEvent(Number(eventElement.eventId))) {
                         popup("Suppression réussie !");
-                        events();
+                        await events();
                     }
                 } catch (e) {
                     console.log(e);
