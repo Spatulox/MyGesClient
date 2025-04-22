@@ -1,0 +1,1131 @@
+
+/* Variables */
+
+@import 'variables.css';
+
+*{
+    transition: background-color 0.5s ease-in-out;
+}
+
+/* Class with tags */
+
+/* Class */
+
+.animatedBox:hover{
+    transform: scale(1.05);
+    transition: all ease-in-out, 0.5s;
+}
+
+.action-list li {
+    cursor: pointer;
+    padding: 8px 0;
+    transition: all 0.2s;
+}
+
+.action-list li:hover {
+    background-color: var(--card-bg);
+    border-radius: 3px;
+    padding-left: 5px;
+    transition: color 0.2s, padding-left 0.2s;
+}
+
+.bottom-sections .credits-section {
+    width: 100%;
+}
+
+.bold{
+    font-weight: 800;
+}
+
+.box{
+    width: 25%;
+    padding: 20px;
+    margin: 5% 10%;
+    background-color: rgb(15, 102, 102);
+    background-color: var(--boxBackgroundColor);
+    border-radius: 5px;
+    transition: all ease-in-out, 0.5s;
+}
+
+.calendar-container {
+    background-color: #36393f;
+    border-radius: 8px;
+    padding: 16px;
+    /*font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
+    color: var(--text-color);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.calendar-title {
+    color: #ffffff;
+    font-size: 20px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--card-bg);
+}
+
+.credits-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    /*font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
+}
+
+.credits-section {
+    background-color: var(--discord-dark);
+    border-radius: 5px;
+    padding: 20px;
+    width: 45%;
+    margin-bottom: 20px;
+}
+
+.credits-section .link-list {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+
+.credits-section .link-list::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: #7289da; /* Couleur Discord bleu */
+}
+
+.credits-section .link-list li {
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+.credits-section .link-list a {
+    display: inline-block;
+    color: #00b0f4;
+    text-decoration: none;
+    transition: color 0.2s, padding-left 0.2s;
+}
+
+.credits-section .link-list a:hover {
+    color: #ffffff;
+    padding-left: 5px;
+}
+
+.credits-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.credits-container li {
+    margin-bottom: 10px;
+}
+
+.credits-container a {
+    color: #00b0f4;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.credits-container a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.closePNG{
+    width: 30px;
+    position: absolute;
+}
+
+.event-list {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.event-name {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.event-date {
+    font-size: 0.9em;
+    color: #b9bbbe;
+}
+
+.event-description {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+}
+
+.event-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+    color: #b9bbbe;
+}
+
+.events-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.event-item, .event-card, .course-card {
+    background-color: var(--discord-dark);
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 4px solid;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.event-item button{
+    position: relative;
+    right: -80%;
+}
+
+.event-card {
+    width: 40%;
+    max-width: 287px;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.event-name {
+    color: #ffffff;
+    font-size: 18px;
+    margin: 0;
+}
+
+.event-date {
+    color: #b9bbbe;
+    font-size: 14px;
+}
+
+.event-description {
+    color: var(--text-color);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.event-time {
+    color: #b9bbbe;
+    font-size: 14px;
+}
+
+.event-time i {
+    margin-right: 4px;
+}
+
+.lessonClosePNG{
+    transform: translateX(190px);
+}
+
+.cursorPointer{
+    cursor: pointer;
+}
+
+.defaultColor{
+    color: var(--mainPoliceColor);
+}
+
+.defaultHeaderMenuColor{
+    color: var(--policeColor);
+}
+/*Paris Location under Schedule*/
+.discord-container {
+    max-width: 600px;
+    margin: auto;
+    margin-bottom: 20px;
+    background-color: var(--boxBackgroundColor);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.discord-container .title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.discord-container .location-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.discord-container .location-item {
+    background-color: var(--discord-light);
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.discord-container .location-item:hover {
+    background-color: var(--discord-lightlight);
+    transform: translateY(-2px);
+}
+
+.discord-container .location-item h2 {
+    margin: 0;
+}
+
+.discord-container .location-item p {
+    margin: 5px 0 0;
+}
+
+.discord-container .location-item a{
+    text-decoration: none;
+    color: inherit;
+}
+
+.flex{
+    display: flex;
+}
+
+.flexCenter{
+    justify-content: center;
+    align-items: center;
+}
+
+.flexStart{
+    justify-content: start;
+    align-items: center;
+}
+
+.flexAround{
+    justify-content: space-around;
+    align-items: center;
+}
+
+.flexBetween{
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grades-list {
+    display: none;
+}
+
+.grades-list.active {
+    display: block;
+}
+
+.lesson{
+    background-color: white;
+    color: black;
+
+    margin: 10px 0px;
+    padding: 10px;
+    border-radius: 5px;
+    max-height: 125px;
+    overflow: hidden;
+
+
+    transition: all ease-in-out, 0.5s;
+}
+
+.lesson:hover{
+    cursor: pointer;
+}
+
+.lesson > div{
+    background-color: lightgrey;
+    padding: 10px;
+    max-height: 60px;
+    overflow: hidden;
+
+    border-radius: 5px;
+
+    transition: all ease-in-out, 0.5s;
+}
+
+.lesson h1, .lesson h2, .lesson h3{
+    margin-top: 0;
+}
+
+.lesson.bigAgenda{
+    max-height: inherit;
+    height: auto;
+    transition: all ease-in-out, 0.5s;
+}
+
+.lesson.bigAgenda > div{
+    max-height: inherit;
+    height: auto;
+    overflow: auto;
+    transition: all ease-in-out, 0.5s;
+}
+
+.noAlignItems{
+    align-items: inherit;
+}
+
+.noDecoration{
+    text-decoration: none;
+    list-style: none;
+    color: var(--mainPoliceColor);
+}
+
+.noDecoration > li {
+    text-decoration: none;
+    list-style: none;
+}
+
+.noMargin{
+    margin: 0px;
+}
+
+.noMarginBottom{
+    margin-bottom: 0px;
+}
+
+.noMarginTop{
+    margin-top: 0px;
+}
+
+.noMarginRight{
+    margin-right: 0px;
+}
+
+.noMarginLeft{
+    margin-left: 0px;
+}
+
+.noPadding{
+    padding: 0px;
+}
+
+.noPaddingBottom{
+    padding-bottom: 0px;
+}
+
+.noPaddingTop{
+    padding-top: 0px;
+}
+
+.noPaddingRight{
+    padding-right: 0px;
+}
+
+.noPaddingLeft{
+    padding-left: 0px;
+}
+
+.main-content-grades {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.marginAuto{
+    margin: auto;
+}
+
+.marginTop10{
+    margin-top: 10px;
+}
+
+.marginBottom10{
+    margin-bottom: 10px;
+}
+
+.marginTop20{
+    margin-top: 20px;
+}
+
+.marginBottom20{
+    margin-bottom: 20px;
+}
+
+.marginTop30{
+    margin-top: 30px;
+}
+
+.marginBottom30{
+    margin-bottom: 30px;
+}
+
+.marginTop40{
+    margin-top: 40px;
+}
+
+.marginBottom40{
+    margin-bottom: 40px;
+}
+
+.marginTopBottom8Pourcent{
+    margin: 8% 0;
+}
+
+.padding5{
+    padding: 5px;
+}
+
+.padding10{
+    padding: 10px;
+}
+
+.paddingTop70{
+    padding-top: 70px;
+}
+
+.pointer{
+    cursor: pointer;
+}
+
+.popup > div{
+    z-index: 2409;
+    min-width: 200px;
+    max-width: 300px;
+    min-height: 30px;
+
+    box-shadow: -2px 2px 5px #000000;
+
+    border-radius: 5px;
+    padding: 10px;
+    background-color: var(--popupColor);
+    color : var(--policeColor);
+
+    animation: popupSlideDown 0.3s ease-out forwards;
+}
+
+.section-title {
+    color: #ffffff;
+    font-size: 24px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--card-bg);
+    padding-bottom: 10px;
+}
+
+.subsection-title {
+    color: #ffffff;
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.semester-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-color);
+    padding: 20px;
+}
+
+
+.tab-button {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    background-color: var(--discord-dark);
+    color: var(--text-color);
+}
+
+.tab-button:hover {
+    background-color: #36393f;
+}
+
+.tab-button.active {
+    background-color: var(--highlight-color);
+    color: #ffffff;
+}
+
+.tab-button.active:hover {
+    background-color: var(--hover-color);
+}
+
+.textCenter{
+    text-align: center;
+}
+
+.tooltip-trigger {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip {
+    visibility: hidden;
+    width: 200px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 15px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 15px;
+}
+
+.tooltip-trigger:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.ulBottom{
+    z-index: 3;
+    height: 50px;
+    position: absolute;
+    bottom: 0px;
+    width: var(--rightPartWidth);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid black;
+    background-color: var(--rightPartColor);
+}
+
+.ulBottom a{
+    margin-left: 5px;
+}
+
+.underline{
+    text-decoration: underline;
+}
+
+.underlinePointer:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.height20{
+    height: 20%;
+}
+
+.height50{
+    height: 50%;
+}
+
+.height80{
+    height: 80%;
+}
+
+.height100{
+    height: 100%;
+}
+
+.width20{
+    width: 20%;
+}
+
+.width50{
+    width: 50%;
+}
+
+.width80{
+    width: 80%;
+}
+
+.width100{
+    width: 100%;
+}
+
+.widthAuto{
+    width: auto;
+}
+
+.wrap{
+    flex-wrap: wrap;
+}
+
+.all-content{
+    width: 100%;
+}
+
+.container-courses #loadingCourses {
+    width: 100px;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 57%;
+    transform: translate(-50%, -50%);
+}
+
+#search-bar-courses{
+    width: 98%;
+}
+
+.container-courses {
+    max-width: 80%;
+    min-height: 500px;
+    margin: 0 auto;
+    margin-bottom: 50px;
+    background-color: var(--discord-dark);
+    padding: 20px;
+}
+.container-courses h1 {
+    text-align: center;
+}
+.container-courses .course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.container-courses .course-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-decoration: underline;
+}
+.container-courses .course-detail {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+.container-courses .teacher {
+    font-style: italic;
+    font-weight: bold;
+    text-decoration: underline;
+    color: var(--highlight-color);
+}
+.container-courses .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 5px;
+}
+.container-courses .badge-blue {
+    background-color: #e8f0fe;
+    color: #1a73e8;
+}
+.container-courses .badge-green {
+    background-color: #e6f4ea;
+    color: #137333;
+}
+
+.container-dashboard, .container-schedule {
+    display: flex;
+    height: 90%;
+    position: relative; /* Permet aux éléments enfants d'utiliser un positionnement absolu par rapport à ce conteneur */
+}
+
+.container-schedule, .main-content-schedule, .calendar-header{
+    width: 100%;
+}
+
+.main-content-dashboard {
+    width: 100%;
+    flex-grow: 1;
+    display: flex; /* Utilisation de flexbox pour aligner les sections */
+    flex-direction: column; /* Colonne par défaut pour les petits écrans */
+}
+
+.main-content-dashboard .recapSection {
+    background-color: var(--boxBackgroundColor);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.main-content-dashboard .recapSection > h2 {
+    margin-bottom: 9px;
+}
+
+.main-content-dashboard .schedule-section, .main-content-dashboard .summary-section {
+    /*width: inherit;*/
+    max-width: inherit;
+    margin: 10px;
+}
+
+.main-content-dashboard .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.main-content-dashboard .header > h2 {
+    margin: 0;
+}
+
+.main-content-dashboard h1,.main-content-dashboard h2 {
+    margin-top: 0;
+}
+
+.main-content-dashboard nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.main-content-dashboard nav button {
+    flex: 1;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    color: var(--text-color);
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.main-content-dashboard nav button:hover,
+.main-content-dashboard nav button.active {
+    background-color: var(--highlight-color);
+}
+
+/* Styles pour les sections de contenu */
+/*.main-content-dashboard #schedule-content,*/
+.main-content-dashboard #grades-content,
+.main-content-dashboard #event-content {
+    max-height: 280px;
+    overflow: auto;
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.main-content-dashboard #schedule-content > h3 {
+    margin-top: 0;
+}
+
+.main-content-dashboard #scheduleParentBkgColor{
+    /*background-color: var(--card-bg);*/
+    background-color: var(--boxBackgroundColor);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.course-item > h3{
+    text-decoration: underline;
+}
+
+.main-content-dashboard .course-item,
+.main-content-dashboard .grade-item,
+.main-content-dashboard .absence-item {
+    background-color: var(--bg-color);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.main-content-dashboard .course-item h3,
+.main-content-dashboard .grade-item h3,
+.main-content-dashboard .absence-item h3 {
+    margin-top: 0;
+    color: var(--highlight-color);
+}
+
+.main-content-dashboard .course-item p,
+.main-content-dashboard .grade-item p,
+.main-content-dashboard .absence-item p {
+    margin: 5px 0;
+}
+
+/* Styles pour les boutons de navigation de l'agenda */
+.main-content-dashboard .navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-left:auto; /* Aligne les boutons à droite */
+    width:auto; /* Ajuste la largeur automatiquement */
+    min-width: 104px;
+    height: 47px;
+}
+
+.main-content-dashboard .navigation-buttons button {
+    padding: 10px 17px;
+    background-color: var(--highlight-color);
+    border-radius: 5px;
+    border:none;
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+    font-size: 18px; /* Taille de la police pour les flèches */
+}
+
+.main-content-dashboard .navigation-buttons button:hover {
+    background-color:var(--hover-color); /* Couleur d'hover plus foncée */
+}
+
+.main-content-dashboard .navigation-buttons button.clicked {
+    animation: blob-animation 0.3s forwards; /* Animation lors du clic */
+}
+
+
+
+.main-content-schedule {
+    flex-grow: 1;
+    /*padding: 20px;*/
+    overflow-y: auto;
+}
+
+.main-content-schedule h1, .main-content-schedule, h2 {
+    margin-top: 0;
+}
+
+.main-content-schedule .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.main-content-schedule .calendar-header button {
+    background-color: var(--card-bg);
+    border: none;
+    color: var(--text-color);
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.main-content-schedule #calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.main-content-schedule #calendar-grid.four-columns {
+    grid-template-columns: repeat(4, 1fr); /* Si besoin, 4 colonnes */
+}
+
+.main-content-schedule #calendar-grid.three-columns {
+    grid-template-columns: repeat(3, 1fr); /* Si besoin, 4 colonnes */
+}
+
+.main-content-schedule #calendar-grid.two-columns {
+    grid-template-columns: repeat(2, 1fr); /* Si besoin, 4 colonnes */
+}
+
+.main-content-schedule #calendar-grid.one-columns {
+    grid-template-columns: repeat(1, 1fr); /* Si besoin, 4 colonnes */
+}
+
+.main-content-schedule .day-column, .main-content-dashboard .day-column {
+    background-color: var(--sidebar-color);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.main-content-schedule .day-header {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: var(--highlight-color);
+    border-radius: 5px;
+}
+
+.course-card {
+    margin: 10px 0;
+    color: var(--text-color);
+    border-color: var(--highlight-color);
+    background-color: var(--card-bg);
+}
+
+.main-content-schedule .course-card h3, .main-content-dashboard .course-card h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.main-content-schedule .course-card p, .main-content-dashboard .course-card p {
+    margin: 2px 0;
+    font-size: 0.9em;
+}
+
+.main-content-schedule .course-type, .main-content-dashboard .course-type {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+
+
+
+
+
+
+.popup-eula {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-eula .popup-box {
+    background-color: #36393f;
+    color: #dcddde;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+
+    animation: discordPopup 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+
+.popup-eula .popup-box h1 {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.popup-eula .popup-box hr {
+    border: none;
+    border-top: 1px solid #4f545c;
+    margin: 15px 0;
+}
+
+.popup-eula .popup-box .underline {
+    text-decoration: underline;
+}
+
+.popup-eula .popup-box ul {
+    padding-left: 20px;
+    margin: 15px 0;
+}
+
+.popup-eula .popup-box li {
+    margin-bottom: 10px;
+}
+
+.popup-eula .popup-box button {
+    background-color: #7289da;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.popup-eula .popup-box button:hover {
+    background-color: #677bc4;
+}
+
+
+
+
+
+
+
+
+
+.news-banner {
+    height: 200px;
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 20px;
+    margin-bottom: 0;
+}
+
+
+/* Media Queries pour le responsive */
+@media screen and (min-width: 1000px) {
+    .container-dashboard {
+        flex-direction: row; /* Disposition en ligne sur les écrans plus larges */
+    }
+
+    .sidebar {
+        width: 250px; /* Largeur fixe pour la barre latérale */
+    }
+
+    .main-content-dashboard {
+        flex-direction: row; /* Reste en ligne sur les grands écrans */
+        align-items:flex-start; /* Aligne le contenu en haut des sections */
+    }
+
+    .main-content-dashboard .recapSection {
+        background-color: var(--boxBackgroundColor);
+        margin-bottom: 50px;
+    }
+
+    .main-content-dashboard .schedule-section {
+        width: 100%; /* Prend toute la largeur disponible */
+        max-width: 450px; /* Largeur maximale pour l'emploi du temps */
+        padding: 20px;
+        transition: all ease-in-out 0.5s;
+        /*transform: translateY(-70px);*/
+    }
+
+    .main-content-dashboard .summary-section {
+        flex-grow: 1;
+        padding: 20px;
+    }
+
+    .main-content-dashboard .summary-section {
+        margin-left :20px ; /* Ajoute un espace entre l'emploi du temps et le résumé sur grand écran */
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .main-content-schedule #calendar-grid{
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    .main-content-schedule #calendar-grid{
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media screen and (max-width: 850px) {
+    .main-content-schedule #calendar-grid{
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .main-content-schedule #calendar-grid{
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .event-card{
+        width: 90%;
+        max-width: inherit;
+    }
+
+    .credits-section{
+        width: 80%;
+    }
+
+    .main-content-schedule #calendar-grid{
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

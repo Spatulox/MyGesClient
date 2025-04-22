@@ -1,19 +1,19 @@
 // Normal functions
-import {capitalizeFirstLetter} from "./functions";
+import {capitalizeFirstLetter} from "./functions.js";
 
 // GO functions
-import {UpdateDiscordRPC} from "../../wailsjs/go/backend/App";
+import {UpdateDiscordRPC} from "../../wailsjs/go/backend/App.js";
 
 // Page Functions
 // They are used
 import {dashboard} from "../JS-Page/dashbord.js";
 import {schedule} from "../JS-Page/schedule.js";
-import {grades} from "../JS-Page/grades";
-import {events} from "../JS-Page/events";
-import {account} from "../JS-Page/account";
-import {courses} from "../JS-Page/courses";
-import {projects} from "../JS-Page/projects";
-import {absences} from "../JS-Page/absences";
+import {grades} from "../JS-Page/grades.js";
+import {events} from "../JS-Page/events.js";
+import {account} from "../JS-Page/account.js";
+import {courses} from "../JS-Page/courses.js";
+import {projects} from "../JS-Page/projects.js";
+import {absences} from "../JS-Page/absences.js";
 
 let leDocToShow = document.getElementById("weirdPlace")
 let isPossibleToSwitchTabs = true

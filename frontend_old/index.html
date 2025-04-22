@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Alternative MyGes Client</title>
+
+    <link rel="stylesheet" type="text/css" href="./src/CSS/animations.css">
+	<link rel="stylesheet" type="text/css" href="./src/CSS/tagsStyle.css">
+    <link rel="stylesheet" type="text/css" href="./src/CSS/idStyle.css">
+    <link rel="stylesheet" type="text/css" href="./src/CSS/classStyle.css">
+    <link rel="stylesheet" type="text/css" href="./src/CSS/addEvent.css">
+    <link rel="stylesheet" type="text/css" href="./src/CSS/login-register.css">
+
+    <link rel="stylesheet" type="text/css" href="./src/CSS/schedule.css">
+    <link rel="stylesheet" type="text/css" href="./src/CSS/projects.css">
+
+    <!--<link rel="stylesheet" type="text/css" href="./src/CSS/testCss.css">-->
+
+    <script type="module" src="./src/JS/loadPages.js" defer></script>
+    <script type="module" src="./src/JS/login-register.js" defer></script>
+    <script type="module" src="./src/JS/start.js" defer></script>
+    <script type="module" src="./src/JS/index_events.js" defer></script>
+
+</head>
+<body class="dark">
+
+    <div id="utilities">
+        <div id="eula" class="popup-eula">
+            <div class="popup-box maxHeight80Pourcent">
+                <h1 class="textCenter">Informations</h1>
+                <hr>
+                <span class="underline">En utilisant ce logiciel, voici ce que vous devez savoir :</span>
+                <ul>
+                    <li>Ce logiciel récupère vos informations MyGes depuis votre compte.</li>
+                    <li>Il enregistre vos données sensibles de compte MyGes (nom d'utilisateur et mot de passe) dans une base de données locale.</li>
+                    <li>Il stocke vos données MyGes (notes, absences, emploi du temps, cours) dans une base de données locale.</li>
+                    <li>Toutes les données récupérées par MyGes Client restent sur votre ordinateur.</li>
+                    <li>Ce logiciel est sous licence GNU GPL v3.</li>
+                    <li>Ce logiciel est conçu pour fonctionner sur un écran de 1920x1080 pixels (mais il dispose d'un design réactif).</li>
+                    <li>C'est un projet open source.</li>
+                    <li>Les développeurs du logiciel ne sont en aucun cas responsable des fuites de données possibles.</li>
+                </ul>
+                <button id="buttonEula" class="marginTop10">Ok</button>
+            </div>
+        </div>
+        <div id="softwareInfo" class="popup-eula">
+            <div class="popup-box maxHeight80Pourcent">
+                <h1 class="textCenter">Informations</h1>
+                <hr>
+                <ul>
+                    <li>Version de l'application : <span class="bold underline">Beta 1.2</span></li>
+                    <li>Build Date : <span class="bold underline">2024-07-15</span></li>
+                    <li>Architecture : <span class="bold underline">x64</span></li>
+                    <li>Version runtime : <span class="bold underline">Go 1.22 / Wails 2.10.1</span></li>
+
+                </ul>
+                <button id="buttonSoftwareInfo" class="marginTop10">Ok</button>
+            </div>
+        </div>
+        <div class="bg-connexion">
+            <div class="login-container" id="connection">
+                <h1 id="connexion-title">Connexion</h1>
+
+                <!-- Nouvelle liste déroulante personnalisée -->
+                <p id="connexion_error" style="display: none; color: darkred;" class="textCenter"></p>
+                <div class="custom-select">
+                    <div class="select-selected">Créer un compte</div>
+                    <div class="select-items select-hide" id="select-connexion">
+                        <div>Créer un compte</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="username" autocomplete="off" required>
+                    <label for="username" id="username-label">Nom d'utilisateur</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" autocomplete="off" id="password" required>
+                    <label for="password">Mot de passe</label>
+                </div>
+                <button id="buttonConnection">Se connecter</button>
+                <button id="buttonCancelConnection" class="marginTop10">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <header id="header">
+        <div id="logoGES" class="flex flexCenter">
+            <a href="https://myges.fr/" target="_blank"><img src="./src/assets/images/GES_Master_logo.png" alt="GES logo"></a>
+        </div>
+        <div class="textCenter" id="mainHeader">
+            <h1 class="bold underline" id="headerTitle">Accueil</h1>
+        </div>
+        <div class="flex flexCenter">
+            <img src="./src/assets/images/black-moon.png" class="themeLightDark dark" alt="light/dark mode" style="display: block">
+            <img src="./src/assets/images/black-sun.png" class="themeLightDark light" alt="light/dark mode" style="display: none">
+        </div>
+    </header>
+
+    <main>
+
+        <div id="rightPart"> <!--class="simplebar">-->
+
+            <!--Up list-->
+            <nav>
+                <ul>
+                    <li class="loadPage active" data-idPage="dashboard">
+                        Accueil
+                    </li>
+                    <li class="loadPage" data-idPage="schedule">
+                        Agenda
+                    </li>
+                    <li class="loadPage" data-idPage="grades">
+                        Notes
+                    </li>
+                    <li class="loadPage" data-idPage="events">
+                        Évènements
+                    </li>
+                    <li class="loadPage" data-idPage="absences">
+                        Absences
+                    </li>
+                    <li class="loadPage" data-idPage="courses">
+                        Cours
+                    </li>
+                    <li class="loadPage" data-idPage="projects">
+                        Projets
+                    </li>    
+                    <li class="loadPage" data-idPage="account">
+                        Compte MyGes
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="ulBottom flex flexAround"><a class="underlinePointer loadPage"  data-idPage="credits">Credit</a> <a class="underlinePointer loadPage" data-idPage="softwareAccount">Compte</a></div>
+
+        </div>  <!--softwareAccount-->
+
+        <div id="mainPart">
+
+            <div id="popupMaster" class="textCenter">
+                <div id="stillpopup" class="popup-container">
+                    <!-- Les popups "still" seront ajoutées ici dynamiquement -->
+                </div>
+                <div id="normalpopup" class="popup-container">
+                    <!-- Les popups "normal" seront ajoutées ici dynamiquement -->
+                </div>
+            </div>
+
+
+            <div id="modal-event" class="modal-event">
+                <div class="modal-content-event">
+                    <span class="close">&times;</span>
+                    <h2 id="modal-title"></h2>
+                    <p id="modal-info"></p>
+                </div>
+            </div>
+
+            <div id="replace" class="paddingTop70">
+                <div class="flex flexCenter">
+                    <!--Default page-->
+                    <div class="box flex flexCenter" id="weirdPlace" style="width: inherit"><p>Quel endroit bizarre... Tiens, le tacos que Poulpax m'a gentiment donné : 🌮</p></div>
+                </div>
+                <!--Good bye Page-->
+                <div id="cya" class="flex flexCenter wrap marginTop10 marginBottom10" style="display: none">
+                    <h1 class="textCenter">Cya 👋</h1>
+                    <p class="textCenter" id="message-cya">Stopping app...</p>
+                    <img src="./src/assets/images/circle-loading.gif" alt="loading..." id="loading-gif-account">
+                </div>
+                <!--Main Menu-->
+                <div class="container-dashboard" id="dashboard" style="display: none">
+                    <div class="all-content">
+                        <div class="main-content-dashboard">
+                            <div class="schedule-section">
+                                <div id="scheduleParentBkgColor">
+                                    <div class="header">
+                                        <h2>Emploi du temps du jour</h2>
+                                        <div class="navigation-buttons">
+                                            <button id="backward-button">&#9664;</button> <!-- Flèche gauche -->
+                                            <button id="forward-button">&#9654;</button>  <!-- Flèche droite -->
+                                        </div>
+                                    </div>
+                                    <div id="schedule-content" class="day-column"></div>
+                                </div>
+                            </div>
+                            <div class="summary-section">
+
+                                <div class="recapSection">
+                                    <h2>Récapitulatif des Évènements</h2>
+                                    <div id="event-content">
+                                        <div id="events-container" class="events-container">
+                                            <!-- Les événements seront injectés ici par JavaScript -->
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="recapSection">
+                                    <h2>Récapitulatif des notes</h2>
+                                    <div class="grades-container">
+                                        <div class="grades-header">
+                                            <span>Cours</span>
+                                            <span>Coef</span>
+                                            <span>Professeur</span>
+                                            <span>Notes</span>
+                                            <span>Exam</span>
+                                            <span>Bonus</span>
+                                        </div>
+                                        <div id="grades-content"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Schedule-->
+                <div id="schedule" style="display: none">
+                    <div class="calendar">
+                        <div class="header">
+                            <button class="nav-btn" id="prev-week">◀</button>
+                            <h1 id="week">Semaine du 24 au 29 Mars 2025</h1>
+                            <button class="nav-btn" id="next-week">▶</button>
+                        </div>
+                        <div class="weekdays">
+                            <div>Heure</div>
+                            <div>Lun<span id="lun-day"></span></div>
+                            <div>Mar<span id="mar-day"></span></div>
+                            <div>Mer<span id="mer-day"></span></div>
+                            <div>Jeu<span id="jeu-day"></span></div>
+                            <div>Ven<span id="ven-day"></span></div>
+                            <div>Sam<span id="sam-day"></span></div>
+                        </div>
+                        <div class="timetable">
+                            <div class="hour-column">
+                                <div class="hour">8h00</div>
+                                <div class="hour">9h45</div>
+                                <div class="hour">11h30</div>
+                                <div class="hour">13h00</div>
+                                <div class="hour">14h00</div>
+                                <div class="hour">15h45</div>
+                                <div class="hour">17h30</div>
+                                <div class="hour">19h15</div>
+                                <div class="hour">21h00</div>
+                            </div>
+                            <div class="day-column" id="monday">
+                            </div>
+                            <div class="day-column" id="tuesday">
+                            </div>
+                            <div class="day-column" id="wednesday">
+                            </div>
+                            <div class="day-column" id="thursday">
+                            </div>
+                            <div class="day-column" id="friday">
+                            </div>
+                            <div class="day-column" id="saturday">
+                                <!-- Samedi vide -->
+                            </div>
+                        </div>
+                        <div class="width100 flex flexCenter">
+                            <div class="width20 flex flexAround">
+                                <button class="nav-btn" id="force-now">Maintenant</button>
+                                <button class="nav-btn" id="force-refresh">Rafraichir</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="discord-container">
+                        <h1 class="title">Paris Locations</h1>
+                        <div class="location-list">
+                            <div class="location-item">
+                                <a href="https://www.google.fr/maps/place/242+Rue+du+Faubourg+Saint-Antoine,+75012+Paris/@48.8491485,2.3870842,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6727347e25d67:0xc73e22c1131584f7!8m2!3d48.849145!4d2.3896591!16s%2Fg%2F11cslq77k8?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">
+                                    <h2 style="color: #FF6D01;">NATION1</h2>
+                                    <p>242 Rue du Faubourg Saint Antoine, Paris 75012</p>
+                                </a>
+                            </div>
+                            <div class="location-item">
+                                <a href="https://www.google.fr/maps/place/220+Rue+du+Faubourg+Saint-Antoine,+75012+Paris/@48.8494825,2.3846271,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6720cbd349643:0x7b264d91a7ebdd1!8m2!3d48.849479!4d2.387202!16s%2Fg%2F11jdtjsng4?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">
+                                    <h2 style="color: #FF0000">NATION2</h2>
+                                    <p>220 Rue du Faubourg Saint-Antoine, Paris 75012</p>
+                                </a>
+                            </div>
+                            <div class="location-item">
+                                <a href="https://www.google.fr/maps/place/21+Rue+Erard,+75012+Paris/@48.8461334,2.3829808,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6720d997a4b7d:0x86fe46d4b5ab876!8m2!3d48.8461299!4d2.3855557!16s%2Fg%2F11c5km4q9l?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">
+                                    <h2 style="color: #FFCE00">Erard</h2>
+                                    <p>21 Rue Erard, Paris 75012</p>
+                                </a>
+                            </div>
+                            <div class="location-item">
+                                <a href="https://www.google.fr/maps/place/14+Pass.+de+la+Main+d'Or,+75011+Paris/@48.8521651,2.3756302,17z/data=!3m1!4b1!4m6!3m5!1s0x47e672089960759b:0x4cce028653dcec68!8m2!3d48.8521616!4d2.3782051!16s%2Fg%2F11c22d31vy?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">
+                                    <h2 style="color: #FFCE00">MAIN-D-OR</h2>
+                                    <p>14 Passage de la Main d'Or, Paris 75011</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Grades-->
+                <div id="grades" style="display: none">
+                    <div id="allGradesContainer" class="marginAuto box width80">
+                        <div class="main-content-grades">
+                            <h2>Mes Notes</h2>
+                            <div class="semester-tabs">
+                                <button class="tab-button active" data-semester="1">Semestre 1</button>
+                                <button class="tab-button" data-semester="2">Semestre 2</button>
+                            </div>
+                            <div class="grades-container">
+                                <div class="grades-header">
+                                    <span>Cours</span>
+                                    <span>ECTS</span>
+                                    <span>Coef</span>
+                                    <span>Professeur</span>
+                                    <span>Notes</span>
+                                    <span>Exam</span>
+                                    <span>Bonus</span>
+                                </div>
+                                <div id="grades-list-semester-1" class="grades-list active">
+                                    <!-- Les notes du premier semestre seront insérées ici -->
+                                </div>
+                                <div id="grades-list-semester-2" class="grades-list">
+                                    <!-- Les notes du deuxième semestre seront insérées ici -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Event-->
+                <div id="events" style="display: none">
+                    <div id="event-manager">
+                        <div class="calendar-container">
+                            <h2 class="calendar-title">Calendrier des événements</h2>
+                            <input type="text" placeholder="Rechercher un évènement" id="searchBar" autocomplete="off">
+                            <div class="event-list">
+                                <div class="event-item" style="border-color: #5865f2;">
+                                    <div class="event-header">
+                                        <span class="event-name">Coucou1</span>
+                                        <span class="event-date">12 Oct - 13 Oct</span>
+                                    </div>
+                                    <p class="event-description">test1</p>
+                                    <div class="event-time">
+                                        <span>Début: 21:23</span>
+                                        <span>Fin: 21:23</span>
+                                    </div>
+                                </div>
+                                <!-- Ajoutez d'autres événements ici -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Absences-->
+                <div id="absences" style="display: none">
+                    <div id="allContainerAbsences" class="flex flexCenter wrap">
+                        <div class="box widthAuto">
+                            <h1>Mes Absences</h1>
+                            <table id="coursesTable">
+                                <thead>
+                                <tr>
+                                    <th>Nom du cours</th>
+                                    <th>Date</th>
+                                    <th>Justifié</th>
+                                    <th>Trimestre</th>
+                                    <th>Année</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Les données seront ajoutées ici via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!--Courses-->
+                <div id="courses" style="display: none">
+                    <div class="container-courses">
+                        <h1>Liste des Cours</h1>
+                        <input type="text" placeholder="Cherchez un cours..." id="search-bar-courses" autocomplete="off">
+                        <div id="courseGrid" class="course-grid">
+                            <!-- Les cartes de cours seront insérées ici par JavaScript -->
+                            <img src="./src/assets/images/circle-loading.gif" alt="loading.." id="loadingCourses">
+                        </div>
+                    </div>
+                </div>
+                <!--Groups project-->
+                <div id="projects" style="display: none">
+                    <!--<img src="./src/assets/images/circle-loading.gif" id="loadingProject" alt="loading...">-->
+                    <div id="courses-container">
+
+                        <div class="project-list">
+                            <div class="project-list-header">Projets à rejoindre</div>
+                            <div id="projecttojoin" ></div>
+                        </div>
+                        
+                    
+                        <div class="project-list">
+                            <div class="project-list-header">Mes Projets</div>
+                            <div id="myproject" ></div>
+                        </div>
+
+                    </div>
+                </div>
+                <!--MyGes Account-->
+                <div id="account" style="display: none">
+                    <div id="account-presentation">
+                        <div class="tooltip-trigger" style="width: 100%; height: 100%">
+                            <img src="./src/assets/images/circle-loading.gif" alt="loading..." id="loading-gif-account">
+                            <span class="tooltip">Recherche sur internet... Peut prendre du temps...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Credits-->
+                <div id="credits" style="display: none">
+                    <div class="credits-container">
+                        <div class="credits-section">
+                            <h1 class="section-title">Crédits</h1>
+
+                            <div class="subsection">
+                                <h2 class="subsection-title">Créateurs</h2>
+                                <ul class="link-list creator-list">
+                                    <li><a href="https://github.com/Spatulox" target="_blank">Spatulox</a> <!-- - <a href="https://github.com/Spatulox?tab=repositories&q=MyGes" target="_blank">(Projets MyGes)</a>--></li>
+                                </ul>
+                            </div>
+
+                            <div class="subsection">
+                                <h2 class="subsection-title">Outils utilisés</h2>
+                                <ul class="link-list tools-list">
+                                    <li><a href="https://tip.golang.org/" target="_blank">GO 22</a> (Backend)</li>
+                                    <li><a href="https://wails.io/docs/guides/frontend/" target="_blank">Wails</a> (Frontend)</li>
+                                    <li><a href="https://www.jetbrains.com/go/" target="_blank">Jetbrains GoLand</a></li>
+                                    <li><a href="https://www.gitkraken.com/" target="_blank">GitKraken</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="subsection">
+                                <h2 class="subsection-title">Informations</h2>
+                                <ul class="link-list info-list">
+                                    <li><a href="https://github.com/Spatulox/MyGesClient" target="_blank">Code Source</a></li>
+                                    <li><a href="https://github.com/Spatulox/MyGesClient/releases" target="_blank">Releases</a></li>
+                                    <li><a href="https://github.com/Spatulox/MyGesClient/issues" target="_blank">Signaler un problème</a></li>
+                                    <li><a href="https://github.com/Spatulox/MyGesClient/issues" target="_blank">Demander une fonctionnalité</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+
+                        <div class="credits-section">
+                            <h1 class="section-title">Autres</h1>
+                            <ul class="action-list">
+                                <li id="eulaShow">Voir les informations d'utilisation de l'application</li>
+                                <li id="appVersion">Informations de l'Application</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="credits-container bottom-sections">
+
+                        <div class="credits-section full-width">
+                            <div class="subsection">
+                                <h2 class="subsection-title">Disclaimer</h2>
+                                <p>This software is under the GNU GPL v3 Licence</p>
+                                <p>Cette application est fournie « telle quelle », sans aucune garantie, expresse ou implicite. Utilisez-la à vos propres risques. Les créateurs et contributeurs ne sont pas responsables des dommages ou pertes résultant de l'utilisation de cette application.</p>
+                            </div>
+                        </div>
+
+                        <div class="credits-section full-width">
+                            <div class="subsection">
+                                <h2 class="subsection-title">Remerciements</h2>
+                                <p>Un grand Merci à Poulpax, surtout pour le tacos.</p>
+                                <p>Un grand Merci à <a href="https://github.com/quantumsheep" target="_blank"> Nathanael Demacon (quantumsheep)</a> et particulièrement à son projet
+                                    <a href="https://github.com/quantumsheep/myges-cli" target="_blank">myges-cli</a> sans lequel ce projet n'aurait pas pu voir le jour.</p>
+                                <p>Un grand Merci aux équipes de développement de <a href="https://wails.io/docs/guides/frontend/" target="_blank">Wails</a>, parce que j'avais franchement la flemme de faire l'appli avec
+                                    <a href="https://fyne.io/" target="_blank">Fyne</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="softwareAccount" style="display: none">
+                    <div class="credits-container">
+                        <div class="credits-section width80">
+                            <h1 class="section-title">Autres</h1>
+                            <ul class="action-list">
+                                <li id="changePassword">Modifier le login et le mot de passe</li>
+                                <li id="deleteOldData">Supprimer les anciennes données</li>
+                                <li id="deconnectionFromMyges">Déconnexion</li>
+                            </ul>
+                        </div>
+                        <div class="credits-section width80">
+                            <h1 class="section-title">Encrypter le mot de passe</h1>
+                            <p>A chaque démarrage de l'application, vous devrez renseigner votre phrase secrète permettant de décrypter votre mot de passe</p>
+                            <input type="text" id="encrypt-input" placeholder="Renseignez votre phrase secrète">
+                            <input type="button" id="encrypt-btn" class="marginTop10" style="width: 100%" value="Encrypter votre mot de passe">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="open-modal" class="add-button initial">
+                <span class="plus">+</span>
+                <div class="modal">
+                    <div class="modal-content">
+                        <h2 class="modal-title">Créer un évènement</h2>
+                        <form id="event-form">
+                            <div class="form-group">
+                                <label for="event-name">Nom</label>
+                                <input type="text" id="event-name" autocomplete="off" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-description">Description</label>
+                                <textarea id="event-description" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-start">Date de début</label>
+                                <input type="datetime-local" id="event-start" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-end">Date de fin</label>
+                                <input type="datetime-local" id="event-end" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-color">Couleur</label>
+                                <input type="color" id="event-color" value="#396aa1">
+                            </div>
+                            <div class="button-group">
+                                <button type="button" class="btn btn-cancel" id="close-modal">Annuler</button>
+                                <button type="button" class="btn btn-create" id="create-btn">Créer l'évènement</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="overlay"></div>
+            
+        </div>
+    </main>
+
+    <footer>
+    </footer>
+</body>
+</html>
