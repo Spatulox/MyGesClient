@@ -71,21 +71,17 @@ export async function initCreateEvent(): Promise<void> {
             console.log(dot.id)
             theSavedPreset = await GetPresetByName(dot.id)
             dot.style.background = theSavedPreset.Value
-            console.log("Preset colors already saved")
         } catch (e: any){
-            console.log("Saving preset colors")
             await SaveEventPreset(dot.id, dot.style.background)
         }
       
         // Sélection sur clic de la pastille
         dot.addEventListener('click', () => {
             const isSelected = dot.classList.contains('selected');
-            console.log('Avant modification:', isSelected, dot.classList.toString());
             document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
             if (!isSelected) {
               dot.classList.add('selected');
             }
-            console.log('Après modification:', dot.classList.toString());
             eventColor.value = rgbToHex(dot.style.background)
           });
           
@@ -99,15 +95,24 @@ export async function initCreateEvent(): Promise<void> {
         });
       
         // Change la couleur de la pastille
-        colorInput.addEventListener('input', () => {
-          dot.style.background = colorInput.value;
-          dot.dataset.color = colorInput.value;
-          // console.log(dot.id)
-          // Tu peux aussi sauvegarder la nouvelle couleur ici
+        colorInput.addEventListener('input', async () => {
+            dot.style.background = colorInput.value;
+            dot.dataset.color = colorInput.value;
+            try{
+                await SaveEventPreset(dot.id, colorInput.value)
+            } catch (e) {
+                console.error(e)
+            }
+            eventColor.value = rgbToHex(colorInput.value)
+                colorPreset.forEach((preset)=>{
+                const dot_tmp = preset.querySelector('.color-dot') as HTMLElement;
+                dot_tmp.classList.remove('selected')
+            })
+            dot.classList.add("selected")
         });
-      });
+    });
       
-      function rgbToHex(rgb: string): string {
+    function rgbToHex(rgb: string): string {
         if (rgb.startsWith('#')) return rgb;
         const result = rgb.match(/\d+/g);
         if (!result) return '#000000';
@@ -121,7 +126,7 @@ export async function initCreateEvent(): Promise<void> {
             })
             .join('')
         );
-      }
+    }
 
       
 
