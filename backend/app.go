@@ -243,7 +243,7 @@ func (a *App) Shutdown(ctx context.Context) {
 
 func (a *App) initDB() error {
 	var err error
-	a.db, err = InitDBConnexion()
+	a.db, err = InitDBConnexion(&a.dbMutex, &a.dbWg)
 	if err != nil {
 		return fmt.Errorf("failed to initialize DB: %w", err)
 	}
@@ -580,4 +580,8 @@ func (a *App) GetCourses() (string, error) {
 	}
 
 	return a.api.GetCourses(a.year)
+}
+
+func (a *App) GetPresetByName(presetName string) (Preset, error) {
+	return GetPresetByName(a.db, presetName)
 }
