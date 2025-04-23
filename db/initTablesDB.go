@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/labstack/gommon/log"
 	_ "modernc.org/sqlite"
 )
 
 // To store the user of the application
-const USER = `CREATE TABLE USER (
+const USER = `CREATE TABLE IF NOT EXISTS USER (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
@@ -23,7 +24,7 @@ const USER = `CREATE TABLE USER (
 );`
 
 // To store the schedule of the user
-const SALLES = `CREATE TABLE SALLES (
+const SALLES = `CREATE TABLE IF NOT EXISTS SALLES (
     room_id INTEGER PRIMARY KEY AUTOINCREMENT,
     room_name TEXT NOT NULL,
     campus TEXT NOT NULL,
@@ -104,7 +105,22 @@ const ABSENCES = `CREATE TABLE IF NOT EXISTS ABSENCES(
     FOREIGN KEY (user_id) REFERENCES USER(user_id)
 );`
 
-func initDBTables() {
+const PRESET = `CREATE TABLE IF NOT EXISTS PRESET(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name TEXT NOT NULL,
+	value TEXT NOT NULL,
+	user_id INT NOT NULL,
+	type TEXT NOT NULL,
+	FOREIGN KEY (user_id) REFERENCES USER(user_id),
+	UNIQUE (user_id, name, type) -- Contrainte pour un seul preset du même nom pour une personne et un même type
+);`
+
+func initDBTables(mutex *sync.Mutex, waitgroup *sync.WaitGroup) {
+	mutex.Lock()
+	waitgroup.Add(1)
+	defer mutex.Unlock()
+	defer waitgroup.Done()
+
 	appDataPath, err := os.UserConfigDir()
 	if err != nil {
 		Log.Error(fmt.Sprintf("erreur lors de l'obtention du dossier AppData: %v", err))
@@ -113,14 +129,14 @@ func initDBTables() {
 	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
-		fmt.Printf("Erreur lors de l'ouverture de la base de données: %v\n", err)
+		Log.Error(fmt.Sprintf("Erreur lors de l'ouverture de la base de données: %v\n", err))
 		return
 	}
 	defer db.Close()
 
 	// Enable foreign key
 	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
-		fmt.Printf("Erreur lors de l'activation des clé étrangère': %v\n", err)
+		Log.Error(fmt.Sprintf("Erreur lors de l'activation des clé étrangère': %v\n", err))
 		return
 	}
 
@@ -178,9 +194,13 @@ func initDBTables() {
 	}
 	Log.Infos("Table 'Absences' créée avec succès.")
 
+	if _, err := db.Exec(PRESET); err != nil {
+		Log.Error(fmt.Sprint("Error lors de la création de la table preset: %v\n", err))
+		return
+	}
 }
 
-func createDB() error {
+func createDB(mutex *sync.Mutex, waitgroup *sync.WaitGroup) error {
 	appDataPath, err := os.UserConfigDir()
 	if err != nil {
 		return fmt.Errorf("erreur lors de l'obtention du dossier AppData: %v", err)
@@ -206,12 +226,14 @@ func createDB() error {
 		defer file.Close()
 		Log.Infos("Fichier db.sqlite créé.")
 
-		initDBTables()
 	} else if err != nil {
 		return fmt.Errorf("erreur lors de la vérification de l'existence du fichier: %v", err)
 	} else {
 		Log.Infos("Le fichier db.sqlite existe déjà.")
 	}
+	Log.Infos("Initialisaion des potentiellement tables manquantes..")
+	initDBTables(mutex, waitgroup)
+	Log.Infos("Fini !")
 
 	return nil
 }

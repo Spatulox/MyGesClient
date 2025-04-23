@@ -1,8 +1,6 @@
 package appTime
 
 import (
-	. "MyGesClient/log"
-	"fmt"
 	"time"
 )
 
@@ -40,8 +38,6 @@ func GetWeekDates() (time.Time, time.Time) {
 	sunday := monday.AddDate(0, 0, 6)
 	// sunday at 5 am
 	sunday = time.Date(sunday.Year(), sunday.Month(), sunday.Day(), 5, 0, 0, 0, time.UTC)
-
-	Log.Debug(fmt.Sprintf("%v : %v", monday, sunday))
 
 	return monday, sunday
 }

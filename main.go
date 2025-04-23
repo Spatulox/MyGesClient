@@ -14,7 +14,18 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+type SilentLogger struct{}
+
+func (l *SilentLogger) Print(message string)   {}
+func (l *SilentLogger) Trace(message string)   {}
+func (l *SilentLogger) Debug(message string)   {}
+func (l *SilentLogger) Info(message string)    {}
+func (l *SilentLogger) Warning(message string) {}
+func (l *SilentLogger) Error(message string)   {}
+func (l *SilentLogger) Fatal(message string)   {}
+
 func main() {
+	Log.DebugBool = true
 	Log.Infos("Launching...")
 	// Create an instance of the app structure
 	app := NewApp()
@@ -25,8 +36,10 @@ func main() {
 		Title:  "MyGesClient",
 		Width:  1400,
 		Height: 800,
+		Logger: &SilentLogger{},
 		AssetServer: &assetserver.Options{
-			Assets: assets,
+			Assets:     assets,
+			Middleware: assetserver.ChainMiddleware(),
 		},
 		OnStartup:  app.Startup,
 		OnShutdown: app.Shutdown,

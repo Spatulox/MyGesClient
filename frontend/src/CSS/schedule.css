@@ -52,12 +52,20 @@
     display: grid;
     grid-template-columns: 50px repeat(6, 1fr);
     gap: 5px;
+    position: relative;
+    overflow: hidden;
 }
 
 #schedule .hour-column {
     display: grid;
     grid-template-rows: repeat(9, 90px);
-    gap: 5px
+    gap: 5px;
+    position: relative;
+}
+
+#schedule .hour-column .hour {
+    position: relative;
+    z-index: 2;
 }
 
 #schedule .hour {
@@ -68,10 +76,46 @@
     font-size: 12px;
 }
 
+#schedule .hour-column .hour::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2.5px;
+    width: 3000%;
+    max-width: 1303px;
+    height: 1px;
+    background: rgb(87, 87, 85);
+    z-index: 1;
+    pointer-events: none;
+}
+
 #schedule .day-column {
     display: grid;
     grid-template-rows: repeat(9, 90px);
     gap: 5px;
+    position: relative;
+}
+
+#schedule .day-column::after, #schedule .hour-column::after{
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 1px;
+    height: 100%;
+    background: rgb(87, 87, 85);
+    z-index: 1;
+}
+
+#schedule .day-column:last-child::after{
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0px;
+    width: 1px;
+    height: 100%;
+    background: rgb(87, 87, 85);
+    z-index: 1;
 }
 
 #schedule .event {

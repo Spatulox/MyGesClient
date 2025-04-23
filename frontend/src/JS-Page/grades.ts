@@ -1,34 +1,39 @@
-import {GetGrades} from "../../wailsjs/go/backend/App";
-import {capitalizeFirstLetter, getYear, scrollMainPart} from "../JS/functions";
+import { GetGrades } from "../../wailsjs/go/backend/App";
+import { structures } from "../../wailsjs/go/models";
+import { capitalizeFirstLetter, getYear, scrollMainPart } from "../JS/functions";
 
-let isStillRunning = false
+let isStillRunning = false;
 
-export async function grades() {
-    if(isStillRunning){
-        return
+export async function grades(): Promise<void> {
+    if (isStillRunning) {
+        return;
     }
-    isStillRunning = true
-    scrollMainPart()
-    const gradesList1 = document.getElementById('grades-list-semester-1');
-    const gradesList2 = document.getElementById('grades-list-semester-2');
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const semester2Tab = document.querySelector('.tab-button[data-semester="2"]');
+    isStillRunning = true;
+    scrollMainPart();
 
-    let year = getYear();
-    let gradeTmp
-    try{
-        gradeTmp = await GetGrades(year.toString())
-    }catch(e){
-        console.log(e)
-        isStillRunning = false
-        return
+    const gradesList1 = document.getElementById('grades-list-semester-1') as HTMLElement | null;
+    const gradesList2 = document.getElementById('grades-list-semester-2') as HTMLElement | null;
+    const tabButtons = document.querySelectorAll<HTMLButtonElement>('.tab-button');
+    const semester2Tab = document.querySelector<HTMLButtonElement>('.tab-button[data-semester="2"]');
+
+    if (!gradesList1 || !gradesList2 || !semester2Tab) {
+        isStillRunning = false;
+        return;
     }
 
-    function populateGrades(gradesList, grades) {
+    let gradeTmp: structures.LocalGrades[] = [];
+    try {
+        gradeTmp = await GetGrades() as structures.LocalGrades[];
+    } catch (e) {
+        console.log(e);
+        isStillRunning = false;
+        return;
+    }
+
+    function populateGrades(gradesList: HTMLElement, grades: structures.LocalGrades[]): void {
         gradesList.innerHTML = ''; // Nettoyer la liste existante
         grades.forEach(grade => {
-
-            let {gradeElement, courseName, gradesHtml, examHtml} = initGradesDisplay(grade)
+            const { gradeElement, courseName, gradesHtml, examHtml } = initGradesDisplay(grade);
 
             gradeElement.innerHTML = `
                 <span>${capitalizeFirstLetter(courseName)}</span>
@@ -69,22 +74,27 @@ export async function grades() {
 
             const semester = button.getAttribute('data-semester');
             document.querySelectorAll('.grades-list').forEach(list => list.classList.remove('active'));
-            document.getElementById(`grades-list-semester-${semester}`).classList.add('active');
+            const list = document.getElementById(`grades-list-semester-${semester}`);
+            if (list) list.classList.add('active');
         });
     });
-    isStillRunning = false
+
+    isStillRunning = false;
 }
 
-
-export function initGradesDisplay(grade){
+export function initGradesDisplay(grade: structures.LocalGrades): {
+    gradeElement: HTMLDivElement;
+    courseName: string;
+    gradesHtml: string;
+    examHtml: string;
+} {
     const gradeElement = document.createElement('div');
     gradeElement.className = 'grade-item';
 
     const gradesHtml = grade.grades != null ? grade.grades.join(', ') : "";
-    const examHtml = grade.exam != null ? grade.exam : "";
+    const examHtml = grade.exam != null ? String(grade.exam) : "";
 
     // Enlever le préfixe "S1 -" ou "S2 -" du nom du cours
     const courseName = grade.course.replace(/^S[12] - /, '');
-    return {gradeElement, courseName, gradesHtml, examHtml}
+    return { gradeElement, courseName, gradesHtml, examHtml };
 }
-

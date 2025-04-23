@@ -10,13 +10,14 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	_ "modernc.org/sqlite"
 )
 
 // ------------------------------------------------ //
 
-func InitDBConnexion() (*sql.DB, error) {
+func InitDBConnexion(mutex *sync.Mutex, waitgroup *sync.WaitGroup) (*sql.DB, error) {
 	appDataPath, err := os.UserConfigDir()
 	if err != nil {
 		return nil, fmt.Errorf("erreur lors de l'obtention du dossier AppData: %v", err)
@@ -31,7 +32,7 @@ func InitDBConnexion() (*sql.DB, error) {
 		return nil, fmt.Errorf("erreur lors de la création du dossier MyGes: %v", err)
 	}
 
-	if err := createDB(); err != nil {
+	if err := createDB(mutex, waitgroup); err != nil {
 		return nil, err
 	}
 
@@ -296,4 +297,70 @@ func DeleteOldData(db *sql.DB) bool {
 	}
 
 	return true
+}
+
+func SavePreset(db *sql.DB, presetName string, value string, presetType string) bool {
+	user, err := GetUser(db)
+
+	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible de sélectionner l'utilisateur actuellement connecté : %v", err))
+		return false
+	}
+
+	query := `
+		INSERT INTO PRESET (user_id, name, value, type)
+		VALUES (?, ?, ?, ?)
+		ON CONFLICT(user_id, name, type) DO UPDATE SET value=excluded.value
+	`
+	_, err = db.Exec(query, user.ID, presetName, value, presetType)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Error when connecting the user : %v", err))
+		return false
+	}
+	return true
+}
+
+func GetPresetByName(db *sql.DB, presetName string) (Preset, error) {
+	user, err := GetUser(db)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible de sélectionner l'utilisateur actuellement connecté : %v", err))
+		return Preset{}, fmt.Errorf("Impossible de récupérer l'utilisateur : %v", err)
+	}
+
+	query := `
+        SELECT id, name, value, type
+        FROM PRESET
+        WHERE user_id = ? AND name = ?
+        LIMIT 1
+    `
+	var p Preset
+	row := db.QueryRow(query, user.ID, presetName)
+	err = row.Scan(&p.ID, &p.Name, &p.Value, &p.Type)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return Preset{}, fmt.Errorf("Aucun preset trouvé pour ce nom")
+		}
+		return Preset{}, fmt.Errorf("Erreur lors de la récupération du preset par son nom : %v", err)
+	}
+	return p, nil
+}
+
+func GetPresetByID(db *sql.DB, id int) (Preset, error) {
+
+	query := `
+        SELECT id, name, value, type
+        FROM PRESET
+        WHERE id = ?
+        LIMIT 1
+    `
+	var p Preset
+	row := db.QueryRow(query, id)
+	err := row.Scan(&p.ID, &p.Name, &p.Value, &p.Type)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return Preset{}, fmt.Errorf("Aucun preset trouvé pour ce nom")
+		}
+		return Preset{}, fmt.Errorf("Erreur lors de la récupération du preset par son id : %v", err)
+	}
+	return p, nil
 }

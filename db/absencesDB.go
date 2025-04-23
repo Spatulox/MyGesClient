@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	. "MyGesClient/structures"
+
+	. "MyGesClient/log"
 )
-import . "MyGesClient/structures"
-import . "MyGesClient/log"
 
 func SaveAbsencesToDB(abs string, db *sql.DB) bool {
-	println(abs)
 	Log.Infos("Saving Absences to DB")
 
 	// Decode the JSON string into a map

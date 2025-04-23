@@ -25,7 +25,7 @@
 
 }
 
-#eula, #mainPart{
+#eula, #softwareInfo, #mainPart{
     font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -508,12 +508,12 @@
     color: #ffffff;
 }
 
-#buttonEula{
+#buttonEula, #buttonSoftwareInfo{
     width: 100% !important;
     background-color: var(--highlight-color);
 }
 
-#buttonEula:hover{
+#buttonEula:hover, #buttonSoftwareInfo:hover{
     width: 100% !important;
     background-color: var(--hover-color);
 }
@@ -557,7 +557,7 @@
     width: 30%;
 }
 
-#eula{
+#eula, #softwareInfo{
     display: none;
     position: absolute;
     z-index: 2408;
@@ -569,14 +569,14 @@
     transition: all ease-in-out 0.3s;
 }
 
-#eula div{
+#eula div, #softwareInfo div{
     margin: auto;
     margin-top: 50px;
     width: 60%;
     overflow: auto;
 }
 
-#eula.active{
+#eula.active, #softwareInfo.active{
     display: block;
     transition: all ease-in-out 0.3s;
 }

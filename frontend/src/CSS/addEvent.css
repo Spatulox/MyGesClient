@@ -1,3 +1,9 @@
+.add-button {
+    --max-width: 600px;
+    --max-height: 695px;
+}
+
+
 .add-button.initial {
     width: 50px;
     height: 50px;
@@ -31,8 +37,8 @@
 }
 
 .add-button.active {
-    width: 400px;
-    height: 560px;
+    width: var(--max-width); /*Overwrited by the animation*/
+    height: var(--max-height); /*Overwrited by the animation*/
     font-size: inherit;
     background-color: var(--discord-dark);
     animation: expandButton 0.8s forwards;
@@ -113,6 +119,7 @@
     visibility: visible;
     pointer-events: auto;
     display: block;
+    transition: all 0.3s ease-in-out;
 }
 
 .modal-overlay.active .modal {
@@ -207,6 +214,7 @@
 .btn:active {
     transform: scale(0.9);
     transition: transform ease-in-out 0.1s;
+    transition: background-color 0.2s;
 }
 
 .btn-cancel {
@@ -245,11 +253,23 @@
         height: 50px;
         bottom: 20px;
         right: 20px;
+        background-color: var(--highlight-color);
         transform: scale(0.3);
     }
+    60% {
+        width: calc(var(--max-width)/2);
+        height: calc(var(--max-height)/2);
+        background-color: var(--discord-dark);
+        bottom: 50%;
+        right: 50%;
+        transform: scale(1) translate(50%, 50%);
+    }
+    99%{
+        background-color: var(--discord-dark);
+    }
     100% {
-        width: 400px;
-        height: 580px;
+        width: var(--max-width);
+        height: var(--max-height);
         bottom: 50%;
         right: 50%;
         transform: scale(1) translate(50%, 50%);
@@ -258,8 +278,17 @@
 
 @keyframes closeButton {
     0% {
-        width: 400px;
-        height: 560px;
+        width: var(--max-width);
+        height: var(--max-height);
+        font-size: inherit;
+        background-color: var(--discord-dark);
+        bottom: 50%;
+        right: 50%;
+        transform: scale(1) translate(50%, 50%);
+    }
+    60% {
+        width: calc(var(--max-width)/2);
+        height: calc(var(--max-height)/2);
         font-size: inherit;
         background-color: var(--discord-dark);
         bottom: 50%;

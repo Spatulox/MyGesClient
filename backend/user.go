@@ -5,7 +5,6 @@ import (
 	. "MyGesClient/log"
 	. "MyGesClient/time"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	. "MyGesClient/structures"
@@ -142,22 +141,6 @@ func (a *App) GetProfile() (string, error) {
 	if a.getAPI() == nil {
 		return createMessage("Internal error"), fmt.Errorf("Impossible to retrieve your profile no internet connexion")
 	}
-
-	a.profileMutex.Lock()
-	if a.isFetchingProfile {
-		a.profileMutex.Unlock()
-		return createMessage("Waiting for the previous profile fetch to end"), errors.New("profile fetch already in progress")
-	}
-	a.isFetchingProfile = true
-	a.profileMutex.Unlock()
-
-	defer func() {
-		a.profileMutex.Lock()
-		a.isFetchingProfile = false
-		a.profileMutex.Unlock()
-	}()
-
-	Log.Infos("Refreshing Profile")
 	api := a.getAPI()
 	return api.GetProfile()
 }

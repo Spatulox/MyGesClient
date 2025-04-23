@@ -92,7 +92,7 @@ func mapToStruct(m map[string]interface{}, v interface{}) error {
 func convertToJSON(data map[string]interface{}) (string, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return errMessage, fmt.Errorf("erreur lors de la conversion en JSON: %w", err)
+		return errMessage, fmt.Errorf("erreur lors de la conversion en JSON") // %w", err)
 	}
 	return string(jsonData), nil
 }
@@ -367,44 +367,48 @@ func (ges *GESapi) QuitProjectGroup(projectRcId int64, projectId int64, projectG
 // --------------------------------------------------------------------------------------- //
 
 func (ges *GESapi) get(url string) (map[string]interface{}, error) {
-	Log.Infos(fmt.Sprintf("INFOS : Requesting GET API for %s", url))
+	Log.Infos(fmt.Sprintf("Requesting GET API for %s", url))
 	result, err := ges.request("GET", url, nil)
 	if err != nil {
 		fmt.Printf("Stack trace:\n%+v\n", err)
+		return nil, fmt.Errorf("GET API call failed: %w", err)
 	}
-	Log.Infos(fmt.Sprintf("INFOS : %s finished", url))
+	Log.Infos(fmt.Sprintf("%s finished", url))
 	return result, nil
 }
 
 func (ges *GESapi) post(url string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
-	Log.Infos(fmt.Sprintf("INFOS : Requesting POST API for %s", url))
+	Log.Infos(fmt.Sprintf("Requesting POST API for %s", url))
 	result, err := ges.request("POST", url, requestConfig)
 	if err != nil {
 		fmt.Printf("Stack trace:\n%+v\n", err)
+		return nil, fmt.Errorf("POST API call failed: %w", err)
 	}
-	Log.Infos(fmt.Sprintf("INFOS : %s finished", url))
+	Log.Infos(fmt.Sprintf("%s finished", url))
 	return result, nil //ges.request("POST", url, requestConfig)
 }
 
 func (ges *GESapi) put(url string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
 	//return ges.request("PUT", url, requestConfig)
-	Log.Infos(fmt.Sprintf("INFOS : Requesting PUT API for %s", url))
+	Log.Infos(fmt.Sprintf("Requesting PUT API for %s", url))
 	result, err := ges.request("PUT", url, requestConfig)
 	if err != nil {
 		fmt.Printf("Stack trace:\n%+v\n", err)
+		return nil, fmt.Errorf("PUT API call failed: %w", err)
 	}
-	Log.Infos(fmt.Sprintf("INFOS : %s finished", url))
+	Log.Infos(fmt.Sprintf("%s finished", url))
 	return result, nil
 }
 
 func (ges *GESapi) delete(url string) (map[string]interface{}, error) {
 	//return ges.request("DELETE", url, nil)
-	Log.Infos(fmt.Sprintf("INFOS : Requesting DELETE API for %s", url))
+	Log.Infos(fmt.Sprintf("Requesting DELETE API for %s", url))
 	result, err := ges.request("DELETE", url, nil)
 	if err != nil {
 		fmt.Printf("Stack trace:\n%+v\n", err)
+		return nil, fmt.Errorf("DELETE API call failed: %w", err)
 	}
-	Log.Infos(fmt.Sprintf("INFOS : %s finished", url))
+	Log.Infos(fmt.Sprintf("%s finished", url))
 	return result, nil
 }
 
@@ -462,8 +466,6 @@ func (ges *GESapi) request(method, url string, requestConfig map[string]interfac
 		fmt.Printf("Error decoding JSON: %v\n", err)
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
-
-	fmt.Printf("Decoded result: %+v\n", result)
 
 	// Getting result field
 	if resultData, ok := result["result"].([]interface{}); ok {

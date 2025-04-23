@@ -16,12 +16,11 @@ type gradesResponse struct {
 
 func SaveGradesToDB(grades string, db *sql.DB) {
 	Log.Infos("INFO : Saving grades into local DB")
-	fmt.Println(grades)
 
 	var gradesResponseVar gradesResponse
 	err := json.Unmarshal([]byte(grades), &gradesResponseVar)
 	if err != nil {
-		fmt.Println("Erreur lors du décodage JSON:", err)
+		Log.Error(fmt.Sprintf("Erreur lors du décodage JSON: %v", err))
 		return
 	}
 
@@ -55,8 +54,6 @@ func SaveGradesToDB(grades string, db *sql.DB) {
 		return
 	}
 	defer stmtGrades.Close()
-
-	fmt.Printf("%d", len(gradesResponseVar.Result))
 
 	for _, item := range gradesResponseVar.Result {
 

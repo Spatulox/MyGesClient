@@ -17,10 +17,10 @@
 
     <!--<link rel="stylesheet" type="text/css" href="./src/CSS/testCss.css">-->
 
-    <script type="module" src="./src/JS/loadPages.js" defer></script>
-    <script type="module" src="./src/JS/login-register.js" defer></script>
-    <script type="module" src="./src/JS/start.js" defer></script>
-    <script type="module" src="./src/JS/index_events.js" defer></script>
+    <script type="module" src="./src/JS/loadPages.ts" defer></script>
+    <script type="module" src="./src/JS/login-register.ts" defer></script>
+    <script type="module" src="./src/JS/start.ts" defer></script>
+    <script type="module" src="./src/JS/index_events.ts" defer></script>
 
 </head>
 <body class="dark">
@@ -42,6 +42,20 @@
                     <li>Les développeurs du logiciel ne sont en aucun cas responsable des fuites de données possibles.</li>
                 </ul>
                 <button id="buttonEula" class="marginTop10">Ok</button>
+            </div>
+        </div>
+        <div id="softwareInfo" class="popup-eula">
+            <div class="popup-box maxHeight80Pourcent">
+                <h1 class="textCenter">Informations</h1>
+                <hr>
+                <ul>
+                    <li>Version de l'application : <span class="bold underline">Beta 1.2</span></li>
+                    <li>Build Date : <span class="bold underline">2024-07-15</span></li>
+                    <li>Architecture : <span class="bold underline">x64</span></li>
+                    <li>Version runtime : <span class="bold underline">Go 1.22 / Wails 2.10.1</span></li>
+
+                </ul>
+                <button id="buttonSoftwareInfo" class="marginTop10">Ok</button>
             </div>
         </div>
         <div class="bg-connexion">
@@ -432,10 +446,8 @@
                         <div class="credits-section">
                             <h1 class="section-title">Autres</h1>
                             <ul class="action-list">
-                                <!--<li id="changePassword">Modifier le login et le mot de passe</li>-->
                                 <li id="eulaShow">Voir les informations d'utilisation de l'application</li>
-                                <!--<li id="deleteOldData">Supprimer les anciennes données</li>
-                                <li id="deconnectionFromMyges">Déconnexion</li>-->
+                                <li id="appVersion">Informations de l'Application</li>
                             </ul>
                         </div>
                     </div>
@@ -504,6 +516,37 @@
                                 <label for="event-end">Date de fin</label>
                                 <input type="datetime-local" id="event-end" required>
                             </div>
+                            <div class="form-group">
+                                <label for="preset-list">Pre-sélections</label>
+                                <div class="color-preset-list" id="preset-list">
+                                    <div class="color-preset">
+                                        <div class="label-edit-wrapper">
+                                          <span class="color-label">Examen</span>
+                                          <button class="edit-color" title="Modifier la couleur"><img src="src//assets//images//edit.png" alt="edit button"></button>
+                                        </div>
+                                        <span class="color-dot" id="preset1" style="background:#e74c3c;" data-color="#e74c3c"></span>
+                                        <input type="color" class="color-picker" style="display:none;">
+                                    </div>
+                                    <div class="color-preset">
+                                        <div class="label-edit-wrapper">
+                                          <span class="color-label">Projet</span>
+                                          <button class="edit-color" title="Modifier la couleur"><img src="src//assets//images//edit.png" alt="edit button"></button>
+                                        </div>
+                                        <span class="color-dot" id="preset2" style="background:#f1c40f;" data-color="#e74c3c"></span>
+                                        <input type="color" class="color-picker" style="display:none;">
+                                    </div>
+                                    <div class="color-preset">
+                                        <div class="label-edit-wrapper">
+                                          <span class="color-label">Rappel</span>
+                                          <button class="edit-color" title="Modifier la couleur"><img src="src//assets//images//edit.png" alt="edit button"></button>
+                                        </div>
+                                        <span class="color-dot" id="preset3" style="background:#2ecc71;" data-color="#e74c3c"></span>
+                                        <input type="color" class="color-picker" style="display:none;">
+                                    </div>
+                                </div>
+                              </div>
+                              
+                              
                             <div class="form-group">
                                 <label for="event-color">Couleur</label>
                                 <input type="color" id="event-color" value="#396aa1">

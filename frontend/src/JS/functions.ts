@@ -1,60 +1,49 @@
-import {GetParentDir, WriteLogFile} from "../../wailsjs/go/backend/App";
+import { GetParentDir, WriteLogFile } from "../../wailsjs/go/backend/App";
 
 // ------------------------------------------------ //
 
-export function log(str) {
+export function log(str: string): void {
+    GetParentDir()
+        .then((parentDir: string) => {
+            const logDir = parentDir.split('\\src')[0] + "\\log";
+            const filePath = logDir + '\\log.txt';
 
-    GetParentDir().then((parentDir) => {
-        const logDir = parentDir.split('\\src')[0] + "\\log"; // Utilisation de / au lieu de \\ pour la compatibilité multiplateforme
-        const filePath = logDir + '\\log.txt';
+            const today = new Date();
+            const previousStr = `[${today.toLocaleDateString()} - ${today.toLocaleTimeString()}] `;
 
-        var today = new Date();
-        let previousStr = `[${today.toLocaleDateString()} - ${today.toLocaleTimeString()}] `;
-
-        //console.log(previousStr + str);
-        WriteLogFile(filePath, previousStr + str + '\n')
-            .then(()=>{
-                console.log(previousStr + str + '\n')
-            })
-            .catch((err)=>{
-                console.error("ERROR : Impossible to write the log file : "+err)
-            })
-    })
-    .catch((error) => {
-        console.error("Error getting parent directory:", error);
-    });
+            WriteLogFile(filePath, previousStr + str + '\n')
+                .then(() => {
+                    console.log(previousStr + str + '\n');
+                })
+                .catch((err: any) => {
+                    console.error("ERROR : Impossible to write the log file : " + err);
+                });
+        })
+        .catch((error: any) => {
+            console.error("Error getting parent directory:", error);
+        });
 }
 
 // ------------------------------------------------ //
 
-export function capitalizeFirstLetter(string) {
-    // Séparer la chaîne et prendre la première partie
-    let part = string.split(".html")[0];
-
-    // Vérifier si la chaîne n'est pas vide
+export function capitalizeFirstLetter(str: string): string {
+    const part = str.split(".html")[0];
     if (part.length === 0) return part;
-
-    // Mettre en majuscule la première lettre et la concaténer avec le reste de la chaîne
     return part.charAt(0).toUpperCase() + part.slice(1);
 }
 
 // ------------------------------------------------ //
 
-export function todayDate(addedDays = 0){
-    // Créer un nouvel objet Date
+export function todayDate(addedDays: number = 0): [string, string] {
     const date = new Date();
-
-    // Ajouter le nombre de jours au jour actuel
     date.setDate(date.getDate() + addedDays);
 
-    // Récupérer le jour, le mois et l'année
     const jour = date.getDate();
-    const mois = date.getMonth() + 1; // Les mois sont indexés à partir de 0, donc on ajoute 1
+    const mois = date.getMonth() + 1;
     const annee = date.getFullYear();
 
-    // Afficher la date au format "jj/mm/aaaa"
-    const dateFormatee = jour.toString().padStart(2, '0') + "/" + mois.toString().padStart(2, '0') + "/" + annee;
-
+    const dateFormatee = jour.toString().padStart(2, '0') + "/" +
+        mois.toString().padStart(2, '0') + "/" + annee;
 
     const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
     const jourDeLaSemaine = jours[date.getDay()];
@@ -64,41 +53,36 @@ export function todayDate(addedDays = 0){
 
 // ------------------------------------------------ //
 
-export function getDateInfo(dateString) {
+export function getDateInfo(dateString: string): [string, string] {
     const parts = dateString.split('/');
     const day = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10);
     const year = parseInt(parts[2], 10);
-    const date = new Date(year, month - 1, day); // Month is 0-based
+    const date = new Date(year, month - 1, day);
 
     const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
     const jourDeLaSemaine = jours[date.getDay()];
 
-    const dateFormatee = day.toString().padStart(2, '0') + "/" + month.toString().padStart(2, '0') + "/" + year;
+    const dateFormatee = day.toString().padStart(2, '0') + "/" +
+        month.toString().padStart(2, '0') + "/" + year;
 
     return [dateFormatee, jourDeLaSemaine];
 }
 
 // ------------------------------------------------ //
 
-export function getYear() {
-    const currentDate = new Date();
-    return currentDate.getFullYear();
+export function getYear(): number {
+    return new Date().getFullYear();
 }
 
 // ------------------------------------------------ //
 
-export function getMonday() {
+export function getMonday(): Date {
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
-
-    // Si aujourd'hui est Dimanche (0), on ajoute 1 jour pour obtenir Lundi de la semaine prochaine
     const offset = dayOfWeek === 0 ? 1 : (dayOfWeek === 1 ? 0 : -dayOfWeek + 1);
-
-    // Calculer le Lundi
     today.setDate(today.getDate() + offset);
-    today.setHours(0, 0, 0, 0); // Réinitialiser l'heure à minuit
-
+    today.setHours(0, 0, 0, 0);
     return today;
 }
 
@@ -109,51 +93,40 @@ export function getMonday() {
  * PLZ USE : getSundayFromMonday
  * @returns {Date} get the current saturday
  */
-export function getSaturday() {
+export function getSaturday(): Date {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
-
-    // Si aujourd'hui est Dimanche (0), on ajoute 1 jour pour obtenir Samedi de la semaine prochaine
+    const dayOfWeek = today.getDay();
     const offset = dayOfWeek === 0 ? 6 : (dayOfWeek === 6 ? 0 : (6 - dayOfWeek));
-
-    // Calculer le Samedi
     today.setDate(today.getDate() + offset);
-    today.setHours(23, 59, 59, 999); // Réinitialiser l'heure à la fin de la journée
-
+    today.setHours(23, 59, 59, 999);
     return today;
 }
 
-export function getSundayFromMonday(currentMonday){
+export function getSundayFromMonday(currentMonday: Date): Date {
     const currentSunday = new Date(currentMonday);
     currentSunday.setUTCDate(currentMonday.getDate() + 6);
-    currentSunday.setUTCHours(5, 0, 0, 0)
-    return currentSunday
+    currentSunday.setUTCHours(5, 0, 0, 0);
+    return currentSunday;
 }
 
 // ------------------------------------------------ //
 
-export function getSunday() {
+export function getSunday(): Date {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
-
-    // Calculer l'offset pour atteindre le prochain Dimanche
+    const dayOfWeek = today.getDay();
     const offset = dayOfWeek === 0 ? 0 : (7 - dayOfWeek);
-
-    // Calculer le Dimanche
     today.setDate(today.getDate() + offset);
-    today.setHours(23, 59, 59, 999); // Réinitialiser l'heure à la fin de la journée
-
+    today.setHours(23, 59, 59, 999);
     return today;
 }
 
-export function toLocalHourString(date_hour){
-    return date_hour.toLocaleTimeString('fr-FR', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' })
+export function toLocalHourString(date_hour: Date): string {
+    return date_hour.toLocaleTimeString('fr-FR', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' });
 }
-
 
 // ------------------------------------------------ //
 
-export function wait(seconds) {
+export function wait(seconds: number): void {
     const start = Date.now();
     const milliseconds = seconds * 1000;
     while (Date.now() - start < milliseconds) {
@@ -163,16 +136,24 @@ export function wait(seconds) {
 
 // ------------------------------------------------ //
 
-export function dayjs(date) {
+type DayjsUnit = 'day' | 'month' | 'year';
+
+export function dayjs(date?: Date | string): {
+    _date: Date;
+    format: (formatStr: string) => string;
+    add: (value: number, unit: DayjsUnit) => ReturnType<typeof dayjs>;
+    subtract: (value: number, unit: DayjsUnit) => ReturnType<typeof dayjs>;
+    isValid: () => boolean;
+} {
     const d = date ? new Date(date) : new Date();
 
     return {
         _date: d,
 
-        format(formatStr) {
-            const pad = (num) => String(num).padStart(2, '0');
+        format(formatStr: string): string {
+            const pad = (num: number) => String(num).padStart(2, '0');
 
-            const formats = {
+            const formats: Record<string, string | number> = {
                 YYYY: d.getFullYear(),
                 MM: pad(d.getMonth() + 1),
                 DD: pad(d.getDate()),
@@ -181,10 +162,10 @@ export function dayjs(date) {
                 ss: pad(d.getSeconds())
             };
 
-            return formatStr.replace(/YYYY|MM|DD|HH|mm|ss/g, match => formats[match]);
+            return formatStr.replace(/YYYY|MM|DD|HH|mm|ss/g, match => String(formats[match]));
         },
 
-        add(value, unit) {
+        add(value: number, unit: DayjsUnit) {
             const newDate = new Date(this._date);
             switch (unit) {
                 case 'day':
@@ -200,7 +181,7 @@ export function dayjs(date) {
             return dayjs(newDate);
         },
 
-        subtract(value, unit) {
+        subtract(value: number, unit: DayjsUnit) {
             return this.add(-value, unit);
         },
 
@@ -210,7 +191,7 @@ export function dayjs(date) {
     };
 }
 
-export function formatDateWithDay(dateString) {
+export function formatDateWithDay(dateString: string): string {
     const date = new Date(dateString);
     const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
     const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
@@ -224,29 +205,31 @@ export function formatDateWithDay(dateString) {
     return `${dayName} ${day} ${month} ${hours}:${minutes}`;
 }
 
-export function formatDate(dateString) {
+export function formatDate(dateString: string): string {
     return dayjs(dateString).format('DD MMM');
 }
 
-export function formatTime(dateString) {
+export function formatTime(dateString: string): string {
     return dayjs(dateString).format('HH:mm');
 }
 
-export function scrollMainPart(){
-    const replace = document.getElementById("replace")
-    replace.style.height = "auto"
+export function scrollMainPart(): void {
+    const replace = document.getElementById("replace") as HTMLElement | null;
+    if (replace) {
+        replace.style.height = "auto";
+    }
 }
 
-export function alertDebug(e){
-    console.log(e)
-    alert(e.toString())
+export function alertDebug(e: unknown): void {
+    console.log(e);
+    alert(String(e));
 }
 
-export function hasCommonClass(element1, element2) {
+export function hasCommonClass(element1: Element, element2: Element): boolean {
     const classes1 = element1.classList;
     const classes2 = element2.classList;
 
-    for (let className of classes1) {
+    for (const className of classes1) {
         if (classes2.contains(className)) {
             return true;
         }
