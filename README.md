@@ -1,3 +1,7 @@
+# MyGES API ETA summer 2025
+See [This issue](https://github.com/SebPautot/myges-documentation/issues/2)
+It will propably broke, sadly T_T
+
 # MyGes Client
 [MyGes Client](https://github.com/Spatulox/MyGesClient) est un logiciel qui vous permet d'accéder facilement à vos informations MyGes, même hors ligne.
 
