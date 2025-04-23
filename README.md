@@ -1,4 +1,4 @@
-# MyGES API ETA summer 2025
+# 🛑MyGES API ETA summer 2025🛑
 See [This issue](https://github.com/SebPautot/myges-documentation/issues/2)
 It will propably broke, sadly T_T
 
