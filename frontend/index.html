@@ -17,10 +17,10 @@
 
     <!--<link rel="stylesheet" type="text/css" href="./src/CSS/testCss.css">-->
 
-    <script type="module" src="./src/JS/loadPages.js" defer></script>
-    <script type="module" src="./src/JS/login-register.js" defer></script>
-    <script type="module" src="./src/JS/start.js" defer></script>
-    <script type="module" src="./src/JS/index_events.js" defer></script>
+    <script type="module" src="./src/JS/loadPages.ts" defer></script>
+    <script type="module" src="./src/JS/login-register.ts" defer></script>
+    <script type="module" src="./src/JS/start.ts" defer></script>
+    <script type="module" src="./src/JS/index_events.ts" defer></script>
 
 </head>
 <body class="dark">
@@ -516,6 +516,37 @@
                                 <label for="event-end">Date de fin</label>
                                 <input type="datetime-local" id="event-end" required>
                             </div>
+                            <div class="form-group">
+                                <label for="preset-list">Pre-sélections</label>
+                                <div class="color-preset-list" id="preset-list">
+                                    <div class="color-preset">
+                                        <div class="label-edit-wrapper">
+                                          <span class="color-label">Examen</span>
+                                          <button class="edit-color" title="Modifier la couleur"><img src="src//assets//images//edit.png" alt="edit button"></button>
+                                        </div>
+                                        <span class="color-dot" id="preset1" style="background:#e74c3c;" data-color="#e74c3c"></span>
+                                        <input type="color" class="color-picker" style="display:none;">
+                                    </div>
+                                    <div class="color-preset">
+                                        <div class="label-edit-wrapper">
+                                          <span class="color-label">Projet</span>
+                                          <button class="edit-color" title="Modifier la couleur"><img src="src//assets//images//edit.png" alt="edit button"></button>
+                                        </div>
+                                        <span class="color-dot" id="preset2" style="background:#f1c40f;" data-color="#e74c3c"></span>
+                                        <input type="color" class="color-picker" style="display:none;">
+                                    </div>
+                                    <div class="color-preset">
+                                        <div class="label-edit-wrapper">
+                                          <span class="color-label">Rappel</span>
+                                          <button class="edit-color" title="Modifier la couleur"><img src="src//assets//images//edit.png" alt="edit button"></button>
+                                        </div>
+                                        <span class="color-dot" id="preset3" style="background:#2ecc71;" data-color="#e74c3c"></span>
+                                        <input type="color" class="color-picker" style="display:none;">
+                                    </div>
+                                </div>
+                              </div>
+                              
+                              
                             <div class="form-group">
                                 <label for="event-color">Couleur</label>
                                 <input type="color" id="event-color" value="#396aa1">

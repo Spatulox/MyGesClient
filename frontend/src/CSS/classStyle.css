@@ -65,6 +65,122 @@
     border-bottom: 1px solid var(--card-bg);
 }
 
+
+
+
+
+
+
+/*
+.color-preset-list {
+    display: flex;
+    gap: 24px;
+}
+.color-preset {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.color-label {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+.color-dot {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px #888;
+    cursor: pointer;
+}
+.color-dot.selected {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #000000;
+    box-shadow: 0 0 2px #888;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.edit-color {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    margin-top: 4px;
+}
+    */
+
+.color-preset-list {
+    display: flex;
+    justify-content: space-around;
+}
+
+.label-edit-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+    
+.color-label {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.color-preset {
+    text-align: center;
+}
+    
+.edit-color {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    line-height: 1;
+    color: #333;
+}
+    
+/*.color-dot {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px #888;
+    cursor: pointer;
+}*/
+
+.color-dot {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px #888;
+    cursor: pointer;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.color-dot.selected {
+    border-color: #396aa1;
+    box-shadow: 0 0 12px #396aa1;
+}
+
+
+
+
+
+
+
+
+
+
 .credits-container {
     display: flex;
     justify-content: space-around;

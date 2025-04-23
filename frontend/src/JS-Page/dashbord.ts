@@ -88,7 +88,7 @@ async function handleGrades(): Promise<void> {
     }
 }
 
-async function handleEvents(): Promise<void> {
+export async function handleEvents(): Promise<void> {
     const eventContent = document.getElementById("event-content") as HTMLElement | null;
     if (!eventContent) return;
 
