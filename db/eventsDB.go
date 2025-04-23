@@ -5,6 +5,8 @@ import (
 	. "MyGesClient/structures"
 	"database/sql"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -40,10 +42,20 @@ func SaveEventDB(db *sql.DB, name string, description *string, startDate string,
 	formattedStartDate := startDateTime.Format("2006-01-02 15:04:05")
 	formattedEndDate := endDateTime.Format("2006-01-02 15:04:05")
 
-	// Exécuter la requête
-	_, err = stmt.Exec(name, description, formattedStartDate, formattedEndDate, color, user.ID)
-	if err != nil {
-		return fmt.Errorf("erreur lors de l'insertion dans la base de données : %v", err)
+	if !strings.HasPrefix(color, "#") {
+		preset, err := GetPresetByName(db, color)
+		if err != nil {
+			return fmt.Errorf("erreur lors de la récupération du preset : %v", err)
+		}
+		_, err = stmt.Exec(name, description, formattedStartDate, formattedEndDate, preset.ID, user.ID)
+		if err != nil {
+			return fmt.Errorf("erreur lors de l'insertion dans la base de données : %v", err)
+		}
+	} else {
+		_, err = stmt.Exec(name, description, formattedStartDate, formattedEndDate, color, user.ID)
+		if err != nil {
+			return fmt.Errorf("erreur lors de l'insertion dans la base de données : %v", err)
+		}
 	}
 	return nil
 }
@@ -77,6 +89,7 @@ func GetEventDB(db *sql.DB) ([]Event, error) {
 		var event Event
 		var description sql.NullString
 		var startDateStr, endDateStr string
+		var colorStr string
 
 		err := rows.Scan(
 			&event.Id,
@@ -84,7 +97,7 @@ func GetEventDB(db *sql.DB) ([]Event, error) {
 			&description,
 			&startDateStr,
 			&endDateStr,
-			&event.Color,
+			&colorStr,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("erreur lors de la lecture d'un événement : %v", err)
@@ -103,6 +116,23 @@ func GetEventDB(db *sql.DB) ([]Event, error) {
 		// Gérer la description qui peut être NULL
 		if description.Valid {
 			event.Description = description.String
+		}
+
+		if strings.HasPrefix(colorStr, "#") {
+			event.Color = colorStr
+		} else {
+			// Tenter de convertir en int
+			presetID, err := strconv.Atoi(colorStr)
+			if err != nil {
+				return nil, fmt.Errorf("la valeur color '%s' n'est ni un code couleur ni un ID valide", colorStr)
+			}
+			preset, err := GetPresetByID(db, presetID)
+			if err != nil {
+				Log.Error(fmt.Sprintf("erreur lors de la récupération du preset (id=%d) : %v", presetID, err))
+				event.Color = "#FFFFFF"
+			} else {
+				event.Color = preset.Value
+			}
 		}
 
 		events = append(events, event)
@@ -276,4 +306,40 @@ func parseEvents(rows *sql.Rows) ([]Event, error) {
 
 	return events, nil
 
+}
+
+func GetEventPresets(db *sql.DB) ([]Preset, error) {
+	query := `
+        SELECT id, name, value, type
+		FROM PRESET
+		WHERE user_id = ?
+		AND type = "event"
+    `
+
+	user, err := GetUser(db)
+	if err != nil {
+		return nil, fmt.Errorf("Impossible to retrieve the user id when getting events")
+	}
+
+	// Exécuter la requête
+	rows, err := db.Query(query, user.ID)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de l'exécution de la requête : %v", err)
+	}
+	defer rows.Close()
+
+	var presets []Preset
+	for rows.Next() {
+		var p Preset
+		if err := rows.Scan(&p.ID, &p.Name, &p.Value, &p.Type); err != nil {
+			return nil, fmt.Errorf("erreur lors du scan d'un preset : %v", err)
+		}
+		presets = append(presets, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("erreur lors de l'itération des résultats des presets : %v", err)
+	}
+
+	return presets, nil
 }

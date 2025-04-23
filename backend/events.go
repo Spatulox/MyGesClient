@@ -62,3 +62,19 @@ func (a *App) DeleteEvent(eventId int) bool {
 	}
 	return true
 }
+
+func (a *App) SaveEventPreset(presetName string, value string) {
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
+	defer a.dbWg.Done()
+	SavePreset(a.db, presetName, value, "event")
+}
+
+func (a *App) GetEventsPresets() ([]Preset, error) {
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
+	defer a.dbWg.Done()
+	return GetEventPresets(a.db)
+}
