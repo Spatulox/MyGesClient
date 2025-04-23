@@ -1,6 +1,6 @@
 # 🛑MyGES API ETA summer 2025🛑
 See [This issue](https://github.com/SebPautot/myges-documentation/issues/2)<br>
-It will propably broke, sadly T_T<br>
+It will propably break, sadly T_T<br>
 Since it will probably broke, only Major issue will be fix, and some minor improvement :
 - [#51](https://github.com/Spatulox/MyGesClient/issues/51)
 - [#52](https://github.com/Spatulox/MyGesClient/issues/52)
