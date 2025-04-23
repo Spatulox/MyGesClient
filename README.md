@@ -51,14 +51,7 @@ __Évènements__<br>
 Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
 
 ## Futur Ajouts
-> - Refaire le multithread avec des mutexs/semaphore et wait group
-> - Encrypter le mot de passe
-> - Deconnexion => Reconnexion : Problème d'intance nil car mal réinitialisée ?
-> - Light mode => Horrible
-> - Lier un event à un cours ?
-> - Ajouter les évènements au calendrier
-> - Quand on créer l'event, ca ne rafaichit pas la page event instant
-> - Rien de plus planifié
+> [Voir l'avancement](https://github.com/users/Spatulox/projects/5/views/1)
 
 <br><br><hr>
 # How to run the code
