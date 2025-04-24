@@ -72,7 +72,7 @@ export async function initCreateEvent(): Promise<void> {
             theSavedPreset = await GetPresetByName(dot.id)
             dot.style.background = theSavedPreset.Value
         } catch (e: any){
-            await SaveEventPreset(dot.id, dot.style.background)
+            await SaveEventPreset(dot.id, rgbToHex(dot.style.background))
         }
       
         // Sélection sur clic de la pastille
@@ -99,7 +99,7 @@ export async function initCreateEvent(): Promise<void> {
             dot.style.background = colorInput.value;
             dot.dataset.color = colorInput.value;
             try{
-                await SaveEventPreset(dot.id, colorInput.value)
+                await SaveEventPreset(dot.id, rgbToHex(colorInput.value))
             } catch (e) {
                 console.error(e)
             }
