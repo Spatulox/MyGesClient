@@ -155,6 +155,24 @@ func GetAllEventDB(db *sql.DB) ([]Event, error) {
         ORDER BY start_date ASC
     `
 
+	query = `
+			SELECT 
+			e.event_id,
+			e.event_name,
+			e.event_description,
+			e.start_date,
+			e.end_date,
+			CASE 
+				WHEN e.color NOT LIKE '#%' THEN p.value
+				ELSE e.color
+			END AS color
+		FROM EVENTS e
+		LEFT JOIN PRESET p ON e.color = p.id
+		WHERE e.start_date >= datetime('now') 
+		AND e.user_id = ?
+		ORDER BY e.start_date ASC
+	`
+
 	user, err := GetUser(db)
 	if err != nil {
 		return nil, fmt.Errorf("Impossible to retrieve the user id when getting events")
