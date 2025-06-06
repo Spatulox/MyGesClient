@@ -68,43 +68,43 @@ async function updatePages(page: string): Promise<void> {
     try {
         switch (page) {
             case 'account':
-                await account();
                 renameMainTitle("Compte");
+                await account();
                 break;
             case 'softwareAccount':
                 renameMainTitle("Compte");
                 break;
             case 'courses':
-                await courses();
                 renameMainTitle("Cours");
+                await courses();
                 break;
             case 'dashboard':
-                await dashboard();
                 renameMainTitle("Accueil");
+                await dashboard();
                 break;
             case 'events':
-                await events();
                 renameMainTitle("Évènements");
+                await events();
                 break;
             case 'grades':
-                await grades();
                 renameMainTitle("Notes");
+                await grades();
                 break;
             case 'schedule':
-                await schedule();
                 renameMainTitle("Agenda");
+                await schedule();
                 break;
             case 'projects':
-                await projects();
                 renameMainTitle("Projets");
+                await projects();
                 break;
             case 'absences':
-                await absences();
                 renameMainTitle("Absences");
+                await absences();
                 break;
             case 'credits':
-                await absences();
                 renameMainTitle("Crédit");
+                await absences();
                 break;
             default:
                 renameMainTitle("Accueil");
