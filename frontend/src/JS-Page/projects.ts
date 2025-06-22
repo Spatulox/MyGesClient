@@ -324,7 +324,7 @@ function addGroupsToProjectToJoin(groups: GroupToJoin[]): void {
                 try {
                     joinButton.style.opacity = "0";
                     if (await JoinProjectGroup(group.rc_id, group.project_id, group.id)) {
-                        popup("Groupe rejoind");
+                        popup("Groupe rejoint");
                         projects(true);
                     }
                 } catch (e) {
