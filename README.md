@@ -9,7 +9,7 @@ None of the issues will be fixed, including All ["In Progress"](https://github.c
 [MyGes Client](https://github.com/Spatulox/MyGesClient) est un logiciel qui vous permet d'accéder facilement à vos informations MyGes, même hors ligne.
 
 ## ⚠️ Disclaimer ⚠️ 
-Ce logiciel utilise l'API Scholae pour se connecter aux services MyGes (voir [MyGesApis](https://github.com/Spatulox/MyGesApis)).<br>
+Ce logiciel utilise l'API Scholae pour se connecter aux services MyGes (voir [MyGesApis](https://github.com/Spatulox/MyGesApis-OUTDATED)).<br>
 
 ## Fonctionnalités Principales
 MyGesClient vous offre une vue d'ensemble de votre vie étudiante :
