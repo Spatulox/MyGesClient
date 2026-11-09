@@ -208,16 +208,9 @@ async function initializeSoftwareAccount(): Promise<void> {
 }
 
 async function initializeSchedulePart(): Promise<void> {
-    const modal = document.getElementById('modal') as HTMLElement | null;
+    // The course modal (#modal-event) is handled by schedule.ts (setupModal)
     const forceRefreshButton = document.getElementById("force-refresh") as HTMLElement | null;
     const forceNowButton = document.getElementById("force-now") as HTMLElement | null;
-    const closeBtn = document.getElementsByClassName('close')[0] as HTMLElement | undefined;
-
-    if (closeBtn && modal) {
-        closeBtn.onclick = function () {
-            modal.style.display = 'none';
-        };
-    }
 
     forceRefreshButton?.addEventListener("click", async () => {
         hideScheduleButtons();
@@ -230,10 +223,4 @@ async function initializeSchedulePart(): Promise<void> {
         try { await schedule(true); } catch (e) { console.log(e); }
         showScheduleButtons();
     });
-
-    window.onclick = function (event: MouseEvent) {
-        if (event.target === modal) {
-            if (modal) modal.style.display = 'none';
-        }
-    };
 }
