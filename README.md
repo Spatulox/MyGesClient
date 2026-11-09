@@ -1,9 +1,16 @@
+
+<details>
+# This is an old message, the API live again ?? 
+  
 # 🛑MyGES API ETA summer 2025🛑
 See [This issue](https://github.com/SebPautot/myges-documentation/issues/2)<br>
 The API was shutdown T_T<br>
 None of the issues will be fixed, including All ["In Progress"](https://github.com/users/Spatulox/projects/5/views/1) Issues
 
 -------------------
+
+</details>
+
 
 # MyGes Client
 [MyGes Client](https://github.com/Spatulox/MyGesClient) est un logiciel qui vous permet d'accéder facilement à vos informations MyGes, même hors ligne.
