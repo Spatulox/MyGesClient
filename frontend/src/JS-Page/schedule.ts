@@ -6,7 +6,8 @@ import {
     scrollMainPart,
     toLocalHourString,
     escapeHtml,
-    safeColor
+    safeColor,
+    cleanCourseName
 } from "../JS/functions";
 import { stillPopup, stopStillPopup } from "../JS/popups";
 import { addDays, getMonday, getSundayFromMonday, toYMD } from "../JS/dates";
@@ -206,7 +207,7 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
 }
 
 function clearAgendaName(course: structures.LocalAgenda): string {
-    return course.agenda_name.includes(" - ") ? course.agenda_name.split(" - ")[1] : course.agenda_name;
+    return cleanCourseName(course.agenda_name);
 }
 
 function clearSchedule(): void {

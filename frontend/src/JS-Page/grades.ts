@@ -1,6 +1,6 @@
 import { GetGrades } from "../../wailsjs/go/backend/App";
 import { structures } from "../../wailsjs/go/models";
-import { capitalizeFirstLetter, escapeHtml, scrollMainPart } from "../JS/functions";
+import { capitalizeFirstLetter, cleanCourseName, escapeHtml, scrollMainPart } from "../JS/functions";
 
 let isStillRunning = false;
 
@@ -98,6 +98,6 @@ export function initGradesDisplay(grade: structures.LocalGrades): {
     const examHtml = grade.exam != null ? String(grade.exam) : "";
 
     // Enlever le préfixe "S1 -" ou "S2 -" du nom du cours
-    const courseName = grade.course.replace(/^S[12] - /, '');
+    const courseName = cleanCourseName(grade.course);
     return { gradeElement, courseName, gradesHtml, examHtml };
 }

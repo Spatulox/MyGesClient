@@ -1,6 +1,7 @@
 import { GetEvents, GetGrades } from "../../wailsjs/go/backend/App";
 import {
     capitalizeFirstLetter,
+    cleanCourseName,
     escapeHtml,
     formatDateWithDay,
     safeColor,
@@ -171,12 +172,7 @@ export async function updateScheduleDashboard(agenda: structures.LocalAgenda[]):
     agenda.forEach(course => {
         const courseElement = document.createElement('div');
         courseElement.className = 'course-card';
-        let courseName = course.agenda_name.includes("S1 - ")
-            ? course.agenda_name.split("S1 - ")[1]
-            : (course.agenda_name.includes("S2 - ")
-                ? course.agenda_name.split("S2 - ")[1]
-                : course.agenda_name);
-        courseName = capitalizeFirstLetter(courseName + "");
+        const courseName = capitalizeFirstLetter(cleanCourseName(course.agenda_name));
         const color = safeColor(course.room.color?.Valid ? course.room.color.String : "", "#FFFFFF");
         let html = `
             <h3 style="color: ${escapeHtml(color)}">${escapeHtml(courseName)}</h3>

@@ -24,6 +24,23 @@ export function safeColor(color: string | null | undefined, fallback: string = "
 
 // ------------------------------------------------ //
 
+// Short codes MyGes adds around course names: level ("M2", "B3"),
+// semester / term ("S1", "t1", "e1")...
+const CODE_TAG = String.raw`[A-Za-z]{1,2}\d+`;
+const LEADING_CODES = new RegExp(`^(\\s*${CODE_TAG}\\s*-\\s*)+`);
+const TRAILING_CODES = new RegExp(`(\\s*-\\s*${CODE_TAG}\\s*)+$`);
+
+/**
+ * Remove the level / semester codes from a course name, wherever MyGes puts
+ * them: "M2 - t1 - fyc" -> "fyc", "S1 - Réseaux" -> "Réseaux", "Réseaux - T1" -> "Réseaux".
+ */
+export function cleanCourseName(name: string): string {
+    const cleaned = name.replace(LEADING_CODES, "").replace(TRAILING_CODES, "").trim();
+    return cleaned || name.trim();
+}
+
+// ------------------------------------------------ //
+
 export function capitalizeFirstLetter(str: string): string {
     const part = str.split(".html")[0];
     if (part.length === 0) return part;
