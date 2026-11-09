@@ -72,23 +72,7 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 		return "", fmt.Errorf("Wrong username or password: %v", err)
 	}
 
-	errour := 0
-	if err := a.initAPI(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrAPIInit
-		Log.Error("API init error")
-	}
-
-	if err := a.initYear(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrYearsRequest
-		Log.Error("YEAR init error")
-	}
-
-	if errour != 0 {
-		a.stopInitIfInternetFunc()
-		a.initIfInternet()
-	}
+	a.connectOrWaitForInternet()
 
 	// Doing a GlobalRefresh to have data stored
 	_, err = a.refreshCurrentWeek()
@@ -209,21 +193,7 @@ func (a *App) ConnectUser(username string, password string) (UserSettings, error
 		return UserSettings{}, fmt.Errorf("Impossible to connect, make sure the account exist and username and password are correct")
 	}
 
-	errour := 0
-	if err := a.initAPI(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrAPIInit
-	}
-
-	if err := a.initYear(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrYearsRequest
-	}
-
-	if errour != 0 {
-		a.stopInitIfInternetFunc()
-		a.initIfInternet()
-	}
+	a.connectOrWaitForInternet()
 
 	return a.getAPIUser(), nil
 }

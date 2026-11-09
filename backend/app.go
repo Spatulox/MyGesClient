@@ -57,7 +57,10 @@ type App struct {
 	isFetchingAbsences bool
 	scheduleMutex      sync.Mutex
 	isFetchingSchedule bool
-	stopInitIfInternet chan struct{}
+
+	bgMutex            sync.Mutex    // protects stopInitIfInternet
+	stopInitIfInternet chan struct{} // closed to stop the running initIfInternet loop
+	bgTasksOnce        sync.Once     // background tasks must only be started once
 }
 
 // -------------------------------------------------------------------------- //
@@ -130,6 +133,8 @@ func (a *App) deleteAPIUser() {
 }
 
 func (a *App) stopInitIfInternetFunc() {
+	a.bgMutex.Lock()
+	defer a.bgMutex.Unlock()
 	if a.stopInitIfInternet != nil {
 		close(a.stopInitIfInternet)
 		a.stopInitIfInternet = nil
@@ -311,7 +316,18 @@ func (a *App) initYear() error {
 	return nil
 }
 
+// initIfInternet waits for the network to come back, then initializes the API
+// and starts the background tasks. Only one such loop runs at a time: calling
+// it again stops the previous one.
 func (a *App) initIfInternet() {
+	a.bgMutex.Lock()
+	if a.stopInitIfInternet != nil {
+		close(a.stopInitIfInternet)
+	}
+	stop := make(chan struct{})
+	a.stopInitIfInternet = stop
+	a.bgMutex.Unlock()
+
 	ctx := a.ctx
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
@@ -322,41 +338,57 @@ func (a *App) initIfInternet() {
 			case <-ctx.Done():
 				Log.Infos("Application context cancelled, stopping internet check")
 				return
-			case <-a.stopInitIfInternet:
+			case <-stop:
 				Log.Infos("initIfInternet goroutine stopped manually")
 				return
 			case <-ticker.C:
 				Log.Infos("Cheking internet connection")
-				if a.CheckInternetConnection() {
-					var errApi, errYear error
-
-					if errApi = a.initAPI(); errApi == nil {
-						Log.Infos("Internet connection restored, initAPI OK")
-					} else {
-						a.handleStartupError("API initialization", errApi)
-					}
-
-					if errYear = a.initYear(); errYear == nil {
-						Log.Infos("Internet connection restored, initYear OK")
-					} else {
-						a.handleStartupError("API initialization", errYear)
-					}
-
-					if errApi == nil && errYear == nil {
-						a.startBackgroundTasks()
-						a.startupStatus = StatusCompleted
-						return
-					}
-				} else {
+				if !a.CheckInternetConnection() {
 					Log.Infos("No internet")
+					continue
+				}
+				if a.connectAPI() {
+					a.bgMutex.Lock()
+					if a.stopInitIfInternet == stop {
+						a.stopInitIfInternet = nil
+					}
+					a.bgMutex.Unlock()
+					return
 				}
 			}
 		}
 	}()
 }
 
+// connectAPI initializes the API session and the year, then starts the
+// background tasks. Returns false if MyGes could not be reached.
+func (a *App) connectAPI() bool {
+	if err := a.initAPI(); err != nil {
+		a.handleStartupError("API initialization", err)
+		return false
+	}
+	if err := a.initYear(); err != nil {
+		a.handleStartupError("Year initialization", err)
+		return false
+	}
+	a.startBackgroundTasks()
+	a.startupStatus = StatusCompleted
+	return true
+}
+
+// connectOrWaitForInternet connects to MyGes, or starts waiting for the
+// network if it is unreachable.
+func (a *App) connectOrWaitForInternet() {
+	if !a.connectAPI() {
+		a.startupStatus = StatusIncompleteNoInternet
+		a.initIfInternet()
+	}
+}
+
+// handleStartupError only logs: the status is set by the caller, so a
+// temporary failure (e.g. token renewal without network) does not leave the
+// app in StatusFailed forever.
 func (a *App) handleStartupError(step string, err error) {
-	a.startupStatus = StatusFailed
 	Log.Error(fmt.Sprintf("Startup failed during %s: %v", step, err))
 }
 
@@ -397,7 +429,14 @@ func (a *App) refreshCurrentWeek() (string, error) {
 	return a.globalRefresh(monday, sunday)
 }
 
+// startBackgroundTasks starts the periodic refreshes. It is safe to call
+// several times (Startup, initIfInternet, account creation, connection):
+// the tasks are only started once.
 func (a *App) startBackgroundTasks() {
+	a.bgTasksOnce.Do(a.runBackgroundTasks)
+}
+
+func (a *App) runBackgroundTasks() {
 	// GlobalRefresh (Schedule / Grades / Absences...)
 	Log.Infos("Launching go routines")
 	go a.runEveryXMinutes(a.ctx, 60, func() {
@@ -438,7 +477,11 @@ func (a *App) startBackgroundTasks() {
 			}
 
 			if i < maxChecks-1 {
-				time.Sleep(checkInterval)
+				select {
+				case <-a.ctx.Done():
+					return
+				case <-time.After(checkInterval):
+				}
 			}
 		}
 	})
