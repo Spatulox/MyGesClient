@@ -97,16 +97,14 @@ export async function handleEvents(): Promise<void> {
 // --------------------------------------------------------------------------------------- //
 
 function recapGrades(gradesList: HTMLElement, grades: structures.LocalGrades[]): void {
-    // Fonction pour obtenir 3 éléments aléatoires d'un tableau
+    // Fonction pour obtenir `count` éléments aléatoires d'un tableau (Fisher-Yates)
     function getRandomElements<T>(array: T[], count: number): T[] {
-        let shuffled = array.slice(0), i = array.length, min = i - count, temp: T, index: number;
-        while (i-- > min) {
-            index = Math.floor((i + 1) * Math.random());
-            temp = shuffled[index];
-            shuffled[index] = shuffled[i];
-            shuffled[i] = temp;
+        const shuffled = array.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
-        return shuffled.slice(min);
+        return shuffled.slice(0, count);
     }
 
     // Fonction pour afficher les notes
