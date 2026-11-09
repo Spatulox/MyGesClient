@@ -9,14 +9,21 @@
 
 /* ---------- Layout: header, sidebar, scrollbars ---------- */
 
+/* The layout is sized to exactly 100% of the window (10vh header + 90vh
+   content, 15% + 85% wide): a real border would add 1px and make the window
+   scroll. Separators are drawn with inset shadows, which take no space. */
+
 .light header,
 .light #mainHeader > div {
     color: var(--mainPoliceColor);
-    border-bottom: 1px solid var(--border-color);
+}
+
+.light header {
+    box-shadow: inset 0 -1px 0 var(--border-color);
 }
 
 .light #rightPart {
-    border-right: 1px solid var(--border-color);
+    box-shadow: inset -1px 0 0 var(--border-color);
 }
 
 .light #rightPart ul li {
