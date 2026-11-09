@@ -1,7 +1,9 @@
 import { GetEvents, GetGrades } from "../../wailsjs/go/backend/App";
 import {
     capitalizeFirstLetter,
+    escapeHtml,
     formatDateWithDay,
+    safeColor,
 } from "../JS/functions";
 import { initGradesDisplay } from "./grades";
 import { popup } from "../JS/popups";
@@ -128,11 +130,11 @@ function recapGrades(gradesList: HTMLElement, grades: structures.LocalGrades[]):
             const { gradeElement, courseName, gradesHtml, examHtml } = initGradesDisplay(grade);
 
             gradeElement.innerHTML = `
-                <span>${capitalizeFirstLetter(courseName)}</span>
-                <span>${grade.coef}</span>
-                <span>${grade.teacher_name}</span>
-                <span>${gradesHtml}</span>
-                <span>${examHtml}</span>
+                <span>${escapeHtml(capitalizeFirstLetter(courseName))}</span>
+                <span>${escapeHtml(grade.coef)}</span>
+                <span>${escapeHtml(grade.teacher_name)}</span>
+                <span>${escapeHtml(gradesHtml)}</span>
+                <span>${escapeHtml(examHtml)}</span>
             `;
 
             gradesList.appendChild(gradeElement);
@@ -146,16 +148,16 @@ function recapGrades(gradesList: HTMLElement, grades: structures.LocalGrades[]):
 function createEventCard(event: structures.Event): HTMLDivElement {
     const card = document.createElement('div');
     card.className = 'event-card';
-    card.style.borderLeftColor = event.color;
+    card.style.borderLeftColor = safeColor(event.color);
 
     const startFormatted = formatDateWithDay(event.start_date);
     const endFormatted = formatDateWithDay(event.end_date);
 
     card.innerHTML = `
         <div class="event-header">
-            <h3 class="event-name">${event.name}</h3>
+            <h3 class="event-name">${escapeHtml(event.name)}</h3>
         </div>
-        <p class="event-description">${event.description}</p>
+        <p class="event-description">${escapeHtml(event.description)}</p>
         <div class="event-time">
             <i class="far fa-clock"></i> ${startFormatted} - ${endFormatted}
         </div>
@@ -188,23 +190,25 @@ export async function updateScheduleDashboard(agenda: structures.LocalAgenda[]):
                 ? course.agenda_name.split("S2 - ")[1]
                 : course.agenda_name);
         courseName = capitalizeFirstLetter(courseName + "");
-        courseElement.innerHTML = `
-            <h3 style="color: ${course.room.color!.Valid ? course.room.color!.String : "#FFFFFF"}">${courseName}</h3>
-            <p>${course.start_date.split('T')[1].substring(0, 5)} - ${course.end_date.split('T')[1].substring(0, 5)}</p>
-            <p>Prof: ${course.discipline.Teacher.teacher}</p>
+        const color = safeColor(course.room.color?.Valid ? course.room.color.String : "", "#FFFFFF");
+        let html = `
+            <h3 style="color: ${escapeHtml(color)}">${escapeHtml(courseName)}</h3>
+            <p>${escapeHtml(course.start_date.split('T')[1].substring(0, 5))} - ${escapeHtml(course.end_date.split('T')[1].substring(0, 5))}</p>
+            <p>Prof: ${escapeHtml(course.discipline.Teacher.teacher)}</p>
         `;
 
         if (course.room.name.Valid) {
-            courseElement.innerHTML += `<p>Salle: ${course.room.name.String} (${course.room.campus.String})</p>`;
+            html += `<p>Salle: ${escapeHtml(course.room.name.String)} (${escapeHtml(course.room.campus.String)})</p>`;
         }
 
-        courseElement.innerHTML += `<p>Type: ${course.type}</p>`;
+        html += `<p>Type: ${escapeHtml(course.type)}</p>`;
         if (course.modality) {
-            courseElement.innerHTML += `<p>Modalité: ${course.modality}</p>`;
+            html += `<p>Modalité: ${escapeHtml(course.modality)}</p>`;
         }
         if (course.comment) {
-            courseElement.innerHTML += `<p>Commentaire: ${course.comment}</p>`;
+            html += `<p>Commentaire: ${escapeHtml(course.comment)}</p>`;
         }
+        courseElement.innerHTML = html;
 
         htmlScheduleElement.appendChild(courseElement);
     });

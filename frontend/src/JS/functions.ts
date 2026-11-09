@@ -1,5 +1,31 @@
 // ------------------------------------------------ //
 
+const HTML_ESCAPES: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+};
+
+/**
+ * Escape a value before inserting it in an HTML template.
+ * Every value coming from MyGes, the local DB or the user must go through it.
+ */
+export function escapeHtml(value: unknown): string {
+    return String(value ?? "").replace(/[&<>"']/g, c => HTML_ESCAPES[c]);
+}
+
+/**
+ * Return the color if it is a valid CSS color, the fallback otherwise.
+ */
+export function safeColor(color: string | null | undefined, fallback: string = ""): string {
+    if (!color) return fallback;
+    return CSS.supports("color", color) ? color : fallback;
+}
+
+// ------------------------------------------------ //
+
 export function capitalizeFirstLetter(str: string): string {
     const part = str.split(".html")[0];
     if (part.length === 0) return part;

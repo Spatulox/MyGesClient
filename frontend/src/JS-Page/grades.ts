@@ -1,6 +1,6 @@
 import { GetGrades } from "../../wailsjs/go/backend/App";
 import { structures } from "../../wailsjs/go/models";
-import { capitalizeFirstLetter, getYear, scrollMainPart } from "../JS/functions";
+import { capitalizeFirstLetter, escapeHtml, scrollMainPart } from "../JS/functions";
 
 let isStillRunning = false;
 
@@ -36,13 +36,13 @@ export async function grades(): Promise<void> {
             const { gradeElement, courseName, gradesHtml, examHtml } = initGradesDisplay(grade);
 
             gradeElement.innerHTML = `
-                <span>${capitalizeFirstLetter(courseName)}</span>
-                <span>${grade.ects}</span>
-                <span>${grade.coef}</span>
-                <span>${grade.teacher_name}</span>
-                <span>${gradesHtml}</span>
-                <span>${examHtml}</span>
-                <span>${grade.bonus}</span>
+                <span>${escapeHtml(capitalizeFirstLetter(courseName))}</span>
+                <span>${escapeHtml(grade.ects)}</span>
+                <span>${escapeHtml(grade.coef)}</span>
+                <span>${escapeHtml(grade.teacher_name)}</span>
+                <span>${escapeHtml(gradesHtml)}</span>
+                <span>${escapeHtml(examHtml)}</span>
+                <span>${escapeHtml(grade.bonus)}</span>
             `;
 
             gradesList.appendChild(gradeElement);

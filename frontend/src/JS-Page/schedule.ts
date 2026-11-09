@@ -7,7 +7,8 @@ import {
     getMonday,
     scrollMainPart,
     toLocalHourString,
-    getSunday
+    escapeHtml,
+    safeColor
 } from "../JS/functions";
 import { stillPopup, stopStillPopup } from "../JS/popups";
 
@@ -144,7 +145,7 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
                 courseElement.setAttribute('data-info', String(course.agenda_id));
 
                 if (course.room.name?.String) {
-                    courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)} <span class="room">${course.room.name.String}</span></p>`;
+                    courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)} <span class="room">${escapeHtml(course.room.name.String)}</span></p>`;
                 } else {
                     courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)}</p>`;
                 }
@@ -177,11 +178,12 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
                     courseElement.style.height = `calc(${maxHeight + minutesDifference}% - ${(courseDuration % standardDuration) - 2}px)`;
                 }
 
-                if (course.type === "Examen") {
-                    courseElement.innerHTML += `<h3 ${course.room.color!.Valid ? 'style="color:' + course.room.color!.String + '"' : ""} >${capitalizeFirstLetter(course_name)} - ${course.type}</h3>`;
-                } else {
-                    courseElement.innerHTML += `<h3 ${course.room.color!.Valid ? 'style="color:' + course.room.color!.String + '"' : ""} >${capitalizeFirstLetter(course_name)}</h3>`;
-                }
+                const title = document.createElement('h3');
+                title.textContent = course.type === "Examen"
+                    ? `${capitalizeFirstLetter(course_name)} - ${course.type}`
+                    : capitalizeFirstLetter(course_name);
+                title.style.color = safeColor(course.room.color?.Valid ? course.room.color.String : "");
+                courseElement.appendChild(title);
 
                 courseElement.addEventListener('click', () => {
                     console.log(course);
@@ -220,15 +222,15 @@ function showModal(course: structures.LocalAgenda): void {
         return;
     }
     modalTitle.textContent = capitalizeFirstLetter(clearAgendaName(course)) || 'Cours';
-    modalTitle.style.color = course.room.color!.Valid ? course.room.color!.String : "";
+    modalTitle.style.color = safeColor(course.room.color?.Valid ? course.room.color.String : "");
     modalInfo.innerHTML = `
-        <p><strong>Type :</strong> ${course.type || 'Non spécifié'}</p>
+        <p><strong>Type :</strong> ${escapeHtml(course.type || 'Non spécifié')}</p>
         <p><strong>Horaire :</strong> ${toLocalHourString(new Date(course.start_date))} - ${toLocalHourString(new Date(course.end_date))}</p>
-        <p><strong>Salle :</strong> ${(course.type === "Examen" ? "Probably " : "") + (course.room.name?.String ?? '') + " " + (course.room.campus?.String ?? '') || 'Non spécifiée'}</p>
-        <p><strong>Modalité :</strong> ${course.modality || 'Non spécifiée'}</p>
-        <p><strong>Discipline :</strong> ${course.discipline?.trimester || 'Non spécifiée'}</p>
-        <p><strong>Professeur(e) :</strong> ${course.discipline?.Teacher?.teacher || 'Non spécifiée'}</p>
-        <p><strong>Commentaire :</strong> ${course.comment || 'Aucun'}</p>
+        <p><strong>Salle :</strong> ${escapeHtml((course.type === "Examen" ? "Probably " : "") + (course.room.name?.String ?? '') + " " + (course.room.campus?.String ?? '') || 'Non spécifiée')}</p>
+        <p><strong>Modalité :</strong> ${escapeHtml(course.modality || 'Non spécifiée')}</p>
+        <p><strong>Discipline :</strong> ${escapeHtml(course.discipline?.trimester || 'Non spécifiée')}</p>
+        <p><strong>Professeur(e) :</strong> ${escapeHtml(course.discipline?.Teacher?.teacher || 'Non spécifiée')}</p>
+        <p><strong>Commentaire :</strong> ${escapeHtml(course.comment || 'Aucun')}</p>
     `;
     modal.style.display = 'block';
 }

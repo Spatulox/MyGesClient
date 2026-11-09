@@ -1,5 +1,5 @@
 import { GetCourses } from "../../wailsjs/go/backend/App";
-import { getYear, scrollMainPart } from "../JS/functions";
+import { escapeHtml, scrollMainPart } from "../JS/functions";
 import { popup } from "../JS/popups";
 
 let isStillRunning = false;
@@ -79,12 +79,12 @@ export async function courses(): Promise<void> {
 function createCourseCard(course: Course): string {
     return `
         <div class="course-card">
-            <div class="course-name">${course.name}</div>
-            <div class="course-detail teacher">${course.teacher}</div>
-            <div class="course-detail">${course.student_group_name}</div>
+            <div class="course-name">${escapeHtml(course.name)}</div>
+            <div class="course-detail teacher">${escapeHtml(course.teacher)}</div>
+            <div class="course-detail">${escapeHtml(course.student_group_name)}</div>
             <div class="course-detail">
-                <span class="badge badge-blue">${course.trimester}</span>
-                <span class="badge badge-green">${course.year}</span>
+                <span class="badge badge-blue">${escapeHtml(course.trimester)}</span>
+                <span class="badge badge-green">${escapeHtml(course.year)}</span>
             </div>
         </div>
     `;

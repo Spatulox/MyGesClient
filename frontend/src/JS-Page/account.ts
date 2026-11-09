@@ -6,7 +6,7 @@ import { stillPopup, stopStillPopup } from "../JS/popups";
 let isStillRunning = false;
 
 
-// Fonction pour créer un élément avec des attributs et du contenu
+// Fonction pour créer un élément avec des attributs et du texte (jamais interprété comme du HTML)
 function createElement<K extends keyof HTMLElementTagNameMap>(
     tag: K,
     attributes: { [key: string]: string } = {},
@@ -14,7 +14,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
 ): HTMLElementTagNameMap[K] {
     const element = document.createElement(tag);
     Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
-    element.innerHTML = content;
+    element.textContent = content;
     return element;
 }
 
@@ -23,7 +23,10 @@ function createInfoSection(title: string, data: Record<string, string>): HTMLDiv
     const section = createElement('div', { class: 'info-section' }) as HTMLDivElement;
     section.appendChild(createElement('h3', {}, title));
     Object.entries(data).forEach(([key, value]) => {
-        section.appendChild(createElement('p', {}, `<strong>${key}:</strong> ${value}`));
+        const p = createElement('p');
+        p.appendChild(createElement('strong', {}, `${key}:`));
+        p.append(` ${value ?? ""}`);
+        section.appendChild(p);
     });
     return section;
 }

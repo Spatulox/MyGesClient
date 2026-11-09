@@ -55,7 +55,7 @@ export function initializeDropDownMenu(): void {
     selectSelected.addEventListener("click", toggleSelect as EventListener);
 
     function handleItemClick(this: HTMLElement, e: Event): void {
-        if (this.innerHTML !== "Créer un compte") {
+        if (this.textContent !== "Créer un compte") {
             showUsernameField(false);
             changeLoginButtonName("Se connecter");
             changeTitle("Se connecter");
@@ -66,7 +66,7 @@ export function initializeDropDownMenu(): void {
         }
 
         e.stopPropagation();
-        selectSelected!.innerHTML = this.innerHTML;
+        selectSelected!.textContent = this.textContent;
         selectItems!.classList.add('select-hide');
         selectSelected!.classList.remove('select-arrow-active');
     }
@@ -173,7 +173,7 @@ export function shakeConnexion(): void {
 export function changeTitle(title: string): void {
     const connexionTitle = document.getElementById("connexion-title");
     if (connexionTitle) {
-        connexionTitle.innerHTML = title;
+        connexionTitle.textContent = title;
     }
     changeLoginButtonName(title);
     changeDefaultSelected(title);
@@ -182,7 +182,7 @@ export function changeTitle(title: string): void {
 function changeDefaultSelected(title: string): void {
     const defaultSelected = document.getElementsByClassName("select-selected")[0] as HTMLElement | undefined;
     if (defaultSelected) {
-        defaultSelected.innerHTML = title;
+        defaultSelected.textContent = title;
         changeLoginButtonName(title);
     }
 }
@@ -191,7 +191,7 @@ export function changeLoginButtonName(name: string): void {
     const loginBtn = document.getElementById('buttonConnection') as HTMLInputElement | HTMLButtonElement | null;
     if (loginBtn) {
         if ('value' in loginBtn) loginBtn.value = name;
-        loginBtn.innerHTML = name;
+        loginBtn.textContent = name;
     }
 }
 
@@ -204,7 +204,7 @@ export function showDropDownMenu(bool: boolean = true): void {
 export function showConnectionError(error: string): void {
     const connexion_error = document.getElementById("connexion_error") as HTMLElement | null;
     if (connexion_error) {
-        connexion_error.innerHTML = error;
+        connexion_error.textContent = error;
         connexion_error.style.display = "block";
     }
 }
@@ -236,7 +236,7 @@ export function createDropDownMenu(users: User[]): void {
     users.forEach(user => {
         const div = document.createElement("div");
         (div as any).value = user.ID; // value n'existe pas sur div, mais utilisé dans le code original
-        div.innerHTML = user.Username;
+        div.textContent = user.Username;
         connexionSelectField.appendChild(div);
     });
     showDropDownMenu(true);

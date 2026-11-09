@@ -1,6 +1,6 @@
 import { DeleteEvent, GetAllEvents, GetEventsLike } from "../../wailsjs/go/backend/App";
 import { structures } from "../../wailsjs/go/models";
-import { formatDateWithDay, scrollMainPart } from "../JS/functions";
+import { escapeHtml, formatDateWithDay, safeColor, scrollMainPart } from "../JS/functions";
 import { popup } from "../JS/popups";
 
 
@@ -54,19 +54,19 @@ export async function events(): Promise<void> {
 function createEventElement(event: structures.Event): { eventElement: HTMLDivElement; eventId: string } {
     const eventElement = document.createElement('div');
     eventElement.className = 'event-item';
-    eventElement.style.borderColor = event.color;
+    eventElement.style.borderColor = safeColor(event.color);
 
     const startDate = formatDateWithDay(event.start_date);
     const endDate = formatDateWithDay(event.end_date);
     eventElement.innerHTML = `
         <div class="event-header">
-            <span class="event-name">${event.name}</span>
+            <span class="event-name">${escapeHtml(event.name)}</span>
         </div>
-        <p class="event-description">${event.description}</p>
+        <p class="event-description">${escapeHtml(event.description)}</p>
         <div class="event-time">
             <span class="event-date">${startDate} - ${endDate}</span>
         </div>
-        <button class="marginTop10 btn btn-delete" id="event-${event.event_id}" value="Supprimer">Supprimer</button>
+        <button class="marginTop10 btn btn-delete" id="event-${Number(event.event_id)}" value="Supprimer">Supprimer</button>
     `;
 
     return { eventElement, eventId: String(event.event_id) };

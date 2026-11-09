@@ -82,10 +82,10 @@ buttonConnection?.addEventListener("click", async function () {
     const usernameInput = document.getElementById("username") as HTMLInputElement | null;
     const passwordInput = document.getElementById("password") as HTMLInputElement | null;
     const selectConnexion = document.getElementsByClassName("select-selected")[0] as HTMLElement | undefined;
-    const selectUser = selectConnexion ? selectConnexion.innerHTML.trim() : "";
+    const selectUser = selectConnexion ? (selectConnexion.textContent ?? "").trim() : "";
 
     const loginBtn = document.getElementById('buttonConnection') as HTMLElement | null;
-    const oldInnerHtmlLoginBtn = loginBtn ? loginBtn.innerHTML : "Se connecter";
+    const oldInnerHtmlLoginBtn = loginBtn ? (loginBtn.textContent ?? "Se connecter") : "Se connecter";
 
     loadingConnectionButton(oldInnerHtmlLoginBtn);
 

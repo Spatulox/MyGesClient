@@ -1,6 +1,6 @@
 import { popup } from "../JS/popups";
 import { GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup } from "../../wailsjs/go/backend/App";
-import { scrollMainPart } from "../JS/functions";
+import { escapeHtml, scrollMainPart } from "../JS/functions";
 
 // Types de base à adapter selon tes vrais modèles
 type Student = {
@@ -261,8 +261,8 @@ function addProjectToJoin(projectName: string, professorName: string, subject: s
     div.classList.add("project-item");
 
     div.innerHTML += `
-        <span class="project-name">${projectName}</span>
-        <span class="project-info">${professorName} - ${subject}</span>
+        <span class="project-name">${escapeHtml(projectName)}</span>
+        <span class="project-info">${escapeHtml(professorName)} - ${escapeHtml(subject)}</span>
     `;
     projectItem.appendChild(div);
 }
@@ -352,10 +352,10 @@ function addMyProject(projectName: string, groupName: string, professorName: str
 
     div.innerHTML = `
         <div class="project-main-info">
-            <span class="project-name">${projectName}<span class="status-label status-${status.toLowerCase()}">${status}</span></span>
-            <span class="group-name">${groupName}</span>
+            <span class="project-name">${escapeHtml(projectName)}<span class="status-label status-${escapeHtml(status.toLowerCase())}">${escapeHtml(status)}</span></span>
+            <span class="group-name">${escapeHtml(groupName)}</span>
         </div>
-        <span class="project-info">${professorName} - ${subject}</span>
+        <span class="project-info">${escapeHtml(professorName)} - ${escapeHtml(subject)}</span>
     `;
 
     projectItem.appendChild(div);
