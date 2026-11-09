@@ -6,7 +6,6 @@ import { DeconnectUser, GetRegisteredUsers } from "../../wailsjs/go/backend/App"
 type User = {
     ID: number;
     Username: string;
-    Password: string;
     Theme: string;
     EULA: boolean;
     Year: string;

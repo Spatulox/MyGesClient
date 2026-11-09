@@ -53,7 +53,7 @@ export async function start(): Promise<void> {
     const laStill = stillPopup("Login...");
     try {
         const user = await GetUserData();
-        if (user === null || !user.Password) {
+        if (!user || !user.Username) {
             changeTitle("Créer un compte");
             changeLoginButtonName("Créer un compte");
             showButtonCancelConnection(false);
