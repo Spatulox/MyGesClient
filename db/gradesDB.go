@@ -14,94 +14,59 @@ type gradesResponse struct {
 	Result []Grades `json:"items"`
 }
 
-func SaveGradesToDB(grades string, db *sql.DB) {
-	Log.Infos("INFO : Saving grades into local DB")
-
-	var gradesResponseVar gradesResponse
-	err := json.Unmarshal([]byte(grades), &gradesResponseVar)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors du décodage JSON: %v", err))
-		return
+// ReplaceGrades atomically replaces the grades of the given user and year with
+// the ones contained in gradesJSON (MyGes "grades" response). The JSON is
+// decoded before anything is deleted, so invalid data never wipes local data.
+func ReplaceGrades(db *sql.DB, userID int64, year string, gradesJSON string) error {
+	var response gradesResponse
+	if err := json.Unmarshal([]byte(gradesJSON), &response); err != nil {
+		return fmt.Errorf("décodage JSON des notes : %w", err)
 	}
 
-	// Commencer une transaction
-	tx, err := db.Begin()
-	if err != nil {
-		Log.Error("Erreur lors du début de la transaction:", err)
-		return
-	}
-	defer tx.Rollback() // En cas d'erreur, annuler la transaction
-
-	// Préparer les requêtes
-	stmtNotes, err := tx.Prepare(`
-        INSERT OR REPLACE INTO NOTES (bonus, coef, course_name, ects, exam, trimestre, year, teacher_name, user_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `)
-	if err != nil {
-		Log.Error("Erreur lors de la préparation de la requête NOTES:", err)
-		return
-	}
-	defer stmtNotes.Close()
-
-	user, _ := GetUser(db)
-
-	stmtGrades, err := tx.Prepare(`
-        INSERT OR REPLACE INTO GRADESVALUE (note_id, grade_value)
-        VALUES (?, ?)
-    `)
-	if err != nil {
-		Log.Error("Erreur lors de la préparation de la requête GRADESVALUE:", err)
-		return
-	}
-	defer stmtGrades.Close()
-
-	for _, item := range gradesResponseVar.Result {
-
-		teacherName := fmt.Sprintf("%s %s", item.TeacherLastName,
-			item.TeacherFirstName)
-
-		// Insérer dans NOTES
-		res, err := stmtNotes.Exec(
-			item.Bonus,
-			item.Coef,
-			item.CourseName,
-			item.ECTS,
-			item.Exam,
-			item.Trimester,
-			item.Year,
-			teacherName,
-			user.ID,
-		)
-		if err != nil {
-			Log.Error("Erreur lors de l'insertion dans NOTES:", err)
-			return
+	return withTx(db, func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`
+			DELETE FROM GRADESVALUE
+			WHERE note_id IN (SELECT note_id FROM NOTES WHERE year = ? AND user_id = ?)`, year, userID); err != nil {
+			return fmt.Errorf("suppression des GRADESVALUE : %w", err)
+		}
+		if _, err := tx.Exec(`DELETE FROM NOTES WHERE year = ? AND user_id = ?`, year, userID); err != nil {
+			return fmt.Errorf("suppression des NOTES : %w", err)
 		}
 
-		// Récupérer l'ID de la note insérée
-		noteID, err := res.LastInsertId()
+		stmtNotes, err := tx.Prepare(`
+			INSERT INTO NOTES (bonus, coef, course_name, ects, exam, trimestre, year, teacher_name, user_id)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 		if err != nil {
-			Log.Error("Erreur lors de la récupération de l'ID de la note:", err)
-			return
+			return fmt.Errorf("préparation de la requête NOTES : %w", err)
 		}
+		defer stmtNotes.Close()
 
-		// Insérer les notes individuelles dans GRADESVALUE
-		for _, grade := range item.Grades {
-			_, err := stmtGrades.Exec(noteID, grade)
+		stmtGrades, err := tx.Prepare(`INSERT INTO GRADESVALUE (note_id, grade_value) VALUES (?, ?)`)
+		if err != nil {
+			return fmt.Errorf("préparation de la requête GRADESVALUE : %w", err)
+		}
+		defer stmtGrades.Close()
+
+		for _, item := range response.Result {
+			teacherName := fmt.Sprintf("%s %s", item.TeacherLastName, item.TeacherFirstName)
+			res, err := stmtNotes.Exec(item.Bonus, item.Coef, item.CourseName, item.ECTS, item.Exam,
+				item.Trimester, item.Year, teacherName, userID)
 			if err != nil {
-				Log.Error("Erreur lors de l'insertion dans GRADESVALUE:", err)
-				return
+				return fmt.Errorf("insertion dans NOTES : %w", err)
+			}
+			noteID, err := res.LastInsertId()
+			if err != nil {
+				return fmt.Errorf("récupération de l'ID de la note : %w", err)
+			}
+			for _, grade := range item.Grades {
+				if _, err := stmtGrades.Exec(noteID, grade); err != nil {
+					return fmt.Errorf("insertion dans GRADESVALUE : %w", err)
+				}
 			}
 		}
-	}
-
-	// Valider la transaction
-	err = tx.Commit()
-	if err != nil {
-		Log.Error("Erreur lors de la validation de la transaction:", err)
-		return
-	}
-
-	Log.Infos("INFO : Grades saved into local DB")
+		Log.Infos("INFO : Grades saved into local DB")
+		return nil
+	})
 }
 
 func GetDBUserGrades(year string, db *sql.DB) ([]LocalGrades, error) {

@@ -89,3 +89,65 @@ func TestDeleteOldDataIsScopedToSelectedUser(t *testing.T) {
 		t.Errorf("alice old events = %d, want 0", got)
 	}
 }
+
+func TestReplaceGradesKeepsDataOnInvalidJSON(t *testing.T) {
+	db := newTestDB(t)
+	mustExec(t, db, `INSERT INTO USER (user_id, username, password, selected) VALUES (1, 'alice', 'p', 1)`)
+	valid := `{"items":[{"bonus":0,"coef":"1","course":"S1 - Go","ects":"2","exam":12.5,"grades":[10,14],"trimester":1,"year":2025}]}`
+
+	if err := ReplaceGrades(db, 1, "2025", valid); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceGrades(db, 1, "2025", "{'message':'error'}"); err == nil {
+		t.Fatal("ReplaceGrades(invalid JSON) succeeded")
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM GRADESVALUE`); got != 2 {
+		t.Fatalf("GRADESVALUE rows = %d, want 2 (data must survive a failed refresh)", got)
+	}
+
+	// Replacing twice must not duplicate rows
+	if err := ReplaceGrades(db, 1, "2025", valid); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM NOTES`); got != 1 {
+		t.Fatalf("NOTES rows = %d, want 1", got)
+	}
+}
+
+func TestReplaceAbsencesAcceptsNullFields(t *testing.T) {
+	db := newTestDB(t)
+	abs := `{"items":[{"course_name":null,"date":1700000000000,"justified":true,"links":null,"trimester":1,"trimester_name":"S1","type":"absence","year":2025}]}`
+	if err := ReplaceAbsences(db, 1, "2025", abs); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM ABSENCES WHERE user_id = 1`); got != 1 {
+		t.Fatalf("ABSENCES rows = %d, want 1", got)
+	}
+}
+
+func TestReplaceAgendaWithNullTrimester(t *testing.T) {
+	db := newTestDB(t)
+	start, end := "2025-01-06T00:00:00.000Z", "2025-01-12T05:00:00.000Z"
+	mustExec(t, db, `INSERT INTO PROFS (teacher_id, teacher_name) VALUES (1, 'x')`)
+	mustExec(t, db, `INSERT INTO DISCIPLINES (discip_id, discip_name, teacher_id, trimestre) VALUES (1, 'x', 1, 'S1')`)
+	mustExec(t, db, `INSERT INTO AGENDA (agenda_id, agenda_name, type, modality, start_date, end_date, comment, discip_id, user_id) VALUES (99, 'old', 'Cours', 'x', '2025-01-07T08:00:00.000Z', '2025-01-07T10:00:00.000Z', '', 1, 1)`)
+
+	agenda := `[{"reservation_id":1,"name":"Go","type":"Cours","modality":"Présentiel","start_date":1736240400000,"end_date":1736245800000,"comment":"","rooms":[{"room_id":3,"name":"A1","campus":"Paris"}],"discipline":{"name":"Go","teacher":"T","teacher_id":7,"trimester":null}}]`
+	if err := ReplaceAgenda(db, 1, start, end, agenda); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM AGENDA WHERE user_id = 1`); got != 1 {
+		t.Fatalf("AGENDA rows = %d, want 1", got)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM AGENDA WHERE agenda_id = 99`); got != 0 {
+		t.Fatalf("old course of the week was not replaced")
+	}
+
+	// A failing refresh keeps the existing week
+	if err := ReplaceAgenda(db, 1, start, end, "not json"); err == nil {
+		t.Fatal("ReplaceAgenda(invalid JSON) succeeded")
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM AGENDA WHERE user_id = 1`); got != 1 {
+		t.Fatalf("AGENDA rows = %d after failed refresh, want 1", got)
+	}
+}

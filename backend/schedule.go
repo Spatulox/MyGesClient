@@ -4,7 +4,6 @@ import (
 	. "MyGesClient/db"
 	. "MyGesClient/log"
 	. "MyGesClient/structures"
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -114,60 +113,18 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
 	defer a.dbWg.Done()
-	if agenda != "" {
-		// ---- Delete all data in AGENDA ---- //
-		_, err = deleteAgendaData(startDate, endDate, a.db)
-		if err != nil {
-			return nil, err
-		}
 
-		// ---- Add all data in AGENDA ---- //
-		SaveAgendaToDB(agenda, a.db)
-	} else {
-		Log.Error("Impossible to save Schedule to DB, nothing have been sent back")
-		return nil, fmt.Errorf("Impossible to save Schedule to DB, nothing have been sent back")
+	user, err := GetUser(a.db)
+	if err != nil {
+		return nil, fmt.Errorf("récupération de l'utilisateur : %w", err)
 	}
 
-	// ---- Get all data in AGENDA ---- //
-
-	userAgenda, err := GetDBUserAgenda(a.db, startDate, endDate)
-	if err != nil {
+	if err := ReplaceAgenda(a.db, user.ID, startDate, endDate, agenda); err != nil {
+		Log.Error(fmt.Sprintf("Impossible to save Schedule to DB : %v", err))
 		return nil, err
 	}
-	return userAgenda, nil
-}
 
-func deleteAgendaData(startDate string, endDate string, db *sql.DB) ([]LocalAgenda, error) {
-	tx, err := db.Begin()
-	if err != nil {
-		Log.Error(err.Error())
-	}
-
-	user, _ := GetUser(db)
-
-	stmtDeleteAgenda, err := tx.Prepare(`
-		DELETE FROM AGENDA WHERE start_date >= ? AND end_date <= ? AND user_id = ?
-	`)
-	if err != nil {
-		tx.Rollback()
-		Log.Error(err.Error())
-		return nil, nil
-	}
-	defer stmtDeleteAgenda.Close()
-
-	_, err = stmtDeleteAgenda.Exec(startDate, endDate, user.ID)
-	if err != nil {
-		tx.Rollback()
-		Log.Error("DELETE AGENDA : " + err.Error())
-		return nil, nil
-	}
-	// Valider la transaction
-	err = tx.Commit()
-	if err != nil {
-		Log.Error(err.Error())
-	}
-
-	return []LocalAgenda{}, nil
+	return GetDBUserAgenda(a.db, startDate, endDate)
 }
 
 func parseAndAdjustDate(dateStr string, isStart bool) (time.Time, error) {
