@@ -33,7 +33,8 @@ export async function getSchedule(monday: string, sunday: string, forceRefresh: 
         let agenda: structures.LocalAgenda[] | undefined;
 
         // saved monday <= today monday's week || no internet connection => not refresh past/today's schedule OR get the local schedule when no internet
-        if (currentMonday && currentMonday <= getMonday() || !CheckInternetConnection()) {
+        const isPastOrCurrentWeek = currentMonday !== null && currentMonday <= getMonday();
+        if (isPastOrCurrentWeek || !(await CheckInternetConnection())) {
             agenda = await GetAgenda(monday, sunday);
             console.log("Chargement de l'agenda enregistré...");
         }
