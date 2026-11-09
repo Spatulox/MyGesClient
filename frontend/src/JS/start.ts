@@ -90,11 +90,16 @@ export async function start(): Promise<void> {
             await connectDiscord();
             await loadPageGo("dashboard.html");
 
-            // Need to wait the full start of the app
+            // Need to wait the full start of the app (bounded: the backend could stay stuck)
+            const STARTUP_TIMEOUT_MS = 60_000;
+            const waitStart = Date.now();
             let status: StartupStatusType = await GetStartupStatus();
-            while (status === StartupStatus.StatusInProgress) {
+            while (status === StartupStatus.StatusInProgress && Date.now() - waitStart < STARTUP_TIMEOUT_MS) {
                 await new Promise(resolve => setTimeout(resolve, 100));
                 status = await GetStartupStatus();
+            }
+            if (status === StartupStatus.StatusInProgress) {
+                popup("Le démarrage prend plus de temps que prévu, certaines pages peuvent être incomplètes");
             }
             await initAllPages(status);
         } catch (e: any) {
