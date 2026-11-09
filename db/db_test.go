@@ -193,3 +193,25 @@ func TestReadsAreScopedToUser(t *testing.T) {
 		t.Fatalf("got %d courses for user 1, want 1", len(agenda))
 	}
 }
+
+func TestConnectUser(t *testing.T) {
+	db := newTestDB(t)
+	mustExec(t, db, `INSERT INTO USER (username, password, selected) VALUES ('alice', 'pa', 1), ('bob', 'pb', 0)`)
+
+	if err := ConnectUser(db, "bob", "wrong"); err == nil {
+		t.Fatal("ConnectUser with a wrong password succeeded")
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM USER WHERE selected = 1 AND username = 'alice'`); got != 1 {
+		t.Fatal("a failed connection must not change the selected account")
+	}
+
+	if err := ConnectUser(db, "bob", "pb"); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM USER WHERE selected = 1`); got != 1 {
+		t.Fatalf("%d selected accounts, want 1", got)
+	}
+	if user, err := GetUser(db); err != nil || user.Username != "bob" {
+		t.Fatalf("GetUser() = %v, %v; want bob", user.Username, err)
+	}
+}

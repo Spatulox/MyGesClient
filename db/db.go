@@ -46,25 +46,18 @@ func InitDBConnexion(mutex *sync.Mutex, waitgroup *sync.WaitGroup) (*sql.DB, err
 
 // ------------------------------------------------ //
 
+// CreateUser creates a new account and makes it the only selected one.
 func CreateUser(db *sql.DB, username string, password string) (bool, error) {
-	// Désélectionner tous les utilisateurs existants
-	_, err := db.Exec("UPDATE USER SET selected = false")
-	if err != nil {
-		return false, fmt.Errorf("Erreur lors de l'update des utilisateurs existants (selected column) : %w", err)
-	}
-
-	// Insérer le nouvel utilisateur
-	result, err := db.Exec("INSERT INTO USER (username, password, selected) VALUES (?, ?, true)", username, password)
-	if err != nil {
-		return false, fmt.Errorf("Erreur lors de l'insertion du nouvel utilisateur : %w", err)
-	}
-
-	// Récupérer l'ID du nouvel utilisateur
-	_, err = result.LastInsertId()
-	if err != nil {
-		return false, fmt.Errorf("Erreur lors de la récupération de l'ID du nouvel utilisateur : %w", err)
-	}
-	return true, nil
+	err := withTx(db, func(tx *sql.Tx) error {
+		if _, err := tx.Exec("UPDATE USER SET selected = false"); err != nil {
+			return fmt.Errorf("Erreur lors de l'update des utilisateurs existants (selected column) : %w", err)
+		}
+		if _, err := tx.Exec("INSERT INTO USER (username, password, selected) VALUES (?, ?, true)", username, password); err != nil {
+			return fmt.Errorf("Erreur lors de l'insertion du nouvel utilisateur : %w", err)
+		}
+		return nil
+	})
+	return err == nil, err
 }
 
 func CheckUserExist(db *sql.DB, username string) (bool, error) {
@@ -175,15 +168,29 @@ func DeconnectUser(db *sql.DB) error {
 
 // ------------------------------------------------ //
 
-func ConnectUser(db *sql.DB, username string, password string) bool {
-	updateQuery := `UPDATE USER SET selected = true WHERE username = ? AND password = ?`
+// ErrBadCredentials is returned by ConnectUser when no local account matches.
+var ErrBadCredentials = errors.New("nom d'utilisateur ou mot de passe incorrect")
 
-	_, err := db.Exec(updateQuery, username, password)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Error when connecting the user : %v", err))
-		return false
-	}
-	return true
+// ConnectUser selects the account matching username and password, and
+// deselects every other account. Nothing changes if the credentials are wrong.
+func ConnectUser(db *sql.DB, username string, password string) error {
+	return withTx(db, func(tx *sql.Tx) error {
+		result, err := tx.Exec(`UPDATE USER SET selected = true WHERE username = ? AND password = ?`, username, password)
+		if err != nil {
+			return fmt.Errorf("Error when connecting the user : %w", err)
+		}
+		n, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+		}
+		if n != 1 {
+			return ErrBadCredentials
+		}
+		if _, err := tx.Exec(`UPDATE USER SET selected = false WHERE username <> ?`, username); err != nil {
+			return fmt.Errorf("Error when deselecting the other users : %w", err)
+		}
+		return nil
+	})
 }
 
 // ------------------------------------------------ //

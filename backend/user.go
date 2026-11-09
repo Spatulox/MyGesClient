@@ -178,19 +178,18 @@ func (a *App) GetRegisteredUsers() ([]UserSettings, error) {
 }
 
 func (a *App) ConnectUser(username string, password string) (UserSettings, error) {
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
+	err := ConnectUser(a.db, username, password)
+	a.dbMutex.Unlock()
+	a.dbWg.Done()
+	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible to connect : %v", err))
+		return UserSettings{}, fmt.Errorf("Impossible to connect, make sure the account exist and username and password are correct: %w", err)
+	}
 
-	if ConnectUser(a.db, username, password) {
-		a.initUser()
-		/*user, err := GetUser(a.db)
-		if err != nil {
-			Log.Error(fmt.Sprintf("Impossible to select the user : %v", err))
-			return UserSettings{}, fmt.Errorf("This user don't exist : %v", err)
-		}
-		a.setAPIUser(user)
-		return user, nil*/
-	} else {
-		Log.Error("Impossible to connect, make sure the account exist and username and password are correct")
-		return UserSettings{}, fmt.Errorf("Impossible to connect, make sure the account exist and username and password are correct")
+	if err := a.initUser(); err != nil {
+		return UserSettings{}, err
 	}
 
 	a.connectOrWaitForInternet()
