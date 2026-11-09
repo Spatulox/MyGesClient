@@ -17,7 +17,12 @@ func (a *App) GetAbsences() ([]LocalAbsences, error) {
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
 	defer a.dbWg.Done()
-	return GetDBUserAbsences(a.year, a.db)
+
+	user, err := GetUser(a.db)
+	if err != nil {
+		return nil, fmt.Errorf("récupération de l'utilisateur : %w", err)
+	}
+	return GetDBUserAbsences(a.db, user.ID, a.year)
 }
 
 func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
@@ -74,5 +79,5 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 		return nil, err
 	}
 
-	return GetDBUserAbsences(a.year, a.db)
+	return GetDBUserAbsences(a.db, user.ID, a.year)
 }

@@ -17,7 +17,12 @@ func (a *App) GetGrades() ([]LocalGrades, error) {
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
 	defer a.dbWg.Done()
-	return GetDBUserGrades(a.year, a.db)
+
+	user, err := GetUser(a.db)
+	if err != nil {
+		return nil, fmt.Errorf("récupération de l'utilisateur : %w", err)
+	}
+	return GetDBUserGrades(a.db, user.ID, a.year)
 }
 
 /*
@@ -79,5 +84,5 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 	}
 
 	Log.Infos("Getting Grades from local DB")
-	return GetDBUserGrades(a.year, a.db)
+	return GetDBUserGrades(a.db, user.ID, a.year)
 }

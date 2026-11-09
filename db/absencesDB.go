@@ -48,7 +48,8 @@ func ReplaceAbsences(db *sql.DB, userID int64, year string, absJSON string) erro
 	})
 }
 
-func GetDBUserAbsences(year string, db *sql.DB) ([]LocalAbsences, error) {
+// GetDBUserAbsences returns the absences of the given user for the given year.
+func GetDBUserAbsences(db *sql.DB, userID int64, year string) ([]LocalAbsences, error) {
 	Log.Infos("INFO : Fetching local DB for Absences")
 	Log.Infos("INFO : Fetched Absences")
 
@@ -59,13 +60,7 @@ func GetDBUserAbsences(year string, db *sql.DB) ([]LocalAbsences, error) {
         ORDER BY abs_date ASC
     `
 
-	user, err := GetUser(db)
-	if err != nil {
-		return nil, fmt.Errorf("Impossible to retrieve the user id when getting events")
-	}
-
-	// Exécuter la requête
-	rows, err := db.Query(query, year, user.ID)
+	rows, err := db.Query(query, year, userID)
 	if err != nil {
 		return nil, fmt.Errorf("erreur lors de l'exécution de la requête : %v", err)
 	}

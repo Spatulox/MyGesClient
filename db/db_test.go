@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -149,5 +150,46 @@ func TestReplaceAgendaWithNullTrimester(t *testing.T) {
 	}
 	if got := count(t, db, `SELECT COUNT(*) FROM AGENDA WHERE user_id = 1`); got != 1 {
 		t.Fatalf("AGENDA rows = %d after failed refresh, want 1", got)
+	}
+}
+
+func TestReadsAreScopedToUser(t *testing.T) {
+	db := newTestDB(t)
+	g := `{"items":[{"bonus":0,"coef":"1","course":"S1 - Go","ects":"2","grades":[10,14],"trimester":1,"year":2025},{"bonus":0,"coef":"1","course":"S1 - Web","ects":"2","grades":[],"trimester":1,"year":2025}]}`
+	if err := ReplaceGrades(db, 1, "2025", g); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceGrades(db, 2, "2025", `{"items":[{"bonus":0,"coef":"1","course":"S1 - Bob","ects":"2","grades":[5],"trimester":1,"year":2025}]}`); err != nil {
+		t.Fatal(err)
+	}
+
+	grades, err := GetDBUserGrades(db, 1, "2025")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(grades) != 2 {
+		t.Fatalf("got %d grades for user 1, want 2", len(grades))
+	}
+	if grades[0].CourseName != "S1 - Go" || len(grades[0].Grades) != 2 || grades[0].Grades[1] != 14 {
+		t.Errorf("unexpected first grade: %+v", grades[0])
+	}
+	if len(grades[1].Grades) != 0 {
+		t.Errorf("course without grades got %v", grades[1].Grades)
+	}
+
+	start, end := "2025-01-06T00:00:00.000Z", "2025-01-12T05:00:00.000Z"
+	course := `[{"reservation_id":%d,"name":"Go","type":"Cours","modality":"x","start_date":1736240400000,"end_date":1736245800000,"comment":"","rooms":[],"discipline":{"name":"Go","teacher":"T","teacher_id":7,"trimester":"S1"}}]`
+	if err := ReplaceAgenda(db, 1, start, end, fmt.Sprintf(course, 1)); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceAgenda(db, 2, start, end, fmt.Sprintf(course, 2)); err != nil {
+		t.Fatal(err)
+	}
+	agenda, err := GetDBUserAgenda(db, 1, start, end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(agenda) != 1 {
+		t.Fatalf("got %d courses for user 1, want 1", len(agenda))
 	}
 }

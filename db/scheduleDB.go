@@ -104,7 +104,8 @@ func ReplaceAgenda(db *sql.DB, userID int64, start string, end string, agendaJSO
 
 // ------------------------------------------------ //
 
-func GetDBUserAgenda(db *sql.DB, start string, end string) ([]LocalAgenda, error) {
+// GetDBUserAgenda returns the schedule of the given user between start and end.
+func GetDBUserAgenda(db *sql.DB, userID int64, start string, end string) ([]LocalAgenda, error) {
 	var agendas []LocalAgenda
 
 	query := `SELECT a.agenda_name, a.type, a.modality, a.start_date, a.end_date, a.comment,
@@ -114,12 +115,12 @@ FROM AGENDA a
      LEFT JOIN SALLES s ON a.room_id = s.room_id
      JOIN DISCIPLINES d ON a.discip_id = d.discip_id
      JOIN PROFS p ON d.teacher_id = p.teacher_id
-WHERE start_date >= ? AND end_date <= ? 
+WHERE a.start_date >= ? AND a.end_date <= ? AND a.user_id = ?
 GROUP BY a.agenda_id
 ORDER BY a.start_date ASC
 `
 
-	rows, err := db.Query(query, start, end)
+	rows, err := db.Query(query, start, end, userID)
 	if err != nil {
 		return nil, err
 	}

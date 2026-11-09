@@ -45,7 +45,12 @@ func (a *App) GetAgenda(start *string, end *string) ([]LocalAgenda, error) {
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
 	defer a.dbWg.Done()
-	return GetDBUserAgenda(a.db, startDateStr, endDateStr)
+
+	user, err := GetUser(a.db)
+	if err != nil {
+		return nil, fmt.Errorf("récupération de l'utilisateur : %w", err)
+	}
+	return GetDBUserAgenda(a.db, user.ID, startDateStr, endDateStr)
 }
 
 /*
@@ -124,7 +129,7 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		return nil, err
 	}
 
-	return GetDBUserAgenda(a.db, startDate, endDate)
+	return GetDBUserAgenda(a.db, user.ID, startDate, endDate)
 }
 
 func parseAndAdjustDate(dateStr string, isStart bool) (time.Time, error) {

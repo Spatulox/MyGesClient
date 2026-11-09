@@ -69,79 +69,50 @@ func ReplaceGrades(db *sql.DB, userID int64, year string, gradesJSON string) err
 	})
 }
 
-func GetDBUserGrades(year string, db *sql.DB) ([]LocalGrades, error) {
+// GetDBUserGrades returns the grades of the given user for the given year.
+func GetDBUserGrades(db *sql.DB, userID int64, year string) ([]LocalGrades, error) {
 	Log.Infos("INFO : Fetching local DB for grades")
 
-	query := `
-        SELECT n.note_id, n.bonus, n.coef, n.course_name, n.ects, n.exam, n.trimestre, n.year,
-               n.teacher_name
-        FROM NOTES n
-        WHERE n.year = ?
-        ORDER BY n.trimestre, n.course_name
-    `
-
-	rows, err := db.Query(query, year)
+	rows, err := db.Query(`
+		SELECT n.note_id, n.bonus, n.coef, n.course_name, n.ects, n.exam, n.trimestre, n.year,
+		       n.teacher_name, g.grade_value
+		FROM NOTES n
+		LEFT JOIN GRADESVALUE g ON g.note_id = n.note_id
+		WHERE n.year = ? AND n.user_id = ?
+		ORDER BY n.trimestre, n.course_name, n.note_id, g.rowid`, year, userID)
 	if err != nil {
-		Log.Error("Erreur lors de la requête des notes:", err)
-		return nil, err
+		return nil, fmt.Errorf("requête des notes : %w", err)
 	}
 	defer rows.Close()
 
 	var grades []LocalGrades
-
+	lastNoteID := -1
 	for rows.Next() {
 		var g LocalGrades
 		var noteID int
 		var examNull sql.NullFloat64
+		var gradeValue sql.NullFloat64
 
-		err := rows.Scan(
-			&noteID,
-			&g.Bonus,
-			&g.Coef,
-			&g.CourseName,
-			&g.ECTS,
-			&examNull,
-			&g.Trimester,
-			&g.Year,
-			&g.TeacherName,
-		)
-		if err != nil {
-			Log.Error("Erreur lors de la lecture d'une ligne de notes:", err)
-			return nil, err
+		if err := rows.Scan(&noteID, &g.Bonus, &g.Coef, &g.CourseName, &g.ECTS, &examNull,
+			&g.Trimester, &g.Year, &g.TeacherName, &gradeValue); err != nil {
+			return nil, fmt.Errorf("lecture d'une ligne de notes : %w", err)
 		}
 
-		if examNull.Valid {
-			g.Exam = &examNull.Float64
-		}
-
-		// Récupérer les notes individuelles pour ce cours
-		gradesQuery := `
-            SELECT grade_value
-            FROM GRADESVALUE
-            WHERE note_id = ?
-        `
-		gradeRows, err := db.Query(gradesQuery, noteID)
-		if err != nil {
-			Log.Error("Erreur lors de la requête des notes individuelles:", err)
-			return nil, err
-		}
-		defer gradeRows.Close()
-
-		for gradeRows.Next() {
-			var gradeValue float64
-			if err := gradeRows.Scan(&gradeValue); err != nil {
-				Log.Error("Erreur lors de la lecture d'une note individuelle:", err)
-				return nil, err
+		if noteID != lastNoteID {
+			if examNull.Valid {
+				exam := examNull.Float64
+				g.Exam = &exam
 			}
-			g.Grades = append(g.Grades, gradeValue)
+			grades = append(grades, g)
+			lastNoteID = noteID
 		}
-
-		grades = append(grades, g)
+		if gradeValue.Valid {
+			last := &grades[len(grades)-1]
+			last.Grades = append(last.Grades, gradeValue.Float64)
+		}
 	}
-
-	if err = rows.Err(); err != nil {
-		Log.Error("Erreur après la lecture des lignes:", err)
-		return nil, err
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("lecture des notes : %w", err)
 	}
 
 	Log.Infos("INFO : Local Fetched Grades")
