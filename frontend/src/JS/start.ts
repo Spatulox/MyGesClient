@@ -23,6 +23,7 @@ import { events } from "../JS-Page/events";
 import { courses } from "../JS-Page/courses";
 import { changeWeek, hideScheduleButtons, schedule, showScheduleButtons } from "../JS-Page/schedule";
 import { projects } from "../JS-Page/projects";
+import { initExternalLinks } from "./externalLinks";
 
 let initializedStart = false;
 
@@ -140,6 +141,9 @@ async function connectDiscord(): Promise<void> {
         console.error("Failed to initialize Discord RPC:", error);
     }
 }
+
+// Once, before anything else: external links must open in the default browser
+initExternalLinks();
 
 start()
     .then(() => {
