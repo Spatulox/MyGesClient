@@ -24,32 +24,42 @@ func ReplaceAgenda(db *sql.DB, userID int64, start string, end string, agendaJSO
 		}
 
 		stmtAgenda, err := tx.Prepare(`
-			INSERT OR REPLACE INTO AGENDA (agenda_id, agenda_name, type, modality, start_date, end_date, comment, room_id, discip_id, user_id)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+			INSERT INTO AGENDA (agenda_id, agenda_name, type, modality, start_date, end_date, comment, room_id, discip_id, user_id)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(agenda_id, user_id) DO UPDATE SET
+				agenda_name = excluded.agenda_name, type = excluded.type, modality = excluded.modality,
+				start_date = excluded.start_date, end_date = excluded.end_date, comment = excluded.comment,
+				room_id = excluded.room_id, discip_id = excluded.discip_id`)
 		if err != nil {
 			return fmt.Errorf("préparation de la requête AGENDA : %w", err)
 		}
 		defer stmtAgenda.Close()
 
 		stmtRoom, err := tx.Prepare(`
-			INSERT OR REPLACE INTO SALLES (room_id, room_name, campus, color)
-			VALUES (?, ?, ?, ?)`)
+			INSERT INTO SALLES (room_id, room_name, campus, color)
+			VALUES (?, ?, ?, ?)
+			ON CONFLICT(room_id) DO UPDATE SET
+				room_name = excluded.room_name, campus = excluded.campus, color = excluded.color`)
 		if err != nil {
 			return fmt.Errorf("préparation de la requête SALLES : %w", err)
 		}
 		defer stmtRoom.Close()
 
 		stmtTeacher, err := tx.Prepare(`
-			INSERT OR REPLACE INTO PROFS (teacher_id, teacher_name)
-			VALUES (?, ?)`)
+			INSERT INTO PROFS (teacher_id, teacher_name)
+			VALUES (?, ?)
+			ON CONFLICT(teacher_id) DO UPDATE SET teacher_name = excluded.teacher_name`)
 		if err != nil {
 			return fmt.Errorf("préparation de la requête PROFS : %w", err)
 		}
 		defer stmtTeacher.Close()
 
 		stmtDiscipline, err := tx.Prepare(`
-			INSERT OR REPLACE INTO DISCIPLINES (discip_id, discip_name, teacher_id, coef, trimestre)
-			VALUES (?, ?, ?, ?, ?)`)
+			INSERT INTO DISCIPLINES (discip_id, discip_name, teacher_id, coef, trimestre)
+			VALUES (?, ?, ?, ?, ?)
+			ON CONFLICT(discip_id) DO UPDATE SET
+				discip_name = excluded.discip_name, teacher_id = excluded.teacher_id,
+				coef = excluded.coef, trimestre = excluded.trimestre`)
 		if err != nil {
 			return fmt.Errorf("préparation de la requête DISCIPLINES : %w", err)
 		}

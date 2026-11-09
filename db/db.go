@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -17,31 +16,41 @@ import (
 
 // ------------------------------------------------ //
 
-func InitDBConnexion(mutex *sync.Mutex, waitgroup *sync.WaitGroup) (*sql.DB, error) {
+// Connection settings, applied by the driver to every pooled connection:
+// foreign keys are enforced, and concurrent writers wait instead of failing
+// with SQLITE_BUSY.
+const dsnPragmas = "?_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)"
+
+// OpenDB opens the SQLite database at path and makes sure its schema is up to date.
+func OpenDB(path string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", path+dsnPragmas)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de l'ouverture de la base de données: %w", err)
+	}
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("erreur lors de la connexion à la base de données: %w", err)
+	}
+	if err := initSchema(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+	return db, nil
+}
+
+// InitDBConnexion opens the application database, in <config dir>/MyGes/db.sqlite.
+func InitDBConnexion() (*sql.DB, error) {
 	appDataPath, err := os.UserConfigDir()
 	if err != nil {
-		return nil, fmt.Errorf("erreur lors de l'obtention du dossier AppData: %v", err)
+		return nil, fmt.Errorf("erreur lors de l'obtention du dossier AppData: %w", err)
 	}
 
 	dbFolder := filepath.Join(appDataPath, "MyGes")
-	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
-
-	// Assurez-vous que le dossier MyGes existe
-	err = os.MkdirAll(filepath.Dir(dbFolder), 0755)
-	if err != nil {
-		return nil, fmt.Errorf("erreur lors de la création du dossier MyGes: %v", err)
+	if err := os.MkdirAll(dbFolder, 0755); err != nil {
+		return nil, fmt.Errorf("erreur lors de la création du dossier MyGes: %w", err)
 	}
 
-	if err := createDB(mutex, waitgroup); err != nil {
-		return nil, err
-	}
-
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		return nil, fmt.Errorf("erreur lors de l'ouverture de la base de données: %v", err)
-	}
-
-	return db, nil
+	return OpenDB(filepath.Join(dbFolder, "db.sqlite"))
 }
 
 // ------------------------------------------------ //

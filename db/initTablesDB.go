@@ -4,12 +4,6 @@ import (
 	. "MyGesClient/log"
 	"database/sql"
 	"fmt"
-	"os"
-	"path/filepath"
-	"sync"
-
-	"github.com/labstack/gommon/log"
-	_ "modernc.org/sqlite"
 )
 
 // To store the user of the application
@@ -115,125 +109,125 @@ const PRESET = `CREATE TABLE IF NOT EXISTS PRESET(
 	UNIQUE (user_id, name, type) -- Contrainte pour un seul preset du même nom pour une personne et un même type
 );`
 
-func initDBTables(mutex *sync.Mutex, waitgroup *sync.WaitGroup) {
-	mutex.Lock()
-	waitgroup.Add(1)
-	defer mutex.Unlock()
-	defer waitgroup.Done()
-
-	appDataPath, err := os.UserConfigDir()
-	if err != nil {
-		Log.Error(fmt.Sprintf("erreur lors de l'obtention du dossier AppData: %v", err))
-		return
-	}
-	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de l'ouverture de la base de données: %v\n", err))
-		return
-	}
-	defer db.Close()
-
-	// Enable foreign key
-	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de l'activation des clé étrangère': %v\n", err))
-		return
-	}
-
-	if _, err := db.Exec(USER); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la création de la table users: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'users' créée avec succès.")
-
-	if _, err := db.Exec(SALLES); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la création de la table salles: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'Salles' créée avec succès.")
-
-	if _, err := db.Exec(PROFS); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la création de la table prof: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'Prof' créée avec succès.")
-
-	if _, err := db.Exec(DISCIPLINES); err != nil {
-		log.Error(fmt.Sprintf("Erreur lors de la création de la table discipline: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'Discipline' créée avec succès.")
-
-	if _, err := db.Exec(AGENDA); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la création de la table agenda: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'Agenda' créée avec succès.")
-
-	if _, err := db.Exec(NOTES); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la création de la table notes: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'Notes' créée avec succès.")
-
-	if _, err := db.Exec(GRADESVALUE); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la création de la table gradesvalue: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'GradesValue' créée avec succès.")
-
-	if _, err := db.Exec(EVENTS); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la création de la table events: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'Events' créée avec succès.")
-
-	if _, err := db.Exec(ABSENCES); err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la création de la table absences: %v\n", err))
-		return
-	}
-	Log.Infos("Table 'Absences' créée avec succès.")
-
-	if _, err := db.Exec(PRESET); err != nil {
-		Log.Error(fmt.Sprint("Error lors de la création de la table preset: %v\n", err))
-		return
-	}
+// Tables, in creation order (referenced tables first)
+var tables = []struct {
+	name   string
+	schema string
+}{
+	{"USER", USER},
+	{"SALLES", SALLES},
+	{"PROFS", PROFS},
+	{"DISCIPLINES", DISCIPLINES},
+	{"AGENDA", AGENDA},
+	{"NOTES", NOTES},
+	{"GRADESVALUE", GRADESVALUE},
+	{"EVENTS", EVENTS},
+	{"ABSENCES", ABSENCES},
+	{"PRESET", PRESET},
 }
 
-func createDB(mutex *sync.Mutex, waitgroup *sync.WaitGroup) error {
-	appDataPath, err := os.UserConfigDir()
-	if err != nil {
-		return fmt.Errorf("erreur lors de l'obtention du dossier AppData: %v", err)
-	}
-
-	dbDir := filepath.Join(appDataPath, "MyGes")
-	dbPath := filepath.Join(dbDir, "db.sqlite")
-
-	// Assurez-vous que le dossier MyGes existe
-	if err := os.MkdirAll(dbDir, 0755); err != nil {
-		return fmt.Errorf("erreur lors de la création du dossier MyGes: %v", err)
-	}
-
-	// Vérifie si le fichier existe
-	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		// Le fichier n'existe pas, donc on le crée
-		file, err := os.Create(dbPath)
-		if err != nil {
-			errMsg := fmt.Sprintf("erreur lors de la création du fichier de base de données: %v", err)
-			Log.Error(errMsg)
-			return fmt.Errorf(errMsg)
+// migrations[i] upgrades a database from version i to version i+1
+// (stored in PRAGMA user_version). Append new migrations at the end,
+// never modify an existing one.
+var migrations = []func(tx *sql.Tx) error{
+	// 1: databases created before last_year existed
+	func(tx *sql.Tx) error {
+		return addColumnIfMissing(tx, "USER", "last_year", "TEXT NOT NULL DEFAULT '1970'")
+	},
+	// 2: a course (reservation) is shared by every student of a class, so
+	// AGENDA is keyed by (agenda_id, user_id) instead of agenda_id alone:
+	// otherwise two local accounts in the same class overwrote each other.
+	func(tx *sql.Tx) error {
+		statements := []string{
+			`CREATE TABLE AGENDA_NEW (
+				agenda_id INTEGER NOT NULL,
+				agenda_name TEXT NOT NULL,
+				type TEXT NOT NULL,
+				modality TEXT NOT NULL,
+				start_date TEXT NOT NULL,
+				end_date TEXT NOT NULL,
+				comment TEXT NOT NULL,
+				room_id INTEGER,
+				discip_id INTEGER NOT NULL,
+				user_id INTEGER NOT NULL,
+				PRIMARY KEY (agenda_id, user_id),
+				FOREIGN KEY (room_id) REFERENCES SALLES (room_id),
+				FOREIGN KEY (discip_id) REFERENCES DISCIPLINES (discip_id),
+				FOREIGN KEY (user_id) REFERENCES USER (user_id)
+			)`,
+			`INSERT INTO AGENDA_NEW SELECT agenda_id, agenda_name, type, modality, start_date, end_date,
+				comment, room_id, discip_id, user_id FROM AGENDA`,
+			`DROP TABLE AGENDA`,
+			`ALTER TABLE AGENDA_NEW RENAME TO AGENDA`,
+			`CREATE INDEX IF NOT EXISTS idx_agenda_user_start ON AGENDA (user_id, start_date)`,
 		}
-		defer file.Close()
-		Log.Infos("Fichier db.sqlite créé.")
+		for _, stmt := range statements {
+			if _, err := tx.Exec(stmt); err != nil {
+				return err
+			}
+		}
+		return nil
+	},
+}
 
-	} else if err != nil {
-		return fmt.Errorf("erreur lors de la vérification de l'existence du fichier: %v", err)
-	} else {
-		Log.Infos("Le fichier db.sqlite existe déjà.")
+// initSchema creates the missing tables, then applies the pending migrations.
+func initSchema(db *sql.DB) error {
+	for _, table := range tables {
+		if _, err := db.Exec(table.schema); err != nil {
+			return fmt.Errorf("création de la table %s : %w", table.name, err)
+		}
 	}
-	Log.Infos("Initialisaion des potentiellement tables manquantes..")
-	initDBTables(mutex, waitgroup)
-	Log.Infos("Fini !")
 
+	var version int
+	if err := db.QueryRow("PRAGMA user_version").Scan(&version); err != nil {
+		return fmt.Errorf("lecture de la version du schéma : %w", err)
+	}
+
+	for ; version < len(migrations); version++ {
+		next := version + 1
+		err := withTx(db, func(tx *sql.Tx) error {
+			if err := migrations[version](tx); err != nil {
+				return err
+			}
+			_, err := tx.Exec(fmt.Sprintf("PRAGMA user_version = %d", next))
+			return err
+		})
+		if err != nil {
+			return fmt.Errorf("migration du schéma vers la version %d : %w", next, err)
+		}
+		Log.Infos(fmt.Sprintf("DB schema migrated to version %d", next))
+	}
 	return nil
+}
+
+func addColumnIfMissing(tx *sql.Tx, table, column, definition string) error {
+	rows, err := tx.Query(fmt.Sprintf("PRAGMA table_info(%s)", table))
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			cid       int
+			name      string
+			colType   string
+			notNull   int
+			dfltValue sql.NullString
+			pk        int
+		)
+		if err := rows.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk); err != nil {
+			return err
+		}
+		if name == column {
+			return nil
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	rows.Close()
+
+	_, err = tx.Exec(fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", table, column, definition))
+	return err
 }

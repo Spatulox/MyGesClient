@@ -254,7 +254,7 @@ func (a *App) Shutdown(ctx context.Context) {
 
 func (a *App) initDB() error {
 	var err error
-	a.db, err = InitDBConnexion(&a.dbMutex, &a.dbWg)
+	a.db, err = InitDBConnexion()
 	if err != nil {
 		return fmt.Errorf("failed to initialize DB: %w", err)
 	}
