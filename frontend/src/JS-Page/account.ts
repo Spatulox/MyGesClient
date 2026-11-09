@@ -100,53 +100,56 @@ export async function account(): Promise<void> {
         return;
     }
     isStillRunning = true;
-    const target = document.getElementById("account-presentation") as HTMLElement | null;
-
-    scrollMainPart();
-    const laStill = stillPopup("Recherche de vos informations...");
-
     try {
-        let profileRaw = await GetProfile();
-        const profileParsed = JSON.parse(profileRaw);
+        const target = document.getElementById("account-presentation") as HTMLElement | null;
 
-        const user: ApiUser = {
-            img_link: profileParsed._links.photo.href,
-            civility: profileParsed.civility,
-            firstname: profileParsed.firstname,
-            name: profileParsed.name,
-            add1: profileParsed.address1,
-            zipcode: profileParsed.zipcode,
-            city: profileParsed.city,
-            country: profileParsed.country,
-            birth_country: profileParsed.birth_country,
-            birth_place: profileParsed.birthplace,
-            birthday: (new Date(profileParsed.birthday)).toLocaleDateString(),
-            nationality: profileParsed.nationality,
-            nom_avant_mariage: profileParsed.maiden_name ? profileParsed.maiden_name : "N/A",
-            mobile: profileParsed.mobile,
-            personal_mail: profileParsed.personal_mail,
-            telephone: profileParsed.telephone,
-            email: profileParsed.email,
-            ine: profileParsed.ine,
-            student_id: profileParsed.student_id,
-        };
+        scrollMainPart();
+        const laStill = stillPopup("Recherche de vos informations...");
 
-        stopStillPopup(laStill);
+        try {
+            let profileRaw = await GetProfile();
+            const profileParsed = JSON.parse(profileRaw);
 
-        if (target) {
-            const studentCard = createStudentCard(user);
-            target.innerHTML = "";
-            target.appendChild(studentCard);
+            const user: ApiUser = {
+                img_link: profileParsed._links.photo.href,
+                civility: profileParsed.civility,
+                firstname: profileParsed.firstname,
+                name: profileParsed.name,
+                add1: profileParsed.address1,
+                zipcode: profileParsed.zipcode,
+                city: profileParsed.city,
+                country: profileParsed.country,
+                birth_country: profileParsed.birth_country,
+                birth_place: profileParsed.birthplace,
+                birthday: (new Date(profileParsed.birthday)).toLocaleDateString(),
+                nationality: profileParsed.nationality,
+                nom_avant_mariage: profileParsed.maiden_name ? profileParsed.maiden_name : "N/A",
+                mobile: profileParsed.mobile,
+                personal_mail: profileParsed.personal_mail,
+                telephone: profileParsed.telephone,
+                email: profileParsed.email,
+                ine: profileParsed.ine,
+                student_id: profileParsed.student_id,
+            };
+
+            stopStillPopup(laStill);
+
+            if (target) {
+                const studentCard = createStudentCard(user);
+                target.innerHTML = "";
+                target.appendChild(studentCard);
+            }
+        } catch (e) {
+            console.log(e);
+            stopStillPopup(laStill);
+            if (target) {
+                target.innerHTML = `
+                <div class="width80 marginAuto flex flexCenter">
+                    <div class="box witdth100">Une erreur c'est produite</div>
+                </div>`;
+            }
         }
-    } catch (e) {
-        console.log(e);
-        stopStillPopup(laStill);
-        if (target) {
-            target.innerHTML = `
-            <div class="width80 marginAuto flex flexCenter">
-                <div class="box witdth100">Une erreur c'est produite</div>
-            </div>`;
-        }
+    } finally {
+        isStillRunning = false;
     }
-    isStillRunning = false;
 }

@@ -17,13 +17,16 @@ let isStillRunning = false;
 export async function schedule(forceRefresh = false): Promise<void> {
     if (isStillRunning) return;
     isStillRunning = true;
-    scrollMainPart();
-    currentMonday = getMonday();
-    const monday = currentMonday;
-    const sunday = getSundayFromMonday(currentMonday);
+    try {
+        scrollMainPart();
+        currentMonday = getMonday();
+        const monday = currentMonday;
+        const sunday = getSundayFromMonday(currentMonday);
 
-    await updateSchedule(monday, sunday, forceRefresh);
-    isStillRunning = false;
+        await updateSchedule(monday, sunday, forceRefresh);
+    } finally {
+        isStillRunning = false;
+    }
 }
 
 export async function getSchedule(monday: string, sunday: string, forceRefresh: boolean = false): Promise<structures.LocalAgenda[] | undefined> {

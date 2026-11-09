@@ -32,19 +32,20 @@ export async function dashboard(): Promise<void> {
     }
 }
 
-forwardButton?.addEventListener("click", async () => {
-    hideDashboardButtons()
-    await changeDay(1)
-    await handleAgenda()
-    showDashboardButtons()
-});
+forwardButton?.addEventListener("click", () => moveDay(1));
+backwardButton?.addEventListener("click", () => moveDay(-1));
 
-backwardButton?.addEventListener("click", async () => {
+async function moveDay(direction: number): Promise<void> {
     hideDashboardButtons()
-    await changeDay(-1)
-    await handleAgenda()
-    showDashboardButtons()
-});
+    try {
+        await changeDay(direction)
+        await handleAgenda()
+    } catch (e) {
+        console.log(e);
+    } finally {
+        showDashboardButtons()
+    }
+}
 
 // --------------------------------------------------------------------------------------- //
 
@@ -228,8 +229,13 @@ function restartTimer() {
         // Schedule is right now
         hideDashboardButtons()
         TODAY = startOfDay();
-        await handleAgenda()
-        showDashboardButtons()
+        try {
+            await handleAgenda()
+        } catch (e) {
+            console.log(e);
+        } finally {
+            showDashboardButtons()
+        }
         
     }, 60000);
 }

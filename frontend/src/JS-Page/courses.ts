@@ -22,57 +22,58 @@ export async function courses(): Promise<void> {
         return;
     }
     isStillRunning = true;
-    scrollMainPart();
-    const loading = document.getElementById("loadingCourses") as HTMLElement | null;
-    const search = document.getElementById("search-bar-courses") as HTMLInputElement | null;
-    const courseGrid = document.getElementById('courseGrid') as HTMLElement | null;
-
-    if (!search || !courseGrid) {
-        console.log(loading, search, courseGrid)
-        popup("Impossible d'accéder à certains éléments du DOM");
-        isStillRunning = false;
-        return;
-    }
-
-    let mygescourses: MyGesCourses | null = null;
     try {
-        let rawCourses = await GetCourses();
+        scrollMainPart();
+        const loading = document.getElementById("loadingCourses") as HTMLElement | null;
+        const search = document.getElementById("search-bar-courses") as HTMLInputElement | null;
+        const courseGrid = document.getElementById('courseGrid') as HTMLElement | null;
 
-        if (!rawCourses) {
-            popup("Impossible de lister vos Cours");
-            isStillRunning = false;
+        if (!search || !courseGrid) {
+            console.log(loading, search, courseGrid)
+            popup("Impossible d'accéder à certains éléments du DOM");
             return;
         }
 
-        mygescourses = JSON.parse(rawCourses) as MyGesCourses;
+        let mygescourses: MyGesCourses | null = null;
+        try {
+            let rawCourses = await GetCourses();
 
-        // Recherche dynamique
-        search.addEventListener("input", () => {
-            courseGrid.innerHTML = "";
-            mygescourses!.items.forEach(course => {
-                if (course.name.toLowerCase().includes(search.value.toLowerCase())) {
-                    courseGrid.innerHTML += createCourseCard(course);
-                }
+            if (!rawCourses) {
+                popup("Impossible de lister vos Cours");
+                return;
+            }
+
+            mygescourses = JSON.parse(rawCourses) as MyGesCourses;
+
+            // Recherche dynamique
+            search.addEventListener("input", () => {
+                courseGrid.innerHTML = "";
+                mygescourses!.items.forEach(course => {
+                    if (course.name.toLowerCase().includes(search.value.toLowerCase())) {
+                        courseGrid.innerHTML += createCourseCard(course);
+                    }
+                });
             });
-        });
 
-        // Affichage initial
-        courseGrid.innerHTML = "";
-        mygescourses.items.forEach(course => {
-            courseGrid.innerHTML += createCourseCard(course);
-        });
+            // Affichage initial
+            courseGrid.innerHTML = "";
+            mygescourses.items.forEach(course => {
+                courseGrid.innerHTML += createCourseCard(course);
+            });
 
-    } catch (e) {
-        console.log(e);
-        courseGrid.innerHTML = `
-        <div class="width100 marginAuto flex flexCenter">
-            <div class="box width100">Une erreur s'est produite</div>
-        </div>`;
-        if(loading){
-            loading.style.display = "none";
+        } catch (e) {
+            console.log(e);
+            courseGrid.innerHTML = `
+            <div class="width100 marginAuto flex flexCenter">
+                <div class="box width100">Une erreur s'est produite</div>
+            </div>`;
+            if(loading){
+                loading.style.display = "none";
+            }
         }
+    } finally {
+        isStillRunning = false;
     }
-    isStillRunning = false;
 }
 
 // Fonction pour générer une carte de cours

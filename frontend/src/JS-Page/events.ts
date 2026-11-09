@@ -15,40 +15,39 @@ export async function events(): Promise<void> {
     }
 
     isStillRunning = true;
-    if (specificEvent) {
-        isStillRunning = false;
-        return;
-    }
-    scrollMainPart();
-
-    const searchBar = document.getElementById("searchBar") as HTMLInputElement | null;
-    if (!searchBar) {
-        popup("Impossible de trouver la barre de recherche des événements.");
-        isStillRunning = false;
-        return;
-    }
-
     try {
-        personnalEvents = await GetAllEvents() as structures.Event[];
-    } catch (e) {
-        console.log(e);
+        if (specificEvent) {
+            return;
+        }
+        scrollMainPart();
+
+        const searchBar = document.getElementById("searchBar") as HTMLInputElement | null;
+        if (!searchBar) {
+            popup("Impossible de trouver la barre de recherche des événements.");
+            return;
+        }
+
+        try {
+            personnalEvents = await GetAllEvents() as structures.Event[];
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+
+        populateCalendar(personnalEvents);
+
+        searchBar.addEventListener("input", async () => {
+            specificEvent = searchBar.value !== "";
+            const searchedEvents = await GetEventsLike(searchBar.value) as structures.Event[];
+            populateCalendar(searchedEvents);
+        });
+
+        /*if (displayEventsId.length === 0) {
+            displayEventsId.push(window.setInterval(events, 20000));
+        }*/
+    } finally {
         isStillRunning = false;
-        return;
     }
-
-    populateCalendar(personnalEvents);
-
-    searchBar.addEventListener("input", async () => {
-        specificEvent = searchBar.value !== "";
-        const searchedEvents = await GetEventsLike(searchBar.value) as structures.Event[];
-        populateCalendar(searchedEvents);
-    });
-
-    /*if (displayEventsId.length === 0) {
-        displayEventsId.push(window.setInterval(events, 20000));
-    }*/
-
-    isStillRunning = false;
 }
 
 function createEventElement(event: structures.Event): { eventElement: HTMLDivElement; eventId: string } {
