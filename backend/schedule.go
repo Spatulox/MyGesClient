@@ -10,7 +10,7 @@ import (
 )
 
 func (a *App) ReturnRefreshScheduleState() bool {
-	return a.isFetchingSchedule
+	return a.isFetchingSchedule.Load()
 }
 
 /*
@@ -62,19 +62,10 @@ func (a *App) RefreshAgenda(start *string, end *string) ([]LocalAgenda, error) {
 		return []LocalAgenda{}, fmt.Errorf("GES instance is nil")
 	}
 
-	a.scheduleMutex.Lock()
-	if a.isFetchingSchedule {
-		a.scheduleMutex.Unlock()
+	if !a.isFetchingSchedule.CompareAndSwap(false, true) {
 		return nil, errors.New("waiting for the previous schedule fetch to end")
 	}
-	a.isFetchingSchedule = true
-	a.scheduleMutex.Unlock()
-
-	defer func() {
-		a.scheduleMutex.Lock()
-		a.isFetchingSchedule = false
-		a.scheduleMutex.Unlock()
-	}()
+	defer a.isFetchingSchedule.Store(false)
 
 	var startDate, endDate string
 	var startInt, endInt error

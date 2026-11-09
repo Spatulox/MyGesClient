@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/hugolgst/rich-go/client"
@@ -47,20 +48,18 @@ const allowedStartupErrors = ErrUserInit | ErrAPIInit | ErrYearsRequest
 // App struct
 type App struct {
 	ctx                context.Context
-	year               string
+	year               string // use getYear / setYear
 	db                 *sql.DB
 	dbMutex            sync.Mutex
 	dbWg               sync.WaitGroup
 	api                *GESapi
 	apiRWMutex         sync.RWMutex
 	user               UserSettings
-	startupStatus      StartupStatus
-	gradesMutex        sync.Mutex
-	isFetchingGrades   bool
-	absencesMutex      sync.Mutex
-	isFetchingAbsences bool
-	scheduleMutex      sync.Mutex
-	isFetchingSchedule bool
+	startupStatus      atomic.Int32 // StartupStatus
+	yearMutex          sync.RWMutex // protects year
+	isFetchingGrades   atomic.Bool
+	isFetchingAbsences atomic.Bool
+	isFetchingSchedule atomic.Bool
 
 	bgMutex            sync.Mutex    // protects stopInitIfInternet
 	stopInitIfInternet chan struct{} // closed to stop the running initIfInternet loop
@@ -78,7 +77,24 @@ func NewApp() *App {
 // -------------------------------------------------------------------------- //
 
 func (a *App) GetStartupStatus() StartupStatus {
-	return a.startupStatus
+	return StartupStatus(a.startupStatus.Load())
+}
+
+func (a *App) setStartupStatus(status StartupStatus) {
+	a.startupStatus.Store(int32(status))
+}
+
+// Thread safe accessors for the school year
+func (a *App) getYear() string {
+	a.yearMutex.RLock()
+	defer a.yearMutex.RUnlock()
+	return a.year
+}
+
+func (a *App) setYear(year string) {
+	a.yearMutex.Lock()
+	defer a.yearMutex.Unlock()
+	a.year = year
 }
 
 func (a *App) CheckOpenDb() bool {
@@ -171,7 +187,7 @@ func (a *App) runEveryXMinutes(ctx context.Context, x time.Duration, f func()) {
 
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
-	a.startupStatus = StatusInProgress
+	a.setStartupStatus(StatusInProgress)
 	startupErrors := 0
 
 	if err := a.initDB(); err != nil {
@@ -197,11 +213,11 @@ func (a *App) Startup(ctx context.Context) {
 	switch {
 	case startupErrors == 0:
 		a.startBackgroundTasks()
-		a.startupStatus = StatusCompleted
+		a.setStartupStatus(StatusCompleted)
 		Log.Infos("Startup completed successfully")
 
 	case startupErrors&^allowedStartupErrors != 0:
-		a.startupStatus = StatusFailed
+		a.setStartupStatus(StatusFailed)
 		errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", startupErrors)
 		if _, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
 			Type:    runtime.ErrorDialog,
@@ -214,11 +230,11 @@ func (a *App) Startup(ctx context.Context) {
 
 	case startupErrors&ErrUserInit != 0:
 		Log.Infos("Starting app without critic errors (no account)")
-		a.startupStatus = StatusIncompleteNoUsers
+		a.setStartupStatus(StatusIncompleteNoUsers)
 
 	default:
 		Log.Infos("Starting app without critic errors (no internet), searching for internet...")
-		a.startupStatus = StatusIncompleteNoInternet
+		a.setStartupStatus(StatusIncompleteNoInternet)
 		a.initIfInternet()
 	}
 }
@@ -273,37 +289,35 @@ func (a *App) initAPI() error {
 
 func (a *App) initYear() error {
 	api := a.getAPI()
-	if api != nil {
-		years, err := api.GetYears()
-		if err != nil {
-			a.handleStartupError("Years initialization request", err)
-			year, err := GetLastYearInDB(a.db)
-			if err != nil {
-				return fmt.Errorf("impossible to retrieve the year", err)
-			}
-			Log.Infos("Local Year Retrieved")
-			a.year = year
-
-		} else {
-			a.year, err = a.getLatestYear(years)
-			if err != nil {
-				a.handleStartupError("Years initialization parsing", err)
-				return fmt.Errorf("impossible parse the retrieved year", err)
-			}
-		}
-
-		boolean, err := UpdateUserLastYear(a.db, a.year)
-		if !boolean || err != nil {
-			Log.Error("Error : Impossible to update the last year for the user : %v", err)
-			return nil
-		}
-	} else {
+	if api == nil {
 		year, err := GetLastYearInDB(a.db)
 		if err != nil {
-			return fmt.Errorf("impossible to retrieve the year", err)
+			return fmt.Errorf("impossible to retrieve the year: %w", err)
 		}
 		Log.Infos("Local Year Retrieved")
-		a.year = year
+		a.setYear(year)
+		return nil
+	}
+
+	var year string
+	years, err := api.GetYears()
+	if err != nil {
+		a.handleStartupError("Years initialization request", err)
+		year, err = GetLastYearInDB(a.db)
+		if err != nil {
+			return fmt.Errorf("impossible to retrieve the year: %w", err)
+		}
+		Log.Infos("Local Year Retrieved")
+	} else {
+		year, err = a.getLatestYear(years)
+		if err != nil {
+			return fmt.Errorf("impossible to parse the retrieved year: %w", err)
+		}
+	}
+	a.setYear(year)
+
+	if ok, err := UpdateUserLastYear(a.db, year); !ok || err != nil {
+		Log.Error(fmt.Sprintf("Error : Impossible to update the last year for the user : %v", err))
 	}
 	return nil
 }
@@ -364,7 +378,7 @@ func (a *App) connectAPI() bool {
 		return false
 	}
 	a.startBackgroundTasks()
-	a.startupStatus = StatusCompleted
+	a.setStartupStatus(StatusCompleted)
 	return true
 }
 
@@ -372,7 +386,7 @@ func (a *App) connectAPI() bool {
 // network if it is unreachable.
 func (a *App) connectOrWaitForInternet() {
 	if !a.connectAPI() {
-		a.startupStatus = StatusIncompleteNoInternet
+		a.setStartupStatus(StatusIncompleteNoInternet)
 		a.initIfInternet()
 	}
 }
@@ -482,7 +496,7 @@ func (a *App) runBackgroundTasks() {
 // -------------------------------------------------------------------------- //
 
 func (a *App) GetStartStatus() StartupStatus {
-	return a.startupStatus
+	return a.GetStartupStatus()
 }
 
 // -------------------------------------------------------------------------- //
@@ -566,22 +580,21 @@ func (a *App) CheckXTimeInternetConnection(attempts int) bool {
 // -------------------------------------------------------------------------- //
 
 func (a *App) GetCourses() (string, error) {
-
-	if a.year == "" {
+	year := a.getYear()
+	if year == "" {
 		return "", fmt.Errorf("Year is undefined")
 	}
 
-	matched, err := regexp.MatchString(`^20\d{2}$`, a.year)
-	if err != nil {
-		Log.Error(fmt.Sprintf("erreur lors de la vérification du format de l'année: %v", err))
-		return "", fmt.Errorf("erreur lors de la vérification du format de l'année: %v", err)
-	}
-	if !matched {
-		Log.Error(fmt.Sprintf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", a.year))
-		return "", fmt.Errorf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", a.year)
+	if !regexp.MustCompile(`^20\d{2}$`).MatchString(year) {
+		Log.Error(fmt.Sprintf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year))
+		return "", fmt.Errorf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year)
 	}
 
-	return a.api.GetCourses(a.year)
+	api := a.getAPI()
+	if api == nil {
+		return "", fmt.Errorf("GESapi instance is nil")
+	}
+	return api.GetCourses(year)
 }
 
 func (a *App) GetPresetByName(presetName string) (Preset, error) {

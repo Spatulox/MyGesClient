@@ -7,7 +7,7 @@ func (a *App) GetProjects() (string, error) {
 	if api == nil {
 		return "", fmt.Errorf("Impossible to retrieve your projects")
 	}
-	return api.GetProjects(a.year)
+	return api.GetProjects(a.getYear())
 }
 
 func (a *App) GetProjectById(id int64) (string, error) {

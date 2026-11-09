@@ -9,7 +9,7 @@ import (
 )
 
 func (a *App) ReturnRefreshGradesState() bool {
-	return a.isFetchingGrades
+	return a.isFetchingGrades.Load()
 }
 
 func (a *App) GetGrades() ([]LocalGrades, error) {
@@ -22,7 +22,7 @@ func (a *App) GetGrades() ([]LocalGrades, error) {
 	if err != nil {
 		return nil, fmt.Errorf("récupération de l'utilisateur : %w", err)
 	}
-	return GetDBUserGrades(a.db, user.ID, a.year)
+	return GetDBUserGrades(a.db, user.ID, a.getYear())
 }
 
 /*
@@ -34,27 +34,12 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 		return []LocalGrades{}, fmt.Errorf("GES instance is nil")
 	}
 
-	a.gradesMutex.Lock()
-	//Log.Debug("gradesMutex locked")
-	if a.isFetchingGrades {
-		//Log.Debug("isFetchingGrades set to true, returning early")
-		a.gradesMutex.Unlock()
-		//Log.Debug("gradesMutex unlocked")
+	if !a.isFetchingGrades.CompareAndSwap(false, true) {
 		return nil, errors.New("waiting for the previous grades fetch to end")
 	}
-	a.isFetchingGrades = true
-	//Log.Debug("isFetchingGrades set to true")
-	a.gradesMutex.Unlock()
-	//Log.Debug("gradesMutex unlocked2")
+	defer a.isFetchingGrades.Store(false)
 
-	defer func() {
-		//Log.Debug("gradesMutex locked2")
-		a.gradesMutex.Lock()
-		a.isFetchingGrades = false
-		//Log.Debug("isFetchingGrades set to false")
-		a.gradesMutex.Unlock()
-		//Log.Debug("gradesMutex unlocked3")
-	}()
+	year := a.getYear()
 
 	Log.Infos("Refreshing Grades")
 
@@ -63,7 +48,7 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshGrades")
 	}
 
-	grades, err := api.GetGrades(a.year)
+	grades, err := api.GetGrades(year)
 	if err != nil {
 		return nil, fmt.Errorf("récupération des notes depuis MyGes : %w", err)
 	}
@@ -79,10 +64,10 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 	}
 
 	Log.Infos("Saving Grades")
-	if err := ReplaceGrades(a.db, user.ID, a.year, grades); err != nil {
+	if err := ReplaceGrades(a.db, user.ID, year, grades); err != nil {
 		return nil, err
 	}
 
 	Log.Infos("Getting Grades from local DB")
-	return GetDBUserGrades(a.db, user.ID, a.year)
+	return GetDBUserGrades(a.db, user.ID, year)
 }

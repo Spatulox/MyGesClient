@@ -9,7 +9,7 @@ import (
 )
 
 func (a *App) ReturnRefreshAbsencesState() bool {
-	return a.isFetchingAbsences
+	return a.isFetchingAbsences.Load()
 }
 
 func (a *App) GetAbsences() ([]LocalAbsences, error) {
@@ -22,7 +22,7 @@ func (a *App) GetAbsences() ([]LocalAbsences, error) {
 	if err != nil {
 		return nil, fmt.Errorf("récupération de l'utilisateur : %w", err)
 	}
-	return GetDBUserAbsences(a.db, user.ID, a.year)
+	return GetDBUserAbsences(a.db, user.ID, a.getYear())
 }
 
 func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
@@ -31,27 +31,12 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 		return []LocalAbsences{}, fmt.Errorf("GES instance is nil")
 	}
 
-	a.absencesMutex.Lock()
-	//Log.Debug("absenceMutex locked")
-	if a.isFetchingAbsences {
-		//Log.Debug("isFetchingAbsences is true, returning early")
-		a.absencesMutex.Unlock()
-		//Log.Debug("absencesMutex unlocked")
+	if !a.isFetchingAbsences.CompareAndSwap(false, true) {
 		return nil, errors.New("waiting for the previous absences fetch to end")
 	}
-	a.isFetchingAbsences = true
-	//Log.Debug("isFetchingAbsences set to true")
-	a.absencesMutex.Unlock()
-	//Log.Debug("absencesMutex unlocked2")
+	defer a.isFetchingAbsences.Store(false)
 
-	defer func() {
-		//Log.Debug("absencesMutex locked2")
-		a.absencesMutex.Lock()
-		a.isFetchingAbsences = false
-		//Log.Debug("isFetchingAbsences set to false")
-		a.absencesMutex.Unlock()
-		//Log.Debug("absencesMutex unlocked3")
-	}()
+	year := a.getYear()
 
 	Log.Infos("Refreshing Absences")
 
@@ -60,7 +45,7 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 		return nil, fmt.Errorf("GESapi instance is nil for RefreshAbsences")
 	}
 
-	absences, err := api.GetAbsences(a.year)
+	absences, err := api.GetAbsences(year)
 	if err != nil {
 		return nil, fmt.Errorf("récupération des absences depuis MyGes : %w", err)
 	}
@@ -75,9 +60,9 @@ func (a *App) RefreshAbsences() ([]LocalAbsences, error) {
 		return nil, fmt.Errorf("récupération de l'utilisateur : %w", err)
 	}
 
-	if err := ReplaceAbsences(a.db, user.ID, a.year, absences); err != nil {
+	if err := ReplaceAbsences(a.db, user.ID, year, absences); err != nil {
 		return nil, err
 	}
 
-	return GetDBUserAbsences(a.db, user.ID, a.year)
+	return GetDBUserAbsences(a.db, user.ID, year)
 }
