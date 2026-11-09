@@ -609,10 +609,18 @@
     cursor: pointer;
 }
 
+.popup{
+    box-sizing: border-box;
+    max-width: min(300px, calc(100vw - 20px));
+    overflow-wrap: anywhere;
+    pointer-events: auto;
+}
+
 .popup > div{
     z-index: 2409;
-    min-width: 200px;
-    max-width: 300px;
+    box-sizing: border-box;
+    min-width: min(200px, calc(100vw - 20px));
+    max-width: 100%;
     min-height: 30px;
 
     box-shadow: -2px 2px 5px #000000;
