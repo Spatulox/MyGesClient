@@ -233,6 +233,14 @@ func (a *App) ConnectUser(username string, password string) (UserSettings, error
 }
 
 func (a *App) DeleteOldData() bool {
-	//Log.Debug("Deleting !!!")
-	return DeleteOldData(a.db)
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
+	defer a.dbWg.Done()
+
+	if err := DeleteOldData(a.db); err != nil {
+		Log.Error(err.Error())
+		return false
+	}
+	return true
 }

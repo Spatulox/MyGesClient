@@ -3,7 +3,6 @@ package db
 import (
 	. "MyGesClient/log"
 	. "MyGesClient/structures"
-	. "MyGesClient/time"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -11,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -236,74 +236,45 @@ func UpdateUserTheme(db *sql.DB, value string) (bool, error) {
 
 // ------------------------------------------------ //
 
-func DeleteOldData(db *sql.DB) bool {
+// DeleteOldData purges, for the selected user only, the past schedule and
+// events, and the grades / absences of the years before the current one.
+func DeleteOldData(db *sql.DB) error {
 	user, err := GetUser(db)
-
 	if err != nil {
-		Log.Error(fmt.Sprintf("Impossible de sélectionner l'utilisateur actuellement connecté : %v", err))
-		return false
+		return fmt.Errorf("impossible de sélectionner l'utilisateur actuellement connecté : %w", err)
 	}
 
 	Log.Infos(fmt.Sprintf("Deleting old data for user : %d", user.ID))
 
-	currDate := GetTodayDate()
-
-	// Delete Schedule
-	deleteQuery := `DELETE FROM AGENDA WHERE user_id = ? and start_date < ?`
-	_, err = db.Exec(deleteQuery, user.ID, currDate)
+	year, err := strconv.Atoi(user.Year)
 	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la deletion de l'agenda : %w", err))
-		return false
+		return fmt.Errorf("année invalide pour l'utilisateur (%q) : %w", user.Year, err)
 	}
 
-	// Prepare year date
-	yearStr, err := GetLastYearInDB(db)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Error when retrieving the last year from DB for the user : %w", err))
-		return false
-	}
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	agendaLimit := today.Format("2006-01-02T15:04:05.000Z") // AGENDA date format
+	eventLimit := today.Format("2006-01-02 15:04:05")       // EVENTS date format
 
-	year, err := strconv.Atoi(yearStr)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Error when asting year str => int : %w", err))
-		return false
-	}
-	year -= 1
-
-	// Delete Grades
-	selectGradeValueQuery := `SELECT note_id FROM NOTES WHERE year <= ? AND user_id = ?`
-
-	_, err = db.Exec(selectGradeValueQuery, year, user.ID)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la selection de valeurs des notes : %w", err))
-		return false
-	}
-
-	deleteGradeValueQuery := `DELETE FROM GRADESVALUE WHERE note_id = ?`
-
-	_, err = db.Exec(deleteGradeValueQuery, user.ID)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la deletion de valeurs des notes : %w", err))
-		return false
-	}
-
-	deleteGradeQuery := `DELETE FROM NOTES WHERE year = ?`
-
-	_, err = db.Exec(deleteGradeQuery, year)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la deletion des notes : %w", err))
-		//return false
-	}
-
-	// Delete EVENTS
-	deleteEventQuery := `DELETE FROM EVENTS WHERE start_date < ?`
-	_, err = db.Exec(deleteEventQuery, currDate)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la deletion des évènements : %w", err))
-		//return false
-	}
-
-	return true
+	return withTx(db, func(tx *sql.Tx) error {
+		queries := []struct {
+			label string
+			query string
+			args  []any
+		}{
+			{"agenda", `DELETE FROM AGENDA WHERE user_id = ? AND start_date < ?`, []any{user.ID, agendaLimit}},
+			{"valeurs des notes", `DELETE FROM GRADESVALUE WHERE note_id IN (SELECT note_id FROM NOTES WHERE user_id = ? AND year < ?)`, []any{user.ID, year}},
+			{"notes", `DELETE FROM NOTES WHERE user_id = ? AND year < ?`, []any{user.ID, year}},
+			{"absences", `DELETE FROM ABSENCES WHERE user_id = ? AND CAST(abs_year AS INTEGER) < ?`, []any{user.ID, year}},
+			{"évènements", `DELETE FROM EVENTS WHERE user_id = ? AND start_date < ?`, []any{user.ID, eventLimit}},
+		}
+		for _, q := range queries {
+			if _, err := tx.Exec(q.query, q.args...); err != nil {
+				return fmt.Errorf("erreur lors de la suppression (%s) : %w", q.label, err)
+			}
+		}
+		return nil
+	})
 }
 
 func SavePreset(db *sql.DB, presetName string, value string, presetType string) bool {
