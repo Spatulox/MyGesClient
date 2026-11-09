@@ -3,14 +3,13 @@ import { structures } from "../../wailsjs/go/models";
 import {
     capitalizeFirstLetter,
     getDateInfo,
-    getSundayFromMonday,
-    getMonday,
     scrollMainPart,
     toLocalHourString,
     escapeHtml,
     safeColor
 } from "../JS/functions";
 import { stillPopup, stopStillPopup } from "../JS/popups";
+import { addDays, getMonday, getSundayFromMonday, toYMD } from "../JS/dates";
 
 let currentMonday: Date | null = null;
 let isStillRunning = false;
@@ -61,7 +60,7 @@ export async function getSchedule(monday: string, sunday: string, forceRefresh: 
 
 async function updateSchedule(monday: Date, sunday: Date, forceRefresh: boolean): Promise<void> {
     printScheduleTitle(monday, sunday);
-    const agenda = await getSchedule(monday.toISOString().split("T")[0], sunday.toISOString().split("T")[0], forceRefresh);
+    const agenda = await getSchedule(toYMD(monday), toYMD(sunday), forceRefresh);
     if (agenda) {
         agenda.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
     }
@@ -254,8 +253,7 @@ function setupModal(): void {
 }
 
 function printScheduleTitle(monday: Date, sunday: Date): void {
-    const saturday = new Date(sunday);
-    saturday.setUTCDate(saturday.getUTCDate() - 1);
+    const saturday = addDays(sunday, -1);
 
     const [mondayFormatted, mondayDayName] = getDateInfo(monday.toLocaleDateString('fr-FR'));
     const [saturdayFormatted, saturdayDayName] = getDateInfo(saturday.toLocaleDateString('fr-FR'));
@@ -290,7 +288,7 @@ export async function changeWeek(direction: number, forceRefresh = false): Promi
         currentMonday = getMonday();
     }
 
-    currentMonday.setDate(currentMonday.getDate() + direction * 7);
+    currentMonday = addDays(currentMonday, direction * 7);
     const currentSunday = getSundayFromMonday(currentMonday);
 
     await updateSchedule(currentMonday, currentSunday, forceRefresh);

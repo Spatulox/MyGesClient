@@ -77,49 +77,6 @@ export function getYear(): number {
 
 // ------------------------------------------------ //
 
-export function getMonday(): Date {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
-    const offset = dayOfWeek === 0 ? 1 : (dayOfWeek === 1 ? 0 : -dayOfWeek + 1);
-    today.setDate(today.getDate() + offset);
-    today.setHours(0, 0, 0, 0);
-    return today;
-}
-
-// ------------------------------------------------ //
-
-/**
- * DEPRECATED
- * PLZ USE : getSundayFromMonday
- * @returns {Date} get the current saturday
- */
-export function getSaturday(): Date {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const offset = dayOfWeek === 0 ? 6 : (dayOfWeek === 6 ? 0 : (6 - dayOfWeek));
-    today.setDate(today.getDate() + offset);
-    today.setHours(23, 59, 59, 999);
-    return today;
-}
-
-export function getSundayFromMonday(currentMonday: Date): Date {
-    const currentSunday = new Date(currentMonday);
-    currentSunday.setUTCDate(currentMonday.getDate() + 6);
-    currentSunday.setUTCHours(5, 0, 0, 0);
-    return currentSunday;
-}
-
-// ------------------------------------------------ //
-
-export function getSunday(): Date {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const offset = dayOfWeek === 0 ? 0 : (7 - dayOfWeek);
-    today.setDate(today.getDate() + offset);
-    today.setHours(23, 59, 59, 999);
-    return today;
-}
-
 export function toLocalHourString(date_hour: Date): string {
     return date_hour.toLocaleTimeString('fr-FR', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' });
 }
