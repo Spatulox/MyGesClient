@@ -9,17 +9,18 @@ import { initGradesDisplay } from "./grades";
 import { popup } from "../JS/popups";
 import { getSchedule } from "./schedule";
 import { structures } from "../../wailsjs/go/models";
+import { addDays, startOfDay, toYMD } from "../JS/dates";
 
 const forwardButton = document.getElementById("forward-button") as HTMLElement | null;
 const backwardButton = document.getElementById("backward-button") as HTMLElement | null;
 const htmlScheduleElement = document.getElementById("schedule-content") as HTMLElement | null;
 const htmlGradeElement = document.getElementById("grades-content") as HTMLElement | null;
-let TODAY = new Date();
-let agenda: structures.LocalAgenda[] | undefined = undefined;
+// Day displayed in the dashboard schedule, at local midnight
+let TODAY = startOfDay();
 let scheduleTimer: ReturnType<typeof setTimeout> | null = null
 
 export async function dashboard(): Promise<void> {
-    TODAY.setUTCHours(5, 0, 0, 0);
+    TODAY = startOfDay();
     try {
         await handleAgenda();
         await handleGrades();
@@ -50,29 +51,16 @@ backwardButton?.addEventListener("click", async () => {
 async function handleAgenda(): Promise<void> {
     if (!htmlScheduleElement) return;
 
-    const tomorrowMidnight = new Date(TODAY);
-    tomorrowMidnight.setUTCHours(22, 0, 0, 0);
     printDate();
-
-    let agenda_new: structures.LocalAgenda[] | undefined = undefined;
-    while (!agenda_new) {
-        agenda_new = await getSchedule(
-            TODAY.toISOString().split("T")[0],
-            tomorrowMidnight.toISOString().split("T")[0]
-        );
-        if(!agenda_new){
-            printDate()
-            return
-        }
-        if (agenda_new && JSON.stringify(agenda) !== JSON.stringify(agenda_new)) {
-            agenda = agenda_new;
-            await updateScheduleDashboard(agenda);
-            const section = document.getElementsByClassName("schedule-section")[0] as HTMLElement | undefined;
-            if (section) section.style.transform = "translateY(-70px)";
-        } else {
-            agenda = agenda_new
-        }
+    const day = toYMD(TODAY);
+    const agenda = await getSchedule(day, day);
+    if (!agenda || agenda.length === 0) {
+        return;
     }
+
+    await updateScheduleDashboard(agenda);
+    const section = document.getElementsByClassName("schedule-section")[0] as HTMLElement | undefined;
+    if (section) section.style.transform = "translateY(-70px)";
 }
 
 async function handleGrades(): Promise<void> {
@@ -215,17 +203,13 @@ export async function updateScheduleDashboard(agenda: structures.LocalAgenda[]):
 }
 
 async function changeDay(direction: number): Promise<void> {
-    if (!TODAY) {
-        TODAY = new Date();
-    }
     restartTimer()
 
-    TODAY.setUTCDate(TODAY.getUTCDate() + direction);
-    TODAY.setUTCHours(5, 0, 0, 0);
-    if (TODAY.getUTCDay() === 0) {
-        TODAY.setUTCDate(TODAY.getUTCDate() + direction);
+    TODAY = addDays(TODAY, direction);
+    // No course on Sunday: skip it
+    if (TODAY.getDay() === 0) {
+        TODAY = addDays(TODAY, direction);
     }
-    console.log(TODAY.toISOString());
 }
 
 function printDate(): void {
@@ -245,8 +229,7 @@ function restartTimer() {
     scheduleTimer = setTimeout(async () => {
         // Schedule is right now
         hideDashboardButtons()
-        let TODAY = new Date();
-        TODAY.setUTCHours(5, 0, 0, 0);
+        TODAY = startOfDay();
         await handleAgenda()
         showDashboardButtons()
         
