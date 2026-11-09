@@ -153,7 +153,9 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
                     courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)}</p>`;
                 }
 
-                const delta = courseStartDate.getTime() - possibleHoursAsDate[currentHourIndex].getTime();
+                // More courses than slots (overlaps, late courses): stick to the last slot instead of crashing
+                const slot = possibleHoursAsDate[Math.min(currentHourIndex, possibleHoursAsDate.length - 1)];
+                const delta = courseStartDate.getTime() - slot.getTime();
                 const deltaMinutes = Math.floor(delta / (1000 * 60));
                 const courseDuration = (courseEndDate.getTime() - courseStartDate.getTime()) / (1000 * 60);
 
@@ -167,9 +169,9 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
                 const translateYUp = `calc(${deltaMinutes}px ${isPauseTime ? "*1.5" : ""} + ${(courseDuration / standardDuration) - 2}px)`;
                 const translateYDown = `calc(${deltaMinutes}px ${isPauseTime ? "*1.5" : ""} - ${(courseDuration / standardDuration) - 2}px)`;
 
-                if (courseStartDate.getTime() > possibleHoursAsDate[currentHourIndex].getTime()) {
+                if (courseStartDate.getTime() > slot.getTime()) {
                     courseElement.style.transform = `translateY(${translateYUp})`;
-                } else if (courseStartDate.getTime() < possibleHoursAsDate[currentHourIndex].getTime()) {
+                } else if (courseStartDate.getTime() < slot.getTime()) {
                     courseElement.style.transform = `translateY(${translateYDown})`;
                 }
 
