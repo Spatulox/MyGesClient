@@ -5,6 +5,31 @@ import { handleEvents } from "../JS-Page/dashbord";
 import { events } from "../JS-Page/events";
 import { popup } from "./popups";
 
+function setDotColor(dot: HTMLElement, color: string): void {
+    dot.style.background = color;
+    dot.dataset.color = color;
+}
+
+/**
+ * Load the saved colors of the event presets, and save the default ones the
+ * first time. Must be called once a user is logged in: presets belong to a user.
+ */
+export async function loadEventPresets(): Promise<void> {
+    const dots = Array.from(document.querySelectorAll<HTMLElement>('.color-preset .color-dot'));
+    await Promise.all(dots.map(async dot => {
+        try {
+            const saved: structures.Preset = await GetPresetByName(dot.id);
+            setDotColor(dot, saved.Value);
+        } catch {
+            try {
+                await SaveEventPreset(dot.id, dot.dataset.color ?? "#5865f2");
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }));
+}
+
 export async function initCreateEvent(): Promise<void> {
     // Récupération des éléments du DOM avec typage
     const addButton = document.getElementById('open-modal') as HTMLElement | null;
@@ -61,57 +86,49 @@ export async function initCreateEvent(): Promise<void> {
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
     }
 
-    colorPreset.forEach(async preset => {
+    // Listeners only: the saved colors are loaded by loadEventPresets(), once a user is logged in
+    colorPreset.forEach(preset => {
         const dot = preset.querySelector('.color-dot') as HTMLElement;
         const colorInput = preset.querySelector('.color-picker') as HTMLInputElement;
         const editBtn = preset.querySelector('.edit-color') as HTMLButtonElement;
 
-        let theSavedPreset: structures.Preset
-        try{
-            console.log(dot.id)
-            theSavedPreset = await GetPresetByName(dot.id)
-            dot.style.background = theSavedPreset.Value
-        } catch (e: any){
-            await SaveEventPreset(dot.id, rgbToHex(dot.style.background))
-        }
-      
         // Sélection sur clic de la pastille
         dot.addEventListener('click', () => {
             const isSelected = dot.classList.contains('selected');
             document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
             if (!isSelected) {
-              dot.classList.add('selected');
+                dot.classList.add('selected');
             }
             eventColor.value = rgbToHex(dot.style.background)
-          });
-          
-      
+        });
+
         // Ouvre le color picker natif et initialise sa valeur avec la couleur du dot
         editBtn.addEventListener('click', () => {
-          // Récupère la couleur actuelle du dot (convertit en format hex si nécessaire)
-          let currentColor = dot.dataset.color || rgbToHex(dot.style.backgroundColor);
-          colorInput.value = currentColor;
-          colorInput.click();
+            colorInput.value = dot.dataset.color || rgbToHex(dot.style.backgroundColor);
+            colorInput.click();
         });
-      
-        // Change la couleur de la pastille
-        colorInput.addEventListener('input', async () => {
-            dot.style.background = colorInput.value;
-            dot.dataset.color = colorInput.value;
-            try{
-                await SaveEventPreset(dot.id, rgbToHex(colorInput.value))
-            } catch (e) {
-                console.error(e)
-            }
+
+        // Aperçu pendant le choix de la couleur
+        colorInput.addEventListener('input', () => {
+            setDotColor(dot, colorInput.value);
             eventColor.value = rgbToHex(colorInput.value)
-                colorPreset.forEach((preset)=>{
+            colorPreset.forEach((preset) => {
                 const dot_tmp = preset.querySelector('.color-dot') as HTMLElement;
                 dot_tmp.classList.remove('selected')
             })
             dot.classList.add("selected")
         });
+
+        // Sauvegarde une seule fois, quand le choix est validé (et pas à chaque mouvement)
+        colorInput.addEventListener('change', async () => {
+            try {
+                await SaveEventPreset(dot.id, rgbToHex(colorInput.value))
+            } catch (e) {
+                console.error(e)
+            }
+        });
     });
-      
+
     function rgbToHex(rgb: string): string {
         if (rgb.startsWith('#')) return rgb;
         const result = rgb.match(/\d+/g);
@@ -176,11 +193,6 @@ export async function initCreateEvent(): Promise<void> {
 
         if (endDate <= startDate) {
             popup("La date de fin doit être après la date de début");
-            return;
-        }
-
-        if (endDate.getTime() === startDate.getTime()) {
-            popup("La date de début et de fin doivent être différente");
             return;
         }
 

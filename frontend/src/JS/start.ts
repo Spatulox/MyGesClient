@@ -5,7 +5,7 @@ import {
     GetStartupStatus
 } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
-import { initCreateEvent } from "./createEvents";
+import { initCreateEvent, loadEventPresets } from "./createEvents";
 
 import { popup, stillPopup, stopStillPopup } from './popups';
 import {
@@ -62,6 +62,9 @@ export async function start(): Promise<void> {
             stopStillPopup(laStill);
             return;
         }
+        // Presets belong to the user: load them only once we know there is one
+        await loadEventPresets();
+
         // Check if the eula is accepted
         if (!user.EULA) {
             const eula = document.getElementById('eula');
