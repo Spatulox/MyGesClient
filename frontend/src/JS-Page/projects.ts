@@ -71,13 +71,12 @@ export async function projects(forceRefresh = false): Promise<void> {
     try {
         const mygesProjects = await GetProjects();
 
+        // Nothing changed since the last visit: keep the current display
         if (mygesProjectsRAM === mygesProjects && !forceRefresh) {
-            popup("No New Projects");
             return;
         }
 
         let profile: Profile = JSON.parse(await GetProfile());
-        mygesProjectsRAM = JSON.stringify(JSON.parse(mygesProjects));
 
         const projectItem = document.getElementById('projecttojoin') as HTMLElement;
         const myproject = document.getElementById('myproject') as HTMLElement;
@@ -85,6 +84,7 @@ export async function projects(forceRefresh = false): Promise<void> {
         myproject.innerHTML = "";
 
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname);
+        mygesProjectsRAM = mygesProjects;
     } catch (e: any) {
         console.error(e);
         popup(e.toString());
