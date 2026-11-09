@@ -1,5 +1,3 @@
-// ------------------------------------------------ //
-
 const HTML_ESCAPES: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
@@ -34,25 +32,6 @@ export function capitalizeFirstLetter(str: string): string {
 
 // ------------------------------------------------ //
 
-export function todayDate(addedDays: number = 0): [string, string] {
-    const date = new Date();
-    date.setDate(date.getDate() + addedDays);
-
-    const jour = date.getDate();
-    const mois = date.getMonth() + 1;
-    const annee = date.getFullYear();
-
-    const dateFormatee = jour.toString().padStart(2, '0') + "/" +
-        mois.toString().padStart(2, '0') + "/" + annee;
-
-    const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-    const jourDeLaSemaine = jours[date.getDay()];
-
-    return [dateFormatee, jourDeLaSemaine];
-}
-
-// ------------------------------------------------ //
-
 export function getDateInfo(dateString: string): [string, string] {
     const parts = dateString.split('/');
     const day = parseInt(parts[0], 10);
@@ -71,82 +50,11 @@ export function getDateInfo(dateString: string): [string, string] {
 
 // ------------------------------------------------ //
 
-export function getYear(): number {
-    return new Date().getFullYear();
-}
-
-// ------------------------------------------------ //
-
 export function toLocalHourString(date_hour: Date): string {
     return date_hour.toLocaleTimeString('fr-FR', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' });
 }
 
 // ------------------------------------------------ //
-
-export function wait(seconds: number): void {
-    const start = Date.now();
-    const milliseconds = seconds * 1000;
-    while (Date.now() - start < milliseconds) {
-        // Boucle active jusqu'à ce que le temps spécifié soit écoulé
-    }
-}
-
-// ------------------------------------------------ //
-
-type DayjsUnit = 'day' | 'month' | 'year';
-
-export function dayjs(date?: Date | string): {
-    _date: Date;
-    format: (formatStr: string) => string;
-    add: (value: number, unit: DayjsUnit) => ReturnType<typeof dayjs>;
-    subtract: (value: number, unit: DayjsUnit) => ReturnType<typeof dayjs>;
-    isValid: () => boolean;
-} {
-    const d = date ? new Date(date) : new Date();
-
-    return {
-        _date: d,
-
-        format(formatStr: string): string {
-            const pad = (num: number) => String(num).padStart(2, '0');
-
-            const formats: Record<string, string | number> = {
-                YYYY: d.getFullYear(),
-                MM: pad(d.getMonth() + 1),
-                DD: pad(d.getDate()),
-                HH: pad(d.getHours()),
-                mm: pad(d.getMinutes()),
-                ss: pad(d.getSeconds())
-            };
-
-            return formatStr.replace(/YYYY|MM|DD|HH|mm|ss/g, match => String(formats[match]));
-        },
-
-        add(value: number, unit: DayjsUnit) {
-            const newDate = new Date(this._date);
-            switch (unit) {
-                case 'day':
-                    newDate.setDate(newDate.getDate() + value);
-                    break;
-                case 'month':
-                    newDate.setMonth(newDate.getMonth() + value);
-                    break;
-                case 'year':
-                    newDate.setFullYear(newDate.getFullYear() + value);
-                    break;
-            }
-            return dayjs(newDate);
-        },
-
-        subtract(value: number, unit: DayjsUnit) {
-            return this.add(-value, unit);
-        },
-
-        isValid() {
-            return !isNaN(this._date.getTime());
-        }
-    };
-}
 
 export function formatDateWithDay(dateString: string): string {
     const date = new Date(dateString);
@@ -162,24 +70,11 @@ export function formatDateWithDay(dateString: string): string {
     return `${dayName} ${day} ${month} ${hours}:${minutes}`;
 }
 
-export function formatDate(dateString: string): string {
-    return dayjs(dateString).format('DD MMM');
-}
-
-export function formatTime(dateString: string): string {
-    return dayjs(dateString).format('HH:mm');
-}
-
 export function scrollMainPart(): void {
     const replace = document.getElementById("replace") as HTMLElement | null;
     if (replace) {
         replace.style.height = "auto";
     }
-}
-
-export function alertDebug(e: unknown): void {
-    console.log(e);
-    alert(String(e));
 }
 
 export function hasCommonClass(element1: Element, element2: Element): boolean {

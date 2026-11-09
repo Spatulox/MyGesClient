@@ -1,7 +1,6 @@
 import {
     GetUserData,
     InitDiscordRPC,
-    UpdateDiscordRPC,
     GetStartupStatus
 } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
@@ -140,12 +139,6 @@ async function connectDiscord(): Promise<void> {
     } catch (error) {
         console.error("Failed to initialize Discord RPC:", error);
     }
-}
-
-function updateActivity(state: string, details: string): void {
-    UpdateDiscordRPC(state, details)
-        .then(() => console.log("Discord RPC activity updated"))
-        .catch(error => console.error("Failed to update Discord RPC activity:", error));
 }
 
 start()
