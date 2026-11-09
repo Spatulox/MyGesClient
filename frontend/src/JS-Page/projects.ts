@@ -138,7 +138,8 @@ function populateData(projects: ProjectsResponse, name: string, firstname: strin
             let pfiles_out: string[] = [];
             if (pfiles) {
                 pfiles_out = pfiles.map(file => {
-                    return `${file.pf_title}.${file.pf_file.split(".")[1]}`;
+                    const extension = file.pf_file.includes(".") ? file.pf_file.split(".").pop() : "";
+                    return extension ? `${file.pf_title}.${extension}` : file.pf_title;
                 });
             }
 
