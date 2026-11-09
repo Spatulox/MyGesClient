@@ -4,10 +4,8 @@ import { escapeHtml, formatDateWithDay, safeColor, scrollMainPart } from "../JS/
 import { popup } from "../JS/popups";
 
 
-let personnalEvents: structures.Event[] = [];
-//let displayEventsId: number[] = [];
-let specificEvent = false;
 let isStillRunning = false;
+let lastListRequest = 0;
 
 export async function events(): Promise<void> {
     if (isStillRunning) {
@@ -16,37 +14,48 @@ export async function events(): Promise<void> {
 
     isStillRunning = true;
     try {
-        if (specificEvent) {
-            return;
-        }
         scrollMainPart();
 
-        const searchBar = document.getElementById("searchBar") as HTMLInputElement | null;
+        const searchBar = getSearchBar();
         if (!searchBar) {
             popup("Impossible de trouver la barre de recherche des événements.");
             return;
         }
 
-        try {
-            personnalEvents = await GetAllEvents() as structures.Event[];
-        } catch (e) {
-            console.log(e);
-            return;
-        }
+        // oninput : un seul handler, même après plusieurs visites
+        searchBar.oninput = () => {
+            void refreshEventList();
+        };
 
-        populateCalendar(personnalEvents);
-
-        searchBar.addEventListener("input", async () => {
-            specificEvent = searchBar.value !== "";
-            const searchedEvents = await GetEventsLike(searchBar.value) as structures.Event[];
-            populateCalendar(searchedEvents);
-        });
-
-        /*if (displayEventsId.length === 0) {
-            displayEventsId.push(window.setInterval(events, 20000));
-        }*/
+        await refreshEventList();
     } finally {
         isStillRunning = false;
+    }
+}
+
+function getSearchBar(): HTMLInputElement | null {
+    return document.getElementById("searchBar") as HTMLInputElement | null;
+}
+
+/**
+ * Display every event, or only the ones matching the search bar when it is
+ * filled. Responses that arrive after a newer request are ignored, so a slow
+ * search can't overwrite the result of the latest one.
+ */
+async function refreshEventList(): Promise<void> {
+    const request = ++lastListRequest;
+    const search = getSearchBar()?.value ?? "";
+
+    let list: structures.Event[];
+    try {
+        list = search !== "" ? await GetEventsLike(search) : await GetAllEvents();
+    } catch (e) {
+        console.log(e);
+        return;
+    }
+
+    if (request === lastListRequest) {
+        populateCalendar(list);
     }
 }
 
@@ -119,7 +128,7 @@ function populateCalendar(eventv: structures.Event[]): void {
                 try {
                     if (await DeleteEvent(Number(eventElement.eventId))) {
                         popup("Suppression réussie !");
-                        await events();
+                        await refreshEventList();
                     }
                 } catch (e) {
                     console.log(e);
@@ -129,14 +138,3 @@ function populateCalendar(eventv: structures.Event[]): void {
         }
     });
 }
-/*
-// Fonction pour arrêter le setInterval
-export function stopDisplayingEvents(): void {
-    while (displayEventsId.length > 0) {
-        const timeoutId = displayEventsId.pop();
-        if (timeoutId !== undefined) {
-            clearInterval(timeoutId);
-        }
-    }
-}
-*/
