@@ -23,7 +23,7 @@ export async function grades(): Promise<void> {
 
         let gradeTmp: structures.LocalGrades[] = [];
         try {
-            gradeTmp = await GetGrades() as structures.LocalGrades[];
+            gradeTmp = (await GetGrades() as structures.LocalGrades[] | null) ?? [];
         } catch (e) {
             console.log(e);
             return;
@@ -49,8 +49,10 @@ export async function grades(): Promise<void> {
         }
 
         // Séparer les notes par semestre
-        const semester1Grades = gradeTmp.filter(grade => grade.course.startsWith('S1 -'));
-        const semester2Grades = gradeTmp.filter(grade => grade.course.startsWith('S2 -'));
+        // Les notes sans préfixe "S1 -" / "S2 -" vont dans le premier onglet au lieu d'être masquées
+        const isSemester2 = (grade: structures.LocalGrades) => grade.course.startsWith('S2 -');
+        const semester1Grades = gradeTmp.filter(grade => !isSemester2(grade));
+        const semester2Grades = gradeTmp.filter(isSemester2);
 
         // Remplir initialement les deux semestres
         populateGrades(gradesList1, semester1Grades);
