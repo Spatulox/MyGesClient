@@ -96,7 +96,7 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
     if (!agenda) return;
 
     // Effacer le contenu existant
-    document.querySelectorAll<HTMLElement>('.day-column').forEach(column => column.innerHTML = '');
+    document.querySelectorAll<HTMLElement>('#schedule .day-column').forEach(column => column.innerHTML = '');
 
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const possibleHours = ["08:00", "09:45", "11:30", "13:00", "14:00", "15:45", "17:30", "19:15", "21:00"];
