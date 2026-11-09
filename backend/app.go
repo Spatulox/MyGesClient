@@ -11,11 +11,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/hugolgst/rich-go/client"
@@ -34,32 +33,37 @@ const (
 	StatusFailed
 )
 
+// Startup error flags, combined with |
 const (
-	ErrDBInit       = 1
-	ErrUserInit     = 10
-	ErrAPIInit      = 100
-	ErrYearsRequest = 1000
-	ErrYearsParsing = 10000
+	ErrDBInit = 1 << iota
+	ErrUserInit
+	ErrAPIInit
+	ErrYearsRequest
 )
+
+// Without a network or an account, the app still starts (offline mode or
+// account creation). Only a DB failure is fatal.
+const allowedStartupErrors = ErrUserInit | ErrAPIInit | ErrYearsRequest
 
 // App struct
 type App struct {
 	ctx                context.Context
-	year               string
+	year               string // use getYear / setYear
 	db                 *sql.DB
 	dbMutex            sync.Mutex
 	dbWg               sync.WaitGroup
 	api                *GESapi
 	apiRWMutex         sync.RWMutex
 	user               UserSettings
-	startupStatus      StartupStatus
-	gradesMutex        sync.Mutex
-	isFetchingGrades   bool
-	absencesMutex      sync.Mutex
-	isFetchingAbsences bool
-	scheduleMutex      sync.Mutex
-	isFetchingSchedule bool
-	stopInitIfInternet chan struct{}
+	startupStatus      atomic.Int32 // StartupStatus
+	yearMutex          sync.RWMutex // protects year
+	isFetchingGrades   atomic.Bool
+	isFetchingAbsences atomic.Bool
+	isFetchingSchedule atomic.Bool
+
+	bgMutex            sync.Mutex    // protects stopInitIfInternet
+	stopInitIfInternet chan struct{} // closed to stop the running initIfInternet loop
+	bgTasksOnce        sync.Once     // background tasks must only be started once
 }
 
 // -------------------------------------------------------------------------- //
@@ -73,7 +77,24 @@ func NewApp() *App {
 // -------------------------------------------------------------------------- //
 
 func (a *App) GetStartupStatus() StartupStatus {
-	return a.startupStatus
+	return StartupStatus(a.startupStatus.Load())
+}
+
+func (a *App) setStartupStatus(status StartupStatus) {
+	a.startupStatus.Store(int32(status))
+}
+
+// Thread safe accessors for the school year
+func (a *App) getYear() string {
+	a.yearMutex.RLock()
+	defer a.yearMutex.RUnlock()
+	return a.year
+}
+
+func (a *App) setYear(year string) {
+	a.yearMutex.Lock()
+	defer a.yearMutex.Unlock()
+	a.year = year
 }
 
 func (a *App) CheckOpenDb() bool {
@@ -132,6 +153,8 @@ func (a *App) deleteAPIUser() {
 }
 
 func (a *App) stopInitIfInternetFunc() {
+	a.bgMutex.Lock()
+	defer a.bgMutex.Unlock()
 	if a.stopInitIfInternet != nil {
 		close(a.stopInitIfInternet)
 		a.stopInitIfInternet = nil
@@ -164,67 +187,55 @@ func (a *App) runEveryXMinutes(ctx context.Context, x time.Duration, f func()) {
 
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
-	a.startupStatus = StatusInProgress
-	errour := 0
+	a.setStartupStatus(StatusInProgress)
+	startupErrors := 0
 
 	if err := a.initDB(); err != nil {
 		a.handleStartupError("DB initialization", err)
-		errour += ErrDBInit
+		startupErrors |= ErrDBInit
 	}
 
 	if err := a.initUser(); err != nil {
 		a.handleStartupError("User initialization", err)
-		errour += ErrUserInit
+		startupErrors |= ErrUserInit
 	}
 
 	if err := a.initAPI(); err != nil {
 		a.handleStartupError("API initialization", err)
-		errour += ErrAPIInit
+		startupErrors |= ErrAPIInit
 	}
 
 	if err := a.initYear(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrYearsRequest
+		a.handleStartupError("Year initialization", err)
+		startupErrors |= ErrYearsRequest
 	}
 
-	if errour != 0 {
-
-		allowedErrors := ErrYearsParsing | ErrAPIInit | ErrUserInit
-
-		// Vérifiez si les erreurs actuelles sont uniquement celles autorisées
-		if errour & ^allowedErrors == 0 {
-			// Les seules erreurs présentes sont celles autorisées, l'application peut démarrer
-			fmt.Println("Starting app without critic errors (No internet or no account)")
-		} else {
-			errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", errour)
-			_, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
-				Type:    runtime.ErrorDialog,
-				Title:   "Erreur de démarrage",
-				Message: errorMessage,
-			})
-			if err != nil {
-				return
-			}
-			runtime.Quit(ctx)
-		}
-
-		if errour&ErrUserInit != 0 {
-			a.startupStatus = StatusIncompleteNoUsers
-			Log.Infos("No Users")
-			Log.Infos("Startup incomplete.")
-		} else {
-			a.startupStatus = StatusIncompleteNoInternet
-			Log.Infos("No Internet")
-			Log.Infos("Startup incomplete, searching for internet...")
-
-			// Search for internet
-			a.initIfInternet()
-
-		}
-	} else {
+	switch {
+	case startupErrors == 0:
 		a.startBackgroundTasks()
-		a.startupStatus = StatusCompleted
+		a.setStartupStatus(StatusCompleted)
 		Log.Infos("Startup completed successfully")
+
+	case startupErrors&^allowedStartupErrors != 0:
+		a.setStartupStatus(StatusFailed)
+		errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", startupErrors)
+		if _, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+			Type:    runtime.ErrorDialog,
+			Title:   "Erreur de démarrage",
+			Message: errorMessage,
+		}); err != nil {
+			return
+		}
+		runtime.Quit(ctx)
+
+	case startupErrors&ErrUserInit != 0:
+		Log.Infos("Starting app without critic errors (no account)")
+		a.setStartupStatus(StatusIncompleteNoUsers)
+
+	default:
+		Log.Infos("Starting app without critic errors (no internet), searching for internet...")
+		a.setStartupStatus(StatusIncompleteNoInternet)
+		a.initIfInternet()
 	}
 }
 
@@ -243,7 +254,7 @@ func (a *App) Shutdown(ctx context.Context) {
 
 func (a *App) initDB() error {
 	var err error
-	a.db, err = InitDBConnexion(&a.dbMutex, &a.dbWg)
+	a.db, err = InitDBConnexion()
 	if err != nil {
 		return fmt.Errorf("failed to initialize DB: %w", err)
 	}
@@ -278,42 +289,51 @@ func (a *App) initAPI() error {
 
 func (a *App) initYear() error {
 	api := a.getAPI()
-	if api != nil {
-		years, err := api.GetYears()
-		if err != nil {
-			a.handleStartupError("Years initialization request", err)
-			year, err := GetLastYearInDB(a.db)
-			if err != nil {
-				return fmt.Errorf("impossible to retrieve the year", err)
-			}
-			Log.Infos("Local Year Retrieved")
-			a.year = year
-
-		} else {
-			a.year, err = a.getLatestYear(years)
-			if err != nil {
-				a.handleStartupError("Years initialization parsing", err)
-				return fmt.Errorf("impossible parse the retrieved year", err)
-			}
-		}
-
-		boolean, err := UpdateUserLastYear(a.db, a.year)
-		if !boolean || err != nil {
-			Log.Error("Error : Impossible to update the last year for the user : %v", err)
-			return nil
-		}
-	} else {
+	if api == nil {
 		year, err := GetLastYearInDB(a.db)
 		if err != nil {
-			return fmt.Errorf("impossible to retrieve the year", err)
+			return fmt.Errorf("impossible to retrieve the year: %w", err)
 		}
 		Log.Infos("Local Year Retrieved")
-		a.year = year
+		a.setYear(year)
+		return nil
+	}
+
+	var year string
+	years, err := api.GetYears()
+	if err != nil {
+		a.handleStartupError("Years initialization request", err)
+		year, err = GetLastYearInDB(a.db)
+		if err != nil {
+			return fmt.Errorf("impossible to retrieve the year: %w", err)
+		}
+		Log.Infos("Local Year Retrieved")
+	} else {
+		year, err = a.getLatestYear(years)
+		if err != nil {
+			return fmt.Errorf("impossible to parse the retrieved year: %w", err)
+		}
+	}
+	a.setYear(year)
+
+	if ok, err := UpdateUserLastYear(a.db, year); !ok || err != nil {
+		Log.Error(fmt.Sprintf("Error : Impossible to update the last year for the user : %v", err))
 	}
 	return nil
 }
 
+// initIfInternet waits for the network to come back, then initializes the API
+// and starts the background tasks. Only one such loop runs at a time: calling
+// it again stops the previous one.
 func (a *App) initIfInternet() {
+	a.bgMutex.Lock()
+	if a.stopInitIfInternet != nil {
+		close(a.stopInitIfInternet)
+	}
+	stop := make(chan struct{})
+	a.stopInitIfInternet = stop
+	a.bgMutex.Unlock()
+
 	ctx := a.ctx
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
@@ -324,41 +344,57 @@ func (a *App) initIfInternet() {
 			case <-ctx.Done():
 				Log.Infos("Application context cancelled, stopping internet check")
 				return
-			case <-a.stopInitIfInternet:
+			case <-stop:
 				Log.Infos("initIfInternet goroutine stopped manually")
 				return
 			case <-ticker.C:
 				Log.Infos("Cheking internet connection")
-				if a.CheckInternetConnection() {
-					var errApi, errYear error
-
-					if errApi = a.initAPI(); errApi == nil {
-						Log.Infos("Internet connection restored, initAPI OK")
-					} else {
-						a.handleStartupError("API initialization", errApi)
-					}
-
-					if errYear = a.initYear(); errYear == nil {
-						Log.Infos("Internet connection restored, initYear OK")
-					} else {
-						a.handleStartupError("API initialization", errYear)
-					}
-
-					if errApi == nil && errYear == nil {
-						a.startBackgroundTasks()
-						a.startupStatus = StatusCompleted
-						return
-					}
-				} else {
+				if !a.CheckInternetConnection() {
 					Log.Infos("No internet")
+					continue
+				}
+				if a.connectAPI() {
+					a.bgMutex.Lock()
+					if a.stopInitIfInternet == stop {
+						a.stopInitIfInternet = nil
+					}
+					a.bgMutex.Unlock()
+					return
 				}
 			}
 		}
 	}()
 }
 
+// connectAPI initializes the API session and the year, then starts the
+// background tasks. Returns false if MyGes could not be reached.
+func (a *App) connectAPI() bool {
+	if err := a.initAPI(); err != nil {
+		a.handleStartupError("API initialization", err)
+		return false
+	}
+	if err := a.initYear(); err != nil {
+		a.handleStartupError("Year initialization", err)
+		return false
+	}
+	a.startBackgroundTasks()
+	a.setStartupStatus(StatusCompleted)
+	return true
+}
+
+// connectOrWaitForInternet connects to MyGes, or starts waiting for the
+// network if it is unreachable.
+func (a *App) connectOrWaitForInternet() {
+	if !a.connectAPI() {
+		a.setStartupStatus(StatusIncompleteNoInternet)
+		a.initIfInternet()
+	}
+}
+
+// handleStartupError only logs: the status is set by the caller, so a
+// temporary failure (e.g. token renewal without network) does not leave the
+// app in StatusFailed forever.
 func (a *App) handleStartupError(step string, err error) {
-	a.startupStatus = StatusFailed
 	Log.Error(fmt.Sprintf("Startup failed during %s: %v", step, err))
 }
 
@@ -387,14 +423,30 @@ func (a *App) getLatestYear(jsonData string) (string, error) {
 
 // -------------------------------------------------------------------------- //
 
-func (a *App) startBackgroundTasks() {
-
+// currentWeekBounds returns the Monday and Sunday of the current week as "2006-01-02".
+func currentWeekBounds() (string, string) {
 	monday, sunday := GetWeekDates()
+	return monday.Format("2006-01-02"), sunday.Format("2006-01-02")
+}
 
+// refreshCurrentWeek refreshes the schedule of the current week, the grades and the absences.
+func (a *App) refreshCurrentWeek() (string, error) {
+	monday, sunday := currentWeekBounds()
+	return a.globalRefresh(monday, sunday)
+}
+
+// startBackgroundTasks starts the periodic refreshes. It is safe to call
+// several times (Startup, initIfInternet, account creation, connection):
+// the tasks are only started once.
+func (a *App) startBackgroundTasks() {
+	a.bgTasksOnce.Do(a.runBackgroundTasks)
+}
+
+func (a *App) runBackgroundTasks() {
 	// GlobalRefresh (Schedule / Grades / Absences...)
 	Log.Infos("Launching go routines")
 	go a.runEveryXMinutes(a.ctx, 60, func() {
-		msg, err := a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), sunday.Format("2006-01-02"))
+		msg, err := a.refreshCurrentWeek()
 		if err != nil {
 			Log.Error(fmt.Sprintf("Global Refresh failed: %v", err))
 		} else {
@@ -404,9 +456,9 @@ func (a *App) startBackgroundTasks() {
 
 	// RefreshingSchedule
 	go a.runEveryXMinutes(a.ctx, 7, func() {
-		monday2 := monday.Format("2006-01-02")
-		sunday2 := sunday.Format("2006-01-02")
-		if _, err := a.RefreshAgenda(&monday2, &sunday2); err != nil {
+		// The week is computed at each tick: the app can stay open across several weeks
+		monday, sunday := currentWeekBounds()
+		if _, err := a.RefreshAgenda(&monday, &sunday); err != nil {
 			Log.Error(fmt.Sprintf("Agenda Refresh failed: %v", err))
 		}
 	})
@@ -431,7 +483,11 @@ func (a *App) startBackgroundTasks() {
 			}
 
 			if i < maxChecks-1 {
-				time.Sleep(checkInterval)
+				select {
+				case <-a.ctx.Done():
+					return
+				case <-time.After(checkInterval):
+				}
 			}
 		}
 	})
@@ -440,47 +496,7 @@ func (a *App) startBackgroundTasks() {
 // -------------------------------------------------------------------------- //
 
 func (a *App) GetStartStatus() StartupStatus {
-	return a.startupStatus
-}
-
-// -------------------------------------------------------------------------- //
-
-func (a *App) GetParentDir() string {
-	execPath, err := os.Executable()
-	if err != nil {
-		return ""
-	}
-
-	// Obtient le répertoire contenant l'exécutable
-	dir := filepath.Dir(execPath)
-
-	// Remonte d'un niveau pour obtenir le répertoire parent
-	parentDir := filepath.Dir(dir)
-
-	return parentDir
-}
-
-func (a *App) WriteLogFile(filePath string, content string) error {
-	dir := filepath.Dir(filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("Erreur lors de la création du répertoire: %w", err)
-	}
-
-	// Ouvrir le fichier en mode append (ou le créer s'il n'existe pas)
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("Erreur lors de l'ouverture du fichier: %w", err)
-	}
-	defer file.Close()
-
-	logEntry := fmt.Sprintf("%s", content)
-
-	// Écrire dans le fichier
-	if _, err := file.WriteString(logEntry); err != nil {
-		return fmt.Errorf("Erreur lors de l'écriture dans le fichier: %w", err)
-	}
-
-	return nil
+	return a.GetStartupStatus()
 }
 
 // -------------------------------------------------------------------------- //
@@ -564,22 +580,21 @@ func (a *App) CheckXTimeInternetConnection(attempts int) bool {
 // -------------------------------------------------------------------------- //
 
 func (a *App) GetCourses() (string, error) {
-
-	if a.year == "" {
+	year := a.getYear()
+	if year == "" {
 		return "", fmt.Errorf("Year is undefined")
 	}
 
-	matched, err := regexp.MatchString(`^20\d{2}$`, a.year)
-	if err != nil {
-		Log.Error(fmt.Sprintf("erreur lors de la vérification du format de l'année: %v", err))
-		return "", fmt.Errorf("erreur lors de la vérification du format de l'année: %v", err)
-	}
-	if !matched {
-		Log.Error(fmt.Sprintf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", a.year))
-		return "", fmt.Errorf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", a.year)
+	if !regexp.MustCompile(`^20\d{2}$`).MatchString(year) {
+		Log.Error(fmt.Sprintf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year))
+		return "", fmt.Errorf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year)
 	}
 
-	return a.api.GetCourses(a.year)
+	api := a.getAPI()
+	if api == nil {
+		return "", fmt.Errorf("GESapi instance is nil")
+	}
+	return api.GetCourses(year)
 }
 
 func (a *App) GetPresetByName(presetName string) (Preset, error) {

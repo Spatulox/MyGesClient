@@ -3,13 +3,14 @@ import { structures } from "../../wailsjs/go/models";
 import {
     capitalizeFirstLetter,
     getDateInfo,
-    getSundayFromMonday,
-    getMonday,
     scrollMainPart,
     toLocalHourString,
-    getSunday
+    escapeHtml,
+    safeColor,
+    cleanCourseName
 } from "../JS/functions";
 import { stillPopup, stopStillPopup } from "../JS/popups";
+import { addDays, getMonday, getSundayFromMonday, toYMD } from "../JS/dates";
 
 let currentMonday: Date | null = null;
 let isStillRunning = false;
@@ -17,22 +18,25 @@ let isStillRunning = false;
 export async function schedule(forceRefresh = false): Promise<void> {
     if (isStillRunning) return;
     isStillRunning = true;
-    scrollMainPart();
-    currentMonday = getMonday();
-    const monday = currentMonday;
-    const sunday = getSundayFromMonday(currentMonday);
+    try {
+        scrollMainPart();
+        currentMonday = getMonday();
+        const monday = currentMonday;
+        const sunday = getSundayFromMonday(currentMonday);
 
-    await updateSchedule(monday, sunday, forceRefresh);
-    isStillRunning = false;
+        await updateSchedule(monday, sunday, forceRefresh);
+    } finally {
+        isStillRunning = false;
+    }
 }
 
 export async function getSchedule(monday: string, sunday: string, forceRefresh: boolean = false): Promise<structures.LocalAgenda[] | undefined> {
     try {
-        clearSchedule();
         let agenda: structures.LocalAgenda[] | undefined;
 
         // saved monday <= today monday's week || no internet connection => not refresh past/today's schedule OR get the local schedule when no internet
-        if (currentMonday && currentMonday <= getMonday() || !CheckInternetConnection()) {
+        const isPastOrCurrentWeek = currentMonday !== null && currentMonday <= getMonday();
+        if (isPastOrCurrentWeek || !(await CheckInternetConnection())) {
             agenda = await GetAgenda(monday, sunday);
             console.log("Chargement de l'agenda enregistré...");
         }
@@ -58,8 +62,9 @@ export async function getSchedule(monday: string, sunday: string, forceRefresh: 
 }
 
 async function updateSchedule(monday: Date, sunday: Date, forceRefresh: boolean): Promise<void> {
+    clearSchedule();
     printScheduleTitle(monday, sunday);
-    const agenda = await getSchedule(monday.toISOString().split("T")[0], sunday.toISOString().split("T")[0], forceRefresh);
+    const agenda = await getSchedule(toYMD(monday), toYMD(sunday), forceRefresh);
     if (agenda) {
         agenda.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
     }
@@ -91,7 +96,7 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
     if (!agenda) return;
 
     // Effacer le contenu existant
-    document.querySelectorAll<HTMLElement>('.day-column').forEach(column => column.innerHTML = '');
+    document.querySelectorAll<HTMLElement>('#schedule .day-column').forEach(column => column.innerHTML = '');
 
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const possibleHours = ["08:00", "09:45", "11:30", "13:00", "14:00", "15:45", "17:30", "19:15", "21:00"];
@@ -144,12 +149,14 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
                 courseElement.setAttribute('data-info', String(course.agenda_id));
 
                 if (course.room.name?.String) {
-                    courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)} <span class="room">${course.room.name.String}</span></p>`;
+                    courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)} <span class="room">${escapeHtml(course.room.name.String)}</span></p>`;
                 } else {
                     courseElement.innerHTML = `<p class="event-time">${toLocalHourString(courseStartDate)} - ${toLocalHourString(courseEndDate)}</p>`;
                 }
 
-                const delta = courseStartDate.getTime() - possibleHoursAsDate[currentHourIndex].getTime();
+                // More courses than slots (overlaps, late courses): stick to the last slot instead of crashing
+                const slot = possibleHoursAsDate[Math.min(currentHourIndex, possibleHoursAsDate.length - 1)];
+                const delta = courseStartDate.getTime() - slot.getTime();
                 const deltaMinutes = Math.floor(delta / (1000 * 60));
                 const courseDuration = (courseEndDate.getTime() - courseStartDate.getTime()) / (1000 * 60);
 
@@ -163,9 +170,9 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
                 const translateYUp = `calc(${deltaMinutes}px ${isPauseTime ? "*1.5" : ""} + ${(courseDuration / standardDuration) - 2}px)`;
                 const translateYDown = `calc(${deltaMinutes}px ${isPauseTime ? "*1.5" : ""} - ${(courseDuration / standardDuration) - 2}px)`;
 
-                if (courseStartDate.getTime() > possibleHoursAsDate[currentHourIndex].getTime()) {
+                if (courseStartDate.getTime() > slot.getTime()) {
                     courseElement.style.transform = `translateY(${translateYUp})`;
-                } else if (courseStartDate.getTime() < possibleHoursAsDate[currentHourIndex].getTime()) {
+                } else if (courseStartDate.getTime() < slot.getTime()) {
                     courseElement.style.transform = `translateY(${translateYDown})`;
                 }
 
@@ -177,11 +184,15 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
                     courseElement.style.height = `calc(${maxHeight + minutesDifference}% - ${(courseDuration % standardDuration) - 2}px)`;
                 }
 
-                if (course.type === "Examen") {
-                    courseElement.innerHTML += `<h3 ${course.room.color!.Valid ? 'style="color:' + course.room.color!.String + '"' : ""} >${capitalizeFirstLetter(course_name)} - ${course.type}</h3>`;
-                } else {
-                    courseElement.innerHTML += `<h3 ${course.room.color!.Valid ? 'style="color:' + course.room.color!.String + '"' : ""} >${capitalizeFirstLetter(course_name)}</h3>`;
-                }
+                const title = document.createElement('h3');
+                title.textContent = course.type === "Examen"
+                    ? `${capitalizeFirstLetter(course_name)} - ${course.type}`
+                    : capitalizeFirstLetter(course_name);
+                const roomColor = safeColor(course.room.color?.Valid ? course.room.color.String : "");
+                title.style.color = roomColor;
+                // Used by the light theme, which shows the room color as a border instead
+                if (roomColor) courseElement.style.setProperty('--course-color', roomColor);
+                courseElement.appendChild(title);
 
                 courseElement.addEventListener('click', () => {
                     console.log(course);
@@ -199,7 +210,7 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
 }
 
 function clearAgendaName(course: structures.LocalAgenda): string {
-    return course.agenda_name.includes(" - ") ? course.agenda_name.split(" - ")[1] : course.agenda_name;
+    return cleanCourseName(course.agenda_name);
 }
 
 function clearSchedule(): void {
@@ -220,17 +231,23 @@ function showModal(course: structures.LocalAgenda): void {
         return;
     }
     modalTitle.textContent = capitalizeFirstLetter(clearAgendaName(course)) || 'Cours';
-    modalTitle.style.color = course.room.color!.Valid ? course.room.color!.String : "";
+    modalTitle.style.color = safeColor(course.room.color?.Valid ? course.room.color.String : "");
     modalInfo.innerHTML = `
-        <p><strong>Type :</strong> ${course.type || 'Non spécifié'}</p>
+        <p><strong>Type :</strong> ${escapeHtml(course.type || 'Non spécifié')}</p>
         <p><strong>Horaire :</strong> ${toLocalHourString(new Date(course.start_date))} - ${toLocalHourString(new Date(course.end_date))}</p>
-        <p><strong>Salle :</strong> ${(course.type === "Examen" ? "Probably " : "") + (course.room.name?.String ?? '') + " " + (course.room.campus?.String ?? '') || 'Non spécifiée'}</p>
-        <p><strong>Modalité :</strong> ${course.modality || 'Non spécifiée'}</p>
-        <p><strong>Discipline :</strong> ${course.discipline?.trimester || 'Non spécifiée'}</p>
-        <p><strong>Professeur(e) :</strong> ${course.discipline?.Teacher?.teacher || 'Non spécifiée'}</p>
-        <p><strong>Commentaire :</strong> ${course.comment || 'Aucun'}</p>
+        <p><strong>Salle :</strong> ${escapeHtml(formatRoom(course))}</p>
+        <p><strong>Modalité :</strong> ${escapeHtml(course.modality || 'Non spécifiée')}</p>
+        <p><strong>Discipline :</strong> ${escapeHtml(course.discipline?.trimester || 'Non spécifiée')}</p>
+        <p><strong>Professeur(e) :</strong> ${escapeHtml(course.discipline?.Teacher?.teacher || 'Non spécifiée')}</p>
+        <p><strong>Commentaire :</strong> ${escapeHtml(course.comment || 'Aucun')}</p>
     `;
     modal.style.display = 'block';
+}
+
+function formatRoom(course: structures.LocalAgenda): string {
+    const room = `${course.room.name?.String ?? ''} ${course.room.campus?.String ?? ''}`.trim();
+    if (!room) return 'Non spécifiée';
+    return (course.type === "Examen" ? "Probably " : "") + room;
 }
 
 function setupModal(): void {
@@ -251,8 +268,7 @@ function setupModal(): void {
 }
 
 function printScheduleTitle(monday: Date, sunday: Date): void {
-    const saturday = new Date(sunday);
-    saturday.setUTCDate(saturday.getUTCDate() - 1);
+    const saturday = addDays(sunday, -1);
 
     const [mondayFormatted, mondayDayName] = getDateInfo(monday.toLocaleDateString('fr-FR'));
     const [saturdayFormatted, saturdayDayName] = getDateInfo(saturday.toLocaleDateString('fr-FR'));
@@ -287,7 +303,7 @@ export async function changeWeek(direction: number, forceRefresh = false): Promi
         currentMonday = getMonday();
     }
 
-    currentMonday.setDate(currentMonday.getDate() + direction * 7);
+    currentMonday = addDays(currentMonday, direction * 7);
     const currentSunday = getSundayFromMonday(currentMonday);
 
     await updateSchedule(currentMonday, currentSunday, forceRefresh);

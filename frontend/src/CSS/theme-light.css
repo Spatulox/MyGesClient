@@ -1,0 +1,309 @@
+/*
+ * Light theme overrides.
+ *
+ * The light palette is defined in variables.css (.light). This file only
+ * fixes the rules that use hardcoded dark colors, or white text meant for
+ * dark surfaces. Every selector starts with .light, so the dark theme is
+ * never affected.
+ */
+
+/* ---------- Layout: header, sidebar, scrollbars ---------- */
+
+.light header,
+.light #mainHeader > div {
+    color: var(--mainPoliceColor);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.light #rightPart {
+    border-right: 1px solid var(--border-color);
+}
+
+.light #rightPart ul li {
+    color: var(--text-secondary-color);
+}
+
+.light #rightPart ul li:hover {
+    background-color: var(--hover-bg);
+    color: var(--mainPoliceColor);
+}
+
+.light #rightPart ul li.active {
+    background-color: var(--accent-soft);
+    color: var(--highlight-color);
+}
+
+.light .ulBottom {
+    border-top: 1px solid var(--border-color);
+}
+
+.light .ulBottom a {
+    color: var(--text-secondary-color);
+}
+
+.light ::-webkit-scrollbar {
+    background: var(--colorMain);
+}
+
+.light ::-webkit-scrollbar-thumb {
+    background: #c3c8cf;
+}
+
+.light ::-webkit-scrollbar-corner {
+    background: var(--colorMain);
+}
+
+.light th,
+.light td {
+    border-color: var(--border-color);
+}
+
+/* ---------- Cards and boxes ---------- */
+
+.light .box,
+.light .recapSection,
+.light .calendar-container,
+.light .container-courses,
+.light .credits-section,
+.light .discord-container,
+.light #account-presentation .card,
+.light #courses-container .container,
+.light #projects .project-list,
+.light .event-item,
+.light .event-card,
+.light .course-card {
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+/* Keep the colored left border of events / courses */
+.light .event-item,
+.light .event-card,
+.light .course-card {
+    border-left-width: 4px;
+}
+
+.light .main-content-dashboard .course-item,
+.light .main-content-dashboard .grade-item,
+.light .main-content-dashboard .day-column {
+    background-color: var(--bg-color);
+}
+
+.light .section-title,
+.light .subsection-title,
+.light .calendar-title,
+.light .event-name,
+.light #courses-container .group-name,
+.light #courses-container .member-name,
+.light #account-presentation strong {
+    color: var(--mainPoliceColor);
+}
+
+.light .event-date,
+.light .event-time,
+.light #courses-container .member-fullname {
+    color: var(--text-secondary-color);
+}
+
+.light #courses-container .group-name-container,
+.light #courses-container .member {
+    border-bottom-color: var(--border-color);
+}
+
+.light .credits-section .link-list a:hover,
+.light .credits-container a:hover {
+    color: var(--highlight-color);
+}
+
+.light .discord-container .location-item {
+    border-color: var(--border-color);
+}
+
+.light .tooltip {
+    background-color: var(--popupColor);
+}
+
+/* ---------- Tables (grades, absences) ---------- */
+
+.light #allGradesContainer .grades-header,
+.light .main-content-dashboard .grades-header,
+.light #allContainerAbsences th {
+    color: #ffffff;
+}
+
+.light #allGradesContainer .grade-item {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.light #allContainerAbsences tr:nth-child(even) {
+    background-color: var(--bg-color);
+}
+
+.light #allContainerAbsences tr:hover {
+    background-color: var(--accent-soft);
+}
+
+.light #allContainerAbsences .justified {
+    color: #1e7f4f;
+}
+
+.light #allContainerAbsences .not-justified {
+    color: #c62828;
+}
+
+.light .tab-button {
+    background-color: var(--discord-light);
+}
+
+.light .tab-button:hover {
+    background-color: var(--discord-lightlight);
+}
+
+.light .tab-button.active {
+    background-color: var(--highlight-color);
+    color: #ffffff;
+}
+
+.light .tab-button.active:hover {
+    background-color: var(--hover-color);
+    color: #ffffff;
+}
+
+/* ---------- Forms ---------- */
+
+.light input[type="text"],
+.light input[type="password"],
+.light input[type="search"],
+.light input[type="datetime-local"],
+.light textarea,
+.light .login-container .select-selected {
+    border: 1px solid var(--border-color);
+}
+
+.light input:focus,
+.light textarea:focus {
+    outline: 2px solid var(--accent-soft);
+    border-color: var(--highlight-color);
+}
+
+.light .color-dot {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 1px var(--border-color);
+}
+
+.light .add-button.active {
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.18);
+}
+
+.light .modal-overlay {
+    background-color: rgba(16, 24, 40, 0.45);
+}
+
+/* ---------- Agenda ---------- */
+
+.light #schedule .calendar {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.light #schedule .hour-column .hour::after,
+.light #schedule .day-column::after,
+.light #schedule .day-column:last-child::after {
+    background: var(--border-color);
+}
+
+.light #schedule .hour {
+    color: var(--text-muted);
+}
+
+/* Courses: light card, room color on the left border (set by schedule.ts in --course-color) */
+.light #schedule .event {
+    background-color: var(--accent-soft);
+    color: var(--mainPoliceColor);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--course-color, var(--highlight-color));
+    /* Same content width as the dark theme (1px border + 10px padding) */
+    padding-left: 7px;
+}
+
+.light #schedule .event:hover {
+    background-color: #dce7f5;
+}
+
+.light #schedule .event-time {
+    color: var(--text-secondary-color);
+}
+
+/* The title color is set inline from the room color, which can be too light on a light card */
+.light #schedule .event h3,
+.light .main-content-dashboard .course-card h3 {
+    color: var(--mainPoliceColor) !important;
+}
+
+.light .main-content-dashboard .course-card {
+    border-left: 4px solid var(--course-color, var(--highlight-color));
+}
+
+.light #mainPart > .modal-event {
+    background-color: rgba(16, 24, 40, 0.45);
+}
+
+.light #mainPart > .modal-event > .modal-content-event {
+    background-color: var(--card-bg);
+    color: var(--mainPoliceColor);
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.18);
+}
+
+.light #mainPart > .modal-event > .modal-content-event > .close:hover,
+.light #mainPart > .modal-event > .modal-content-event > .close:focus {
+    color: var(--mainPoliceColor);
+}
+
+/* ---------- EULA / software info ---------- */
+
+.light .popup-eula .popup-box {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.light .popup-eula .popup-box h1 {
+    color: var(--mainPoliceColor);
+}
+
+.light .popup-eula .popup-box hr {
+    border-top-color: var(--border-color);
+}
+
+/* ---------- Login ---------- */
+
+.light .bg-connexion,
+.light .bg-connexion.active {
+    background-color: var(--mainPartColor);
+}
+
+.light .login-container {
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+}
+
+.light .login-container h1 {
+    color: var(--mainPoliceColor);
+}
+
+.light .login-container label {
+    color: var(--text-secondary-color);
+}
+
+.light .login-container .select-selected:after {
+    border-color: var(--text-secondary-color) transparent transparent transparent;
+}
+
+.light .login-container .select-items {
+    border-color: var(--border-color);
+}
+
+.light .login-container .select-items div:hover,
+.light .same-as-selected {
+    background-color: var(--hover-bg);
+}

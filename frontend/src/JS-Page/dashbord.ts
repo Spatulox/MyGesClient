@@ -1,23 +1,27 @@
 import { GetEvents, GetGrades } from "../../wailsjs/go/backend/App";
 import {
     capitalizeFirstLetter,
+    cleanCourseName,
+    escapeHtml,
     formatDateWithDay,
+    safeColor,
 } from "../JS/functions";
 import { initGradesDisplay } from "./grades";
 import { popup } from "../JS/popups";
 import { getSchedule } from "./schedule";
 import { structures } from "../../wailsjs/go/models";
+import { addDays, startOfDay, toYMD } from "../JS/dates";
 
 const forwardButton = document.getElementById("forward-button") as HTMLElement | null;
 const backwardButton = document.getElementById("backward-button") as HTMLElement | null;
 const htmlScheduleElement = document.getElementById("schedule-content") as HTMLElement | null;
 const htmlGradeElement = document.getElementById("grades-content") as HTMLElement | null;
-let TODAY = new Date();
-let agenda: structures.LocalAgenda[] | undefined = undefined;
+// Day displayed in the dashboard schedule, at local midnight
+let TODAY = startOfDay();
 let scheduleTimer: ReturnType<typeof setTimeout> | null = null
 
 export async function dashboard(): Promise<void> {
-    TODAY.setUTCHours(5, 0, 0, 0);
+    TODAY = startOfDay();
     try {
         await handleAgenda();
         await handleGrades();
@@ -29,48 +33,36 @@ export async function dashboard(): Promise<void> {
     }
 }
 
-forwardButton?.addEventListener("click", async () => {
-    hideDashboardButtons()
-    await changeDay(1)
-    await handleAgenda()
-    showDashboardButtons()
-});
+forwardButton?.addEventListener("click", () => moveDay(1));
+backwardButton?.addEventListener("click", () => moveDay(-1));
 
-backwardButton?.addEventListener("click", async () => {
+async function moveDay(direction: number): Promise<void> {
     hideDashboardButtons()
-    await changeDay(-1)
-    await handleAgenda()
-    showDashboardButtons()
-});
+    try {
+        await changeDay(direction)
+        await handleAgenda()
+    } catch (e) {
+        console.log(e);
+    } finally {
+        showDashboardButtons()
+    }
+}
 
 // --------------------------------------------------------------------------------------- //
 
 async function handleAgenda(): Promise<void> {
     if (!htmlScheduleElement) return;
 
-    const tomorrowMidnight = new Date(TODAY);
-    tomorrowMidnight.setUTCHours(22, 0, 0, 0);
     printDate();
-
-    let agenda_new: structures.LocalAgenda[] | undefined = undefined;
-    while (!agenda_new) {
-        agenda_new = await getSchedule(
-            TODAY.toISOString().split("T")[0],
-            tomorrowMidnight.toISOString().split("T")[0]
-        );
-        if(!agenda_new){
-            printDate()
-            return
-        }
-        if (agenda_new && JSON.stringify(agenda) !== JSON.stringify(agenda_new)) {
-            agenda = agenda_new;
-            await updateScheduleDashboard(agenda);
-            const section = document.getElementsByClassName("schedule-section")[0] as HTMLElement | undefined;
-            if (section) section.style.transform = "translateY(-70px)";
-        } else {
-            agenda = agenda_new
-        }
+    const day = toYMD(TODAY);
+    const agenda = await getSchedule(day, day);
+    if (!agenda || agenda.length === 0) {
+        return;
     }
+
+    await updateScheduleDashboard(agenda);
+    const section = document.getElementsByClassName("schedule-section")[0] as HTMLElement | undefined;
+    if (section) section.style.transform = "translateY(-70px)";
 }
 
 async function handleGrades(): Promise<void> {
@@ -107,16 +99,14 @@ export async function handleEvents(): Promise<void> {
 // --------------------------------------------------------------------------------------- //
 
 function recapGrades(gradesList: HTMLElement, grades: structures.LocalGrades[]): void {
-    // Fonction pour obtenir 3 éléments aléatoires d'un tableau
+    // Fonction pour obtenir `count` éléments aléatoires d'un tableau (Fisher-Yates)
     function getRandomElements<T>(array: T[], count: number): T[] {
-        let shuffled = array.slice(0), i = array.length, min = i - count, temp: T, index: number;
-        while (i-- > min) {
-            index = Math.floor((i + 1) * Math.random());
-            temp = shuffled[index];
-            shuffled[index] = shuffled[i];
-            shuffled[i] = temp;
+        const shuffled = array.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
-        return shuffled.slice(min);
+        return shuffled.slice(0, count);
     }
 
     // Fonction pour afficher les notes
@@ -128,11 +118,11 @@ function recapGrades(gradesList: HTMLElement, grades: structures.LocalGrades[]):
             const { gradeElement, courseName, gradesHtml, examHtml } = initGradesDisplay(grade);
 
             gradeElement.innerHTML = `
-                <span>${capitalizeFirstLetter(courseName)}</span>
-                <span>${grade.coef}</span>
-                <span>${grade.teacher_name}</span>
-                <span>${gradesHtml}</span>
-                <span>${examHtml}</span>
+                <span>${escapeHtml(capitalizeFirstLetter(courseName))}</span>
+                <span>${escapeHtml(grade.coef)}</span>
+                <span>${escapeHtml(grade.teacher_name)}</span>
+                <span>${escapeHtml(gradesHtml)}</span>
+                <span>${escapeHtml(examHtml)}</span>
             `;
 
             gradesList.appendChild(gradeElement);
@@ -146,16 +136,16 @@ function recapGrades(gradesList: HTMLElement, grades: structures.LocalGrades[]):
 function createEventCard(event: structures.Event): HTMLDivElement {
     const card = document.createElement('div');
     card.className = 'event-card';
-    card.style.borderLeftColor = event.color;
+    card.style.borderLeftColor = safeColor(event.color);
 
     const startFormatted = formatDateWithDay(event.start_date);
     const endFormatted = formatDateWithDay(event.end_date);
 
     card.innerHTML = `
         <div class="event-header">
-            <h3 class="event-name">${event.name}</h3>
+            <h3 class="event-name">${escapeHtml(event.name)}</h3>
         </div>
-        <p class="event-description">${event.description}</p>
+        <p class="event-description">${escapeHtml(event.description)}</p>
         <div class="event-time">
             <i class="far fa-clock"></i> ${startFormatted} - ${endFormatted}
         </div>
@@ -182,46 +172,41 @@ export async function updateScheduleDashboard(agenda: structures.LocalAgenda[]):
     agenda.forEach(course => {
         const courseElement = document.createElement('div');
         courseElement.className = 'course-card';
-        let courseName = course.agenda_name.includes("S1 - ")
-            ? course.agenda_name.split("S1 - ")[1]
-            : (course.agenda_name.includes("S2 - ")
-                ? course.agenda_name.split("S2 - ")[1]
-                : course.agenda_name);
-        courseName = capitalizeFirstLetter(courseName + "");
-        courseElement.innerHTML = `
-            <h3 style="color: ${course.room.color!.Valid ? course.room.color!.String : "#FFFFFF"}">${courseName}</h3>
-            <p>${course.start_date.split('T')[1].substring(0, 5)} - ${course.end_date.split('T')[1].substring(0, 5)}</p>
-            <p>Prof: ${course.discipline.Teacher.teacher}</p>
+        const courseName = capitalizeFirstLetter(cleanCourseName(course.agenda_name));
+        const color = safeColor(course.room.color?.Valid ? course.room.color.String : "", "#FFFFFF");
+        // Used by the light theme, which shows the room color as a border instead
+        courseElement.style.setProperty('--course-color', color);
+        let html = `
+            <h3 style="color: ${escapeHtml(color)}">${escapeHtml(courseName)}</h3>
+            <p>${escapeHtml(course.start_date.split('T')[1].substring(0, 5))} - ${escapeHtml(course.end_date.split('T')[1].substring(0, 5))}</p>
+            <p>Prof: ${escapeHtml(course.discipline.Teacher.teacher)}</p>
         `;
 
         if (course.room.name.Valid) {
-            courseElement.innerHTML += `<p>Salle: ${course.room.name.String} (${course.room.campus.String})</p>`;
+            html += `<p>Salle: ${escapeHtml(course.room.name.String)} (${escapeHtml(course.room.campus.String)})</p>`;
         }
 
-        courseElement.innerHTML += `<p>Type: ${course.type}</p>`;
+        html += `<p>Type: ${escapeHtml(course.type)}</p>`;
         if (course.modality) {
-            courseElement.innerHTML += `<p>Modalité: ${course.modality}</p>`;
+            html += `<p>Modalité: ${escapeHtml(course.modality)}</p>`;
         }
         if (course.comment) {
-            courseElement.innerHTML += `<p>Commentaire: ${course.comment}</p>`;
+            html += `<p>Commentaire: ${escapeHtml(course.comment)}</p>`;
         }
+        courseElement.innerHTML = html;
 
         htmlScheduleElement.appendChild(courseElement);
     });
 }
 
 async function changeDay(direction: number): Promise<void> {
-    if (!TODAY) {
-        TODAY = new Date();
-    }
     restartTimer()
 
-    TODAY.setUTCDate(TODAY.getUTCDate() + direction);
-    TODAY.setUTCHours(5, 0, 0, 0);
-    if (TODAY.getUTCDay() === 0) {
-        TODAY.setUTCDate(TODAY.getUTCDate() + direction);
+    TODAY = addDays(TODAY, direction);
+    // No course on Sunday: skip it
+    if (TODAY.getDay() === 0) {
+        TODAY = addDays(TODAY, direction);
     }
-    console.log(TODAY.toISOString());
 }
 
 function printDate(): void {
@@ -241,10 +226,14 @@ function restartTimer() {
     scheduleTimer = setTimeout(async () => {
         // Schedule is right now
         hideDashboardButtons()
-        let TODAY = new Date();
-        TODAY.setUTCHours(5, 0, 0, 0);
-        await handleAgenda()
-        showDashboardButtons()
+        TODAY = startOfDay();
+        try {
+            await handleAgenda()
+        } catch (e) {
+            console.log(e);
+        } finally {
+            showDashboardButtons()
+        }
         
     }, 60000);
 }

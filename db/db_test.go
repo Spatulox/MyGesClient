@@ -1,0 +1,274 @@
+package db
+
+import (
+	"database/sql"
+	"fmt"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	_ "modernc.org/sqlite"
+)
+
+func newTestDB(t *testing.T) *sql.DB {
+	t.Helper()
+	db, err := OpenDB(filepath.Join(t.TempDir(), "test.sqlite"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Close() })
+	return db
+}
+
+func addUsers(t *testing.T, db *sql.DB, ids ...int) {
+	t.Helper()
+	for i, id := range ids {
+		mustExec(t, db, `INSERT INTO USER (user_id, username, password, selected) VALUES (?, ?, 'p', ?)`, id, fmt.Sprintf("user%d", id), i == 0)
+	}
+}
+
+func mustExec(t *testing.T, db *sql.DB, q string, args ...any) {
+	t.Helper()
+	if _, err := db.Exec(q, args...); err != nil {
+		t.Fatalf("%s: %v", q, err)
+	}
+}
+
+func count(t *testing.T, db *sql.DB, q string, args ...any) int {
+	t.Helper()
+	var n int
+	if err := db.QueryRow(q, args...).Scan(&n); err != nil {
+		t.Fatalf("%s: %v", q, err)
+	}
+	return n
+}
+
+func TestUpdateUserPassword(t *testing.T) {
+	db := newTestDB(t)
+	mustExec(t, db, `INSERT INTO USER (username, password, selected) VALUES ('alice', 'old', 1)`)
+
+	ok, err := UpdateUserPassword(db, "alice", "new")
+	if !ok || err != nil {
+		t.Fatalf("UpdateUserPassword() = %v, %v", ok, err)
+	}
+	if n := count(t, db, `SELECT COUNT(*) FROM USER WHERE username = 'alice' AND password = 'new'`); n != 1 {
+		t.Fatalf("password not updated")
+	}
+
+	if ok, err := UpdateUserPassword(db, "bob", "x"); ok || err == nil {
+		t.Fatalf("UpdateUserPassword(unknown user) = %v, %v; want failure", ok, err)
+	}
+}
+
+func TestDeleteOldDataIsScopedToSelectedUser(t *testing.T) {
+	db := newTestDB(t)
+	mustExec(t, db, `INSERT INTO USER (user_id, username, password, selected, last_year) VALUES (1, 'alice', 'p', 1, '2025'), (2, 'bob', 'p', 0, '2025')`)
+	insertNote := func(id, user, year int) {
+		mustExec(t, db, `INSERT INTO NOTES (note_id, bonus, coef, course_name, ects, trimestre, year, teacher_name, user_id) VALUES (?, 0, '1', 'c', '1', 1, ?, 't', ?)`, id, year, user)
+		mustExec(t, db, `INSERT INTO GRADESVALUE (note_id, grade_value) VALUES (?, 10)`, id)
+	}
+	insertNote(1, 1, 2023) // alice, old  -> deleted
+	insertNote(2, 1, 2024) // alice, old  -> deleted
+	insertNote(3, 1, 2025) // alice, current -> kept
+	insertNote(4, 2, 2023) // bob -> kept
+	mustExec(t, db, `INSERT INTO EVENTS (event_name, start_date, end_date, color, user_id) VALUES ('e', '2000-01-01 10:00:00', '2000-01-01 11:00:00', '#fff', 1), ('e', '2000-01-01 10:00:00', '2000-01-01 11:00:00', '#fff', 2)`)
+
+	if err := DeleteOldData(db); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := count(t, db, `SELECT COUNT(*) FROM NOTES WHERE user_id = 1`); got != 1 {
+		t.Errorf("alice notes = %d, want 1", got)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM NOTES WHERE user_id = 2`); got != 1 {
+		t.Errorf("bob notes = %d, want 1", got)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM GRADESVALUE WHERE note_id NOT IN (SELECT note_id FROM NOTES)`); got != 0 {
+		t.Errorf("%d orphan GRADESVALUE rows", got)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM EVENTS WHERE user_id = 2`); got != 1 {
+		t.Errorf("bob events = %d, want 1", got)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM EVENTS WHERE user_id = 1`); got != 0 {
+		t.Errorf("alice old events = %d, want 0", got)
+	}
+}
+
+func TestReplaceGradesKeepsDataOnInvalidJSON(t *testing.T) {
+	db := newTestDB(t)
+	mustExec(t, db, `INSERT INTO USER (user_id, username, password, selected) VALUES (1, 'alice', 'p', 1)`)
+	valid := `{"items":[{"bonus":0,"coef":"1","course":"S1 - Go","ects":"2","exam":12.5,"grades":[10,14],"trimester":1,"year":2025}]}`
+
+	if err := ReplaceGrades(db, 1, "2025", valid); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceGrades(db, 1, "2025", "{'message':'error'}"); err == nil {
+		t.Fatal("ReplaceGrades(invalid JSON) succeeded")
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM GRADESVALUE`); got != 2 {
+		t.Fatalf("GRADESVALUE rows = %d, want 2 (data must survive a failed refresh)", got)
+	}
+
+	// Replacing twice must not duplicate rows
+	if err := ReplaceGrades(db, 1, "2025", valid); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM NOTES`); got != 1 {
+		t.Fatalf("NOTES rows = %d, want 1", got)
+	}
+}
+
+func TestReplaceAbsencesAcceptsNullFields(t *testing.T) {
+	db := newTestDB(t)
+	addUsers(t, db, 1)
+	abs := `{"items":[{"course_name":null,"date":1700000000000,"justified":true,"links":null,"trimester":1,"trimester_name":"S1","type":"absence","year":2025}]}`
+	if err := ReplaceAbsences(db, 1, "2025", abs); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM ABSENCES WHERE user_id = 1`); got != 1 {
+		t.Fatalf("ABSENCES rows = %d, want 1", got)
+	}
+}
+
+func TestReplaceAgendaWithNullTrimester(t *testing.T) {
+	db := newTestDB(t)
+	addUsers(t, db, 1)
+	start, end := "2025-01-06T00:00:00.000Z", "2025-01-12T05:00:00.000Z"
+	mustExec(t, db, `INSERT INTO PROFS (teacher_id, teacher_name) VALUES (1, 'x')`)
+	mustExec(t, db, `INSERT INTO DISCIPLINES (discip_id, discip_name, teacher_id, trimestre) VALUES (1, 'x', 1, 'S1')`)
+	mustExec(t, db, `INSERT INTO AGENDA (agenda_id, agenda_name, type, modality, start_date, end_date, comment, discip_id, user_id) VALUES (99, 'old', 'Cours', 'x', '2025-01-07T08:00:00.000Z', '2025-01-07T10:00:00.000Z', '', 1, 1)`)
+
+	agenda := `[{"reservation_id":1,"name":"Go","type":"Cours","modality":"Présentiel","start_date":1736240400000,"end_date":1736245800000,"comment":"","rooms":[{"room_id":3,"name":"A1","campus":"Paris"}],"discipline":{"name":"Go","teacher":"T","teacher_id":7,"trimester":null}}]`
+	if err := ReplaceAgenda(db, 1, start, end, agenda); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM AGENDA WHERE user_id = 1`); got != 1 {
+		t.Fatalf("AGENDA rows = %d, want 1", got)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM AGENDA WHERE agenda_id = 99`); got != 0 {
+		t.Fatalf("old course of the week was not replaced")
+	}
+
+	// A failing refresh keeps the existing week
+	if err := ReplaceAgenda(db, 1, start, end, "not json"); err == nil {
+		t.Fatal("ReplaceAgenda(invalid JSON) succeeded")
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM AGENDA WHERE user_id = 1`); got != 1 {
+		t.Fatalf("AGENDA rows = %d after failed refresh, want 1", got)
+	}
+}
+
+func TestReadsAreScopedToUser(t *testing.T) {
+	db := newTestDB(t)
+	addUsers(t, db, 1, 2)
+	g := `{"items":[{"bonus":0,"coef":"1","course":"S1 - Go","ects":"2","grades":[10,14],"trimester":1,"year":2025},{"bonus":0,"coef":"1","course":"S1 - Web","ects":"2","grades":[],"trimester":1,"year":2025}]}`
+	if err := ReplaceGrades(db, 1, "2025", g); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceGrades(db, 2, "2025", `{"items":[{"bonus":0,"coef":"1","course":"S1 - Bob","ects":"2","grades":[5],"trimester":1,"year":2025}]}`); err != nil {
+		t.Fatal(err)
+	}
+
+	grades, err := GetDBUserGrades(db, 1, "2025")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(grades) != 2 {
+		t.Fatalf("got %d grades for user 1, want 2", len(grades))
+	}
+	if grades[0].CourseName != "S1 - Go" || len(grades[0].Grades) != 2 || grades[0].Grades[1] != 14 {
+		t.Errorf("unexpected first grade: %+v", grades[0])
+	}
+	if len(grades[1].Grades) != 0 {
+		t.Errorf("course without grades got %v", grades[1].Grades)
+	}
+
+	start, end := "2025-01-06T00:00:00.000Z", "2025-01-12T05:00:00.000Z"
+	course := `[{"reservation_id":%d,"name":"Go","type":"Cours","modality":"x","start_date":1736240400000,"end_date":1736245800000,"comment":"","rooms":[],"discipline":{"name":"Go","teacher":"T","teacher_id":7,"trimester":"S1"}}]`
+	if err := ReplaceAgenda(db, 1, start, end, fmt.Sprintf(course, 1)); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceAgenda(db, 2, start, end, fmt.Sprintf(course, 1)); err != nil { // same class, same reservation
+		t.Fatal(err)
+	}
+	agenda, err := GetDBUserAgenda(db, 1, start, end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(agenda) != 1 {
+		t.Fatalf("got %d courses for user 1, want 1", len(agenda))
+	}
+}
+
+func TestConnectUser(t *testing.T) {
+	db := newTestDB(t)
+	mustExec(t, db, `INSERT INTO USER (username, password, selected) VALUES ('alice', 'pa', 1), ('bob', 'pb', 0)`)
+
+	if err := ConnectUser(db, "bob", "wrong"); err == nil {
+		t.Fatal("ConnectUser with a wrong password succeeded")
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM USER WHERE selected = 1 AND username = 'alice'`); got != 1 {
+		t.Fatal("a failed connection must not change the selected account")
+	}
+
+	if err := ConnectUser(db, "bob", "pb"); err != nil {
+		t.Fatal(err)
+	}
+	if got := count(t, db, `SELECT COUNT(*) FROM USER WHERE selected = 1`); got != 1 {
+		t.Fatalf("%d selected accounts, want 1", got)
+	}
+	if user, err := GetUser(db); err != nil || user.Username != "bob" {
+		t.Fatalf("GetUser() = %v, %v; want bob", user.Username, err)
+	}
+}
+
+func TestReplaceAgendaTwiceWithForeignKeys(t *testing.T) {
+	db := newTestDB(t)
+	addUsers(t, db, 1)
+	start, end := "2025-01-06T00:00:00.000Z", "2025-01-12T05:00:00.000Z"
+	agenda := `[{"reservation_id":1,"name":"Go","type":"Cours","modality":"x","start_date":1736240400000,"end_date":1736245800000,"comment":"","rooms":[{"room_id":3,"name":"A1","campus":"Paris"}],"discipline":{"name":"Go","teacher":"T","teacher_id":7,"trimester":"S1"}}]`
+	for i := 0; i < 2; i++ {
+		if err := ReplaceAgenda(db, 1, start, end, agenda); err != nil {
+			t.Fatalf("refresh %d: %v", i, err)
+		}
+	}
+	// Another week referencing the same room / teacher must not break the first one
+	if err := ReplaceAgenda(db, 1, "2025-01-13T00:00:00.000Z", "2025-01-19T05:00:00.000Z", strings.Replace(agenda, `"reservation_id":1`, `"reservation_id":2`, 1)); err != nil {
+		t.Fatal(err)
+	}
+	var fk int
+	if err := db.QueryRow("PRAGMA foreign_keys").Scan(&fk); err != nil || fk != 1 {
+		t.Fatalf("foreign_keys = %d, %v; want 1", fk, err)
+	}
+}
+
+func TestMigrationAddsLastYear(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "old.sqlite")
+	old, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Schema of an old version, before last_year
+	mustExec(t, old, `CREATE TABLE USER (user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, theme TEXT NOT NULL DEFAULT 'dark', eula BOOLEAN NOT NULL DEFAULT 0, selected BOOLEAN NOT NULL DEFAULT 0)`)
+	mustExec(t, old, `INSERT INTO USER (username, password, selected) VALUES ('alice', 'p', 1)`)
+	old.Close()
+
+	db, err := OpenDB(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	user, err := GetUser(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if user.Year != "1970" {
+		t.Fatalf("Year = %q, want the default 1970", user.Year)
+	}
+
+	// Opening again must not re-run the migrations
+	db.Close()
+	if db, err = OpenDB(path); err != nil {
+		t.Fatal(err)
+	}
+}

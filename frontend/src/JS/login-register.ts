@@ -6,7 +6,6 @@ import { DeconnectUser, GetRegisteredUsers } from "../../wailsjs/go/backend/App"
 type User = {
     ID: number;
     Username: string;
-    Password: string;
     Theme: string;
     EULA: boolean;
     Year: string;
@@ -44,6 +43,35 @@ function toggleSelect(this: HTMLElement, e: Event): void {
     this.classList.toggle('select-arrow-active');
 }
 
+// Handlers are defined at module level so removeEventListener() finds the
+// same function and the listeners are never attached twice.
+function handleItemClick(this: HTMLElement, e: Event): void {
+    const selectSelected = document.querySelector('.custom-select .select-selected') as HTMLElement | null;
+    const selectItems = document.querySelector('.custom-select .select-items') as HTMLElement | null;
+
+    if (this.textContent !== "Créer un compte") {
+        showUsernameField(false);
+        changeLoginButtonName("Se connecter");
+        changeTitle("Se connecter");
+    } else {
+        changeLoginButtonName("Créer un compte");
+        changeTitle("Créer un compte");
+        showUsernameField(true);
+    }
+
+    e.stopPropagation();
+    if (selectSelected) {
+        selectSelected.textContent = this.textContent;
+        selectSelected.classList.remove('select-arrow-active');
+    }
+    selectItems?.classList.add('select-hide');
+}
+
+function handleOutsideClick(): void {
+    document.querySelector('.custom-select .select-items')?.classList.add('select-hide');
+    document.querySelector('.custom-select .select-selected')?.classList.remove('select-arrow-active');
+}
+
 export function initializeDropDownMenu(): void {
     console.log("Initialize drop down menu");
     const customSelect = document.querySelector('.custom-select') as HTMLElement | null;
@@ -55,35 +83,13 @@ export function initializeDropDownMenu(): void {
     selectSelected.removeEventListener("click", toggleSelect as EventListener);
     selectSelected.addEventListener("click", toggleSelect as EventListener);
 
-    function handleItemClick(this: HTMLElement, e: Event): void {
-        if (this.innerHTML !== "Créer un compte") {
-            showUsernameField(false);
-            changeLoginButtonName("Se connecter");
-            changeTitle("Se connecter");
-        } else {
-            changeLoginButtonName("Créer un compte");
-            changeTitle("Créer un compte");
-            showUsernameField(true);
-        }
-
-        e.stopPropagation();
-        selectSelected!.innerHTML = this.innerHTML;
-        selectItems!.classList.add('select-hide');
-        selectSelected!.classList.remove('select-arrow-active');
-    }
-
-    function handleOutsideClick(): void {
-        selectItems!.classList.add('select-hide');
-        selectSelected!.classList.remove('select-arrow-active');
-    }
-
     selectItems.querySelectorAll('div').forEach(item => {
         item.removeEventListener('click', handleItemClick as EventListener);
         item.addEventListener('click', handleItemClick as EventListener);
     });
 
-    document.removeEventListener('click', handleOutsideClick as EventListener);
-    document.addEventListener('click', handleOutsideClick as EventListener);
+    document.removeEventListener('click', handleOutsideClick);
+    document.addEventListener('click', handleOutsideClick);
 }
 
 export async function changeLoginPassword(button: boolean = true): Promise<void> {
@@ -174,7 +180,7 @@ export function shakeConnexion(): void {
 export function changeTitle(title: string): void {
     const connexionTitle = document.getElementById("connexion-title");
     if (connexionTitle) {
-        connexionTitle.innerHTML = title;
+        connexionTitle.textContent = title;
     }
     changeLoginButtonName(title);
     changeDefaultSelected(title);
@@ -183,7 +189,7 @@ export function changeTitle(title: string): void {
 function changeDefaultSelected(title: string): void {
     const defaultSelected = document.getElementsByClassName("select-selected")[0] as HTMLElement | undefined;
     if (defaultSelected) {
-        defaultSelected.innerHTML = title;
+        defaultSelected.textContent = title;
         changeLoginButtonName(title);
     }
 }
@@ -192,7 +198,7 @@ export function changeLoginButtonName(name: string): void {
     const loginBtn = document.getElementById('buttonConnection') as HTMLInputElement | HTMLButtonElement | null;
     if (loginBtn) {
         if ('value' in loginBtn) loginBtn.value = name;
-        loginBtn.innerHTML = name;
+        loginBtn.textContent = name;
     }
 }
 
@@ -205,7 +211,7 @@ export function showDropDownMenu(bool: boolean = true): void {
 export function showConnectionError(error: string): void {
     const connexion_error = document.getElementById("connexion_error") as HTMLElement | null;
     if (connexion_error) {
-        connexion_error.innerHTML = error;
+        connexion_error.textContent = error;
         connexion_error.style.display = "block";
     }
 }
@@ -237,7 +243,7 @@ export function createDropDownMenu(users: User[]): void {
     users.forEach(user => {
         const div = document.createElement("div");
         (div as any).value = user.ID; // value n'existe pas sur div, mais utilisé dans le code original
-        div.innerHTML = user.Username;
+        div.textContent = user.Username;
         connexionSelectField.appendChild(div);
     });
     showDropDownMenu(true);

@@ -1,5 +1,5 @@
 import { GetCourses } from "../../wailsjs/go/backend/App";
-import { getYear, scrollMainPart } from "../JS/functions";
+import { escapeHtml, scrollMainPart } from "../JS/functions";
 import { popup } from "../JS/popups";
 
 let isStillRunning = false;
@@ -22,69 +22,70 @@ export async function courses(): Promise<void> {
         return;
     }
     isStillRunning = true;
-    scrollMainPart();
-    const loading = document.getElementById("loadingCourses") as HTMLElement | null;
-    const search = document.getElementById("search-bar-courses") as HTMLInputElement | null;
-    const courseGrid = document.getElementById('courseGrid') as HTMLElement | null;
-
-    if (!search || !courseGrid) {
-        console.log(loading, search, courseGrid)
-        popup("Impossible d'accéder à certains éléments du DOM");
-        isStillRunning = false;
-        return;
-    }
-
-    let mygescourses: MyGesCourses | null = null;
     try {
-        let rawCourses = await GetCourses();
+        scrollMainPart();
+        const loading = document.getElementById("loadingCourses") as HTMLElement | null;
+        const search = document.getElementById("search-bar-courses") as HTMLInputElement | null;
+        const courseGrid = document.getElementById('courseGrid') as HTMLElement | null;
 
-        if (!rawCourses) {
-            popup("Impossible de lister vos Cours");
-            isStillRunning = false;
+        if (!search || !courseGrid) {
+            console.log(loading, search, courseGrid)
+            popup("Impossible d'accéder à certains éléments du DOM");
             return;
         }
 
-        mygescourses = JSON.parse(rawCourses) as MyGesCourses;
+        let mygescourses: MyGesCourses | null = null;
+        try {
+            let rawCourses = await GetCourses();
 
-        // Recherche dynamique
-        search.addEventListener("input", () => {
+            if (!rawCourses) {
+                popup("Impossible de lister vos Cours");
+                return;
+            }
+
+            mygescourses = JSON.parse(rawCourses) as MyGesCourses;
+
+            // Recherche dynamique (oninput : un seul handler, même après plusieurs visites)
+            search.oninput = () => {
+                courseGrid.innerHTML = "";
+                mygescourses!.items.forEach(course => {
+                    if (course.name.toLowerCase().includes(search.value.toLowerCase())) {
+                        courseGrid.innerHTML += createCourseCard(course);
+                    }
+                });
+            };
+
+            // Affichage initial
             courseGrid.innerHTML = "";
-            mygescourses!.items.forEach(course => {
-                if (course.name.toLowerCase().includes(search.value.toLowerCase())) {
-                    courseGrid.innerHTML += createCourseCard(course);
-                }
+            mygescourses.items.forEach(course => {
+                courseGrid.innerHTML += createCourseCard(course);
             });
-        });
 
-        // Affichage initial
-        courseGrid.innerHTML = "";
-        mygescourses.items.forEach(course => {
-            courseGrid.innerHTML += createCourseCard(course);
-        });
-
-    } catch (e) {
-        console.log(e);
-        courseGrid.innerHTML = `
-        <div class="width100 marginAuto flex flexCenter">
-            <div class="box width100">Une erreur s'est produite</div>
-        </div>`;
-        if(loading){
-            loading.style.display = "none";
+        } catch (e) {
+            console.log(e);
+            courseGrid.innerHTML = `
+            <div class="width100 marginAuto flex flexCenter">
+                <div class="box width100">Une erreur s'est produite</div>
+            </div>`;
+            if(loading){
+                loading.style.display = "none";
+            }
         }
+    } finally {
+        isStillRunning = false;
     }
-    isStillRunning = false;
 }
 
 // Fonction pour générer une carte de cours
 function createCourseCard(course: Course): string {
     return `
         <div class="course-card">
-            <div class="course-name">${course.name}</div>
-            <div class="course-detail teacher">${course.teacher}</div>
-            <div class="course-detail">${course.student_group_name}</div>
+            <div class="course-name">${escapeHtml(course.name)}</div>
+            <div class="course-detail teacher">${escapeHtml(course.teacher)}</div>
+            <div class="course-detail">${escapeHtml(course.student_group_name)}</div>
             <div class="course-detail">
-                <span class="badge badge-blue">${course.trimester}</span>
-                <span class="badge badge-green">${course.year}</span>
+                <span class="badge badge-blue">${escapeHtml(course.trimester)}</span>
+                <span class="badge badge-green">${escapeHtml(course.year)}</span>
             </div>
         </div>
     `;

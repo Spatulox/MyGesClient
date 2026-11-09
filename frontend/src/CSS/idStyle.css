@@ -441,7 +441,7 @@
     margin-bottom: 2px;
 }
 
-#loading-gif-account{
+.loading-gif-account{
     margin: auto;
     display: block;
     width: 50px;
@@ -590,7 +590,7 @@
 }
 
 #normalpopup > div{
-    position: absolute;
+    position: fixed;
     z-index: 2409;
     left: 50%;
     transform: translate(-50%, 0%);
@@ -615,10 +615,15 @@
     display: none;
 }
 
+/* Popups are placed relative to the window: they stay visible when the page scrolls
+   and can never be pushed outside of the screen */
 #popupMaster{
-    width: var(--mainPartWidth);
-    position: absolute;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 2409;
+    pointer-events: none;
 }
 
 #recapAbsences table, #recapGrades table{
@@ -685,7 +690,7 @@
 }
 
 #stillpopup > div{
-    position: absolute;
+    position: fixed;
     z-index: 2409;
     right: 10px;
     top: -200px;

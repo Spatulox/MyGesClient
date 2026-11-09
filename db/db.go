@@ -3,68 +3,70 @@ package db
 import (
 	. "MyGesClient/log"
 	. "MyGesClient/structures"
-	. "MyGesClient/time"
 	"database/sql"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
 
 // ------------------------------------------------ //
 
-func InitDBConnexion(mutex *sync.Mutex, waitgroup *sync.WaitGroup) (*sql.DB, error) {
+// Connection settings, applied by the driver to every pooled connection:
+// foreign keys are enforced, and concurrent writers wait instead of failing
+// with SQLITE_BUSY.
+const dsnPragmas = "?_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)"
+
+// OpenDB opens the SQLite database at path and makes sure its schema is up to date.
+func OpenDB(path string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", path+dsnPragmas)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de l'ouverture de la base de données: %w", err)
+	}
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("erreur lors de la connexion à la base de données: %w", err)
+	}
+	if err := initSchema(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+	return db, nil
+}
+
+// InitDBConnexion opens the application database, in <config dir>/MyGes/db.sqlite.
+func InitDBConnexion() (*sql.DB, error) {
 	appDataPath, err := os.UserConfigDir()
 	if err != nil {
-		return nil, fmt.Errorf("erreur lors de l'obtention du dossier AppData: %v", err)
+		return nil, fmt.Errorf("erreur lors de l'obtention du dossier AppData: %w", err)
 	}
 
 	dbFolder := filepath.Join(appDataPath, "MyGes")
-	dbPath := filepath.Join(appDataPath, "MyGes", "db.sqlite")
-
-	// Assurez-vous que le dossier MyGes existe
-	err = os.MkdirAll(filepath.Dir(dbFolder), 0755)
-	if err != nil {
-		return nil, fmt.Errorf("erreur lors de la création du dossier MyGes: %v", err)
+	if err := os.MkdirAll(dbFolder, 0755); err != nil {
+		return nil, fmt.Errorf("erreur lors de la création du dossier MyGes: %w", err)
 	}
 
-	if err := createDB(mutex, waitgroup); err != nil {
-		return nil, err
-	}
-
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		return nil, fmt.Errorf("erreur lors de l'ouverture de la base de données: %v", err)
-	}
-
-	return db, nil
+	return OpenDB(filepath.Join(dbFolder, "db.sqlite"))
 }
 
 // ------------------------------------------------ //
 
+// CreateUser creates a new account and makes it the only selected one.
 func CreateUser(db *sql.DB, username string, password string) (bool, error) {
-	// Désélectionner tous les utilisateurs existants
-	_, err := db.Exec("UPDATE USER SET selected = false")
-	if err != nil {
-		return false, fmt.Errorf("Erreur lors de l'update des utilisateurs existants (selected column) : %w", err)
-	}
-
-	// Insérer le nouvel utilisateur
-	result, err := db.Exec("INSERT INTO USER (username, password, selected) VALUES (?, ?, true)", username, password)
-	if err != nil {
-		return false, fmt.Errorf("Erreur lors de l'insertion du nouvel utilisateur : %w", err)
-	}
-
-	// Récupérer l'ID du nouvel utilisateur
-	_, err = result.LastInsertId()
-	if err != nil {
-		return false, fmt.Errorf("Erreur lors de la récupération de l'ID du nouvel utilisateur : %w", err)
-	}
-	return true, nil
+	err := withTx(db, func(tx *sql.Tx) error {
+		if _, err := tx.Exec("UPDATE USER SET selected = false"); err != nil {
+			return fmt.Errorf("Erreur lors de l'update des utilisateurs existants (selected column) : %w", err)
+		}
+		if _, err := tx.Exec("INSERT INTO USER (username, password, selected) VALUES (?, ?, true)", username, password); err != nil {
+			return fmt.Errorf("Erreur lors de l'insertion du nouvel utilisateur : %w", err)
+		}
+		return nil
+	})
+	return err == nil, err
 }
 
 func CheckUserExist(db *sql.DB, username string) (bool, error) {
@@ -79,9 +81,16 @@ func CheckUserExist(db *sql.DB, username string) (bool, error) {
 // ------------------------------------------------ //
 
 func UpdateUserPassword(db *sql.DB, username string, password string) (bool, error) {
-	_, err := db.Exec("UPDATE USER SET password = ? WHERE username = ?", username, password)
+	result, err := db.Exec("UPDATE USER SET password = ? WHERE username = ?", password, username)
 	if err != nil {
 		return false, fmt.Errorf("Erreur lors de l'update de l'utilisateurs %s : %w", username, err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+	}
+	if rowsAffected != 1 {
+		return false, fmt.Errorf("Aucun compte local ne correspond à l'utilisateur %s", username)
 	}
 	return true, nil
 }
@@ -168,15 +177,29 @@ func DeconnectUser(db *sql.DB) error {
 
 // ------------------------------------------------ //
 
-func ConnectUser(db *sql.DB, username string, password string) bool {
-	updateQuery := `UPDATE USER SET selected = true WHERE username = ? AND password = ?`
+// ErrBadCredentials is returned by ConnectUser when no local account matches.
+var ErrBadCredentials = errors.New("nom d'utilisateur ou mot de passe incorrect")
 
-	_, err := db.Exec(updateQuery, username, password)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Error when connecting the user : %v", err))
-		return false
-	}
-	return true
+// ConnectUser selects the account matching username and password, and
+// deselects every other account. Nothing changes if the credentials are wrong.
+func ConnectUser(db *sql.DB, username string, password string) error {
+	return withTx(db, func(tx *sql.Tx) error {
+		result, err := tx.Exec(`UPDATE USER SET selected = true WHERE username = ? AND password = ?`, username, password)
+		if err != nil {
+			return fmt.Errorf("Error when connecting the user : %w", err)
+		}
+		n, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+		}
+		if n != 1 {
+			return ErrBadCredentials
+		}
+		if _, err := tx.Exec(`UPDATE USER SET selected = false WHERE username <> ?`, username); err != nil {
+			return fmt.Errorf("Error when deselecting the other users : %w", err)
+		}
+		return nil
+	})
 }
 
 // ------------------------------------------------ //
@@ -229,74 +252,45 @@ func UpdateUserTheme(db *sql.DB, value string) (bool, error) {
 
 // ------------------------------------------------ //
 
-func DeleteOldData(db *sql.DB) bool {
+// DeleteOldData purges, for the selected user only, the past schedule and
+// events, and the grades / absences of the years before the current one.
+func DeleteOldData(db *sql.DB) error {
 	user, err := GetUser(db)
-
 	if err != nil {
-		Log.Error(fmt.Sprintf("Impossible de sélectionner l'utilisateur actuellement connecté : %v", err))
-		return false
+		return fmt.Errorf("impossible de sélectionner l'utilisateur actuellement connecté : %w", err)
 	}
 
 	Log.Infos(fmt.Sprintf("Deleting old data for user : %d", user.ID))
 
-	currDate := GetTodayDate()
-
-	// Delete Schedule
-	deleteQuery := `DELETE FROM AGENDA WHERE user_id = ? and start_date < ?`
-	_, err = db.Exec(deleteQuery, user.ID, currDate)
+	year, err := strconv.Atoi(user.Year)
 	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la deletion de l'agenda : %w", err))
-		return false
+		return fmt.Errorf("année invalide pour l'utilisateur (%q) : %w", user.Year, err)
 	}
 
-	// Prepare year date
-	yearStr, err := GetLastYearInDB(db)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Error when retrieving the last year from DB for the user : %w", err))
-		return false
-	}
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	agendaLimit := today.Format("2006-01-02T15:04:05.000Z") // AGENDA date format
+	eventLimit := today.Format("2006-01-02 15:04:05")       // EVENTS date format
 
-	year, err := strconv.Atoi(yearStr)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Error when asting year str => int : %w", err))
-		return false
-	}
-	year -= 1
-
-	// Delete Grades
-	selectGradeValueQuery := `SELECT note_id FROM NOTES WHERE year <= ? AND user_id = ?`
-
-	_, err = db.Exec(selectGradeValueQuery, year, user.ID)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la selection de valeurs des notes : %w", err))
-		return false
-	}
-
-	deleteGradeValueQuery := `DELETE FROM GRADESVALUE WHERE note_id = ?`
-
-	_, err = db.Exec(deleteGradeValueQuery, user.ID)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la deletion de valeurs des notes : %w", err))
-		return false
-	}
-
-	deleteGradeQuery := `DELETE FROM NOTES WHERE year = ?`
-
-	_, err = db.Exec(deleteGradeQuery, year)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la deletion des notes : %w", err))
-		//return false
-	}
-
-	// Delete EVENTS
-	deleteEventQuery := `DELETE FROM EVENTS WHERE start_date < ?`
-	_, err = db.Exec(deleteEventQuery, currDate)
-	if err != nil {
-		Log.Error(fmt.Sprintf("Erreur lors de la deletion des évènements : %w", err))
-		//return false
-	}
-
-	return true
+	return withTx(db, func(tx *sql.Tx) error {
+		queries := []struct {
+			label string
+			query string
+			args  []any
+		}{
+			{"agenda", `DELETE FROM AGENDA WHERE user_id = ? AND start_date < ?`, []any{user.ID, agendaLimit}},
+			{"valeurs des notes", `DELETE FROM GRADESVALUE WHERE note_id IN (SELECT note_id FROM NOTES WHERE user_id = ? AND year < ?)`, []any{user.ID, year}},
+			{"notes", `DELETE FROM NOTES WHERE user_id = ? AND year < ?`, []any{user.ID, year}},
+			{"absences", `DELETE FROM ABSENCES WHERE user_id = ? AND CAST(abs_year AS INTEGER) < ?`, []any{user.ID, year}},
+			{"évènements", `DELETE FROM EVENTS WHERE user_id = ? AND start_date < ?`, []any{user.ID, eventLimit}},
+		}
+		for _, q := range queries {
+			if _, err := tx.Exec(q.query, q.args...); err != nil {
+				return fmt.Errorf("erreur lors de la suppression (%s) : %w", q.label, err)
+			}
+		}
+		return nil
+	})
 }
 
 func SavePreset(db *sql.DB, presetName string, value string, presetType string) bool {

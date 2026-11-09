@@ -1,13 +1,11 @@
 import { DeleteEvent, GetAllEvents, GetEventsLike } from "../../wailsjs/go/backend/App";
 import { structures } from "../../wailsjs/go/models";
-import { formatDateWithDay, scrollMainPart } from "../JS/functions";
+import { escapeHtml, formatDateWithDay, safeColor, scrollMainPart } from "../JS/functions";
 import { popup } from "../JS/popups";
 
 
-let personnalEvents: structures.Event[] = [];
-//let displayEventsId: number[] = [];
-let specificEvent = false;
 let isStillRunning = false;
+let lastListRequest = 0;
 
 export async function events(): Promise<void> {
     if (isStillRunning) {
@@ -15,58 +13,68 @@ export async function events(): Promise<void> {
     }
 
     isStillRunning = true;
-    if (specificEvent) {
-        isStillRunning = false;
-        return;
-    }
-    scrollMainPart();
-
-    const searchBar = document.getElementById("searchBar") as HTMLInputElement | null;
-    if (!searchBar) {
-        popup("Impossible de trouver la barre de recherche des événements.");
-        isStillRunning = false;
-        return;
-    }
-
     try {
-        personnalEvents = await GetAllEvents() as structures.Event[];
+        scrollMainPart();
+
+        const searchBar = getSearchBar();
+        if (!searchBar) {
+            popup("Impossible de trouver la barre de recherche des événements.");
+            return;
+        }
+
+        // oninput : un seul handler, même après plusieurs visites
+        searchBar.oninput = () => {
+            void refreshEventList();
+        };
+
+        await refreshEventList();
+    } finally {
+        isStillRunning = false;
+    }
+}
+
+function getSearchBar(): HTMLInputElement | null {
+    return document.getElementById("searchBar") as HTMLInputElement | null;
+}
+
+/**
+ * Display every event, or only the ones matching the search bar when it is
+ * filled. Responses that arrive after a newer request are ignored, so a slow
+ * search can't overwrite the result of the latest one.
+ */
+async function refreshEventList(): Promise<void> {
+    const request = ++lastListRequest;
+    const search = getSearchBar()?.value ?? "";
+
+    let list: structures.Event[];
+    try {
+        list = search !== "" ? await GetEventsLike(search) : await GetAllEvents();
     } catch (e) {
         console.log(e);
-        isStillRunning = false;
         return;
     }
 
-    populateCalendar(personnalEvents);
-
-    searchBar.addEventListener("input", async () => {
-        specificEvent = searchBar.value !== "";
-        const searchedEvents = await GetEventsLike(searchBar.value) as structures.Event[];
-        populateCalendar(searchedEvents);
-    });
-
-    /*if (displayEventsId.length === 0) {
-        displayEventsId.push(window.setInterval(events, 20000));
-    }*/
-
-    isStillRunning = false;
+    if (request === lastListRequest) {
+        populateCalendar(list);
+    }
 }
 
 function createEventElement(event: structures.Event): { eventElement: HTMLDivElement; eventId: string } {
     const eventElement = document.createElement('div');
     eventElement.className = 'event-item';
-    eventElement.style.borderColor = event.color;
+    eventElement.style.borderColor = safeColor(event.color);
 
     const startDate = formatDateWithDay(event.start_date);
     const endDate = formatDateWithDay(event.end_date);
     eventElement.innerHTML = `
         <div class="event-header">
-            <span class="event-name">${event.name}</span>
+            <span class="event-name">${escapeHtml(event.name)}</span>
         </div>
-        <p class="event-description">${event.description}</p>
+        <p class="event-description">${escapeHtml(event.description)}</p>
         <div class="event-time">
             <span class="event-date">${startDate} - ${endDate}</span>
         </div>
-        <button class="marginTop10 btn btn-delete" id="event-${event.event_id}" value="Supprimer">Supprimer</button>
+        <button class="marginTop10 btn btn-delete" id="event-${Number(event.event_id)}" value="Supprimer">Supprimer</button>
     `;
 
     return { eventElement, eventId: String(event.event_id) };
@@ -120,7 +128,7 @@ function populateCalendar(eventv: structures.Event[]): void {
                 try {
                     if (await DeleteEvent(Number(eventElement.eventId))) {
                         popup("Suppression réussie !");
-                        await events();
+                        await refreshEventList();
                     }
                 } catch (e) {
                     console.log(e);
@@ -130,14 +138,3 @@ function populateCalendar(eventv: structures.Event[]): void {
         }
     });
 }
-/*
-// Fonction pour arrêter le setInterval
-export function stopDisplayingEvents(): void {
-    while (displayEventsId.length > 0) {
-        const timeoutId = displayEventsId.pop();
-        if (timeoutId !== undefined) {
-            clearInterval(timeoutId);
-        }
-    }
-}
-*/

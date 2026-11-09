@@ -12,57 +12,44 @@ import (
 	. "MyGesClient/log"
 )
 
-func SaveAbsencesToDB(abs string, db *sql.DB) bool {
-	Log.Infos("Saving Absences to DB")
-
-	// Decode the JSON string into a map
-	var data map[string]interface{}
-	err := json.Unmarshal([]byte(abs), &data)
-	if err != nil {
-		Log.Error("Error decoding JSON:", err)
-		return false
-	}
-
-	// Check if "result" exists and is a slice
-	result, ok := data["items"].([]interface{})
-	if !ok {
-		Log.Error("Invalid or missing 'result' in JSON data")
-		return false
-	}
-
-	// Convert the data to []Absences
-	var absences []Absences
-	for _, item := range result {
-		absence, err := mapToAbsences(item.(map[string]interface{}))
-		if err != nil {
-			Log.Error("Error mapping item to Absences:", err)
-			continue
-		}
-		absences = append(absences, absence)
-	}
-
-	// Here, you would typically insert the absences into your database
-	// This is a placeholder for the actual database insertion logic
-	user, err := GetUser(db)
-	if err != nil {
-		Log.Error("Impossible to select the user before saving absences")
-		return false
-	}
-
-	for _, absence := range absences {
-		err := insertAbsenceIntoDB(db, absence, user.ID)
-		if err != nil {
-			Log.Error("Error inserting absence into DB:", err)
-			// Decide whether to continue or return based on your error handling strategy
-		}
-	}
-
-	Log.Infos("Absences saved to DB successfully")
-	return true
-
+type absencesResponse struct {
+	Items []Absences `json:"items"`
 }
 
-func GetDBUserAbsences(year string, db *sql.DB) ([]LocalAbsences, error) {
+// ReplaceAbsences atomically replaces the absences of the given user and year
+// with the ones contained in absJSON (MyGes "absences" response). The JSON is
+// decoded before anything is deleted, so invalid data never wipes local data.
+func ReplaceAbsences(db *sql.DB, userID int64, year string, absJSON string) error {
+	var response absencesResponse
+	if err := json.Unmarshal([]byte(absJSON), &response); err != nil {
+		return fmt.Errorf("décodage JSON des absences : %w", err)
+	}
+
+	return withTx(db, func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`DELETE FROM ABSENCES WHERE abs_year = ? AND user_id = ?`, year, userID); err != nil {
+			return fmt.Errorf("suppression des ABSENCES : %w", err)
+		}
+
+		stmt, err := tx.Prepare(`
+			INSERT INTO ABSENCES (abs_cours, abs_date, abs_justified, abs_trimester, abs_trimester_name, abs_type, abs_year, user_id)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+		if err != nil {
+			return fmt.Errorf("préparation de la requête ABSENCES : %w", err)
+		}
+		defer stmt.Close()
+
+		for _, a := range response.Items {
+			if _, err := stmt.Exec(a.CourseName, a.Date, a.Justified, a.Trimester, a.TrimesterName, a.Type, a.Year, userID); err != nil {
+				return fmt.Errorf("insertion dans ABSENCES : %w", err)
+			}
+		}
+		Log.Infos("Absences saved to DB successfully")
+		return nil
+	})
+}
+
+// GetDBUserAbsences returns the absences of the given user for the given year.
+func GetDBUserAbsences(db *sql.DB, userID int64, year string) ([]LocalAbsences, error) {
 	Log.Infos("INFO : Fetching local DB for Absences")
 	Log.Infos("INFO : Fetched Absences")
 
@@ -73,13 +60,7 @@ func GetDBUserAbsences(year string, db *sql.DB) ([]LocalAbsences, error) {
         ORDER BY abs_date ASC
     `
 
-	user, err := GetUser(db)
-	if err != nil {
-		return nil, fmt.Errorf("Impossible to retrieve the user id when getting events")
-	}
-
-	// Exécuter la requête
-	rows, err := db.Query(query, year, user.ID)
+	rows, err := db.Query(query, year, userID)
 	if err != nil {
 		return nil, fmt.Errorf("erreur lors de l'exécution de la requête : %v", err)
 	}
@@ -114,28 +95,4 @@ func GetDBUserAbsences(year string, db *sql.DB) ([]LocalAbsences, error) {
 	}
 
 	return absences, nil
-}
-
-func mapToAbsences(m map[string]interface{}) (Absences, error) {
-	// Assuming Absences is your struct type
-	return Absences{
-		CourseName:    m["course_name"].(string),
-		Date:          m["date"].(float64),
-		Justified:     m["justified"].(bool),
-		Links:         []string{}, // Assuming it's always an empty slice
-		Trimester:     int(m["trimester"].(float64)),
-		TrimesterName: m["trimester_name"].(string),
-		Type:          m["type"].(string),
-		Year:          int(m["year"].(float64)),
-	}, nil
-}
-
-func insertAbsenceIntoDB(db *sql.DB, absence Absences, userId int64) error {
-	// This is a placeholder for the actual insertion logic
-	// You would typically use db.Exec or db.Query here to insert the data
-	// For example:
-
-	_, err := db.Exec("INSERT INTO ABSENCES (abs_cours, abs_date, abs_justified, abs_trimester, abs_trimester_name, abs_type, abs_year, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-		absence.CourseName, absence.Date, absence.Justified, absence.Trimester, absence.TrimesterName, absence.Type, absence.Year, userId)
-	return err
 }

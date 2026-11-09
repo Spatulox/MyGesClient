@@ -1,11 +1,10 @@
 import {
     GetUserData,
     InitDiscordRPC,
-    UpdateDiscordRPC,
     GetStartupStatus
 } from "../../wailsjs/go/backend/App";
 import { loadPageGo } from "./loadPages";
-import { initCreateEvent } from "./createEvents";
+import { initCreateEvent, loadEventPresets } from "./createEvents";
 
 import { popup, stillPopup, stopStillPopup } from './popups';
 import {
@@ -24,6 +23,7 @@ import { events } from "../JS-Page/events";
 import { courses } from "../JS-Page/courses";
 import { changeWeek, hideScheduleButtons, schedule, showScheduleButtons } from "../JS-Page/schedule";
 import { projects } from "../JS-Page/projects";
+import { initExternalLinks } from "./externalLinks";
 
 let initializedStart = false;
 
@@ -53,7 +53,7 @@ export async function start(): Promise<void> {
     const laStill = stillPopup("Login...");
     try {
         const user = await GetUserData();
-        if (user === null || !user.Password) {
+        if (!user || !user.Username) {
             changeTitle("Créer un compte");
             changeLoginButtonName("Créer un compte");
             showButtonCancelConnection(false);
@@ -62,6 +62,9 @@ export async function start(): Promise<void> {
             stopStillPopup(laStill);
             return;
         }
+        // Presets belong to the user: load them only once we know there is one
+        await loadEventPresets();
+
         // Check if the eula is accepted
         if (!user.EULA) {
             const eula = document.getElementById('eula');
@@ -87,11 +90,16 @@ export async function start(): Promise<void> {
             await connectDiscord();
             await loadPageGo("dashboard.html");
 
-            // Need to wait the full start of the app
+            // Need to wait the full start of the app (bounded: the backend could stay stuck)
+            const STARTUP_TIMEOUT_MS = 60_000;
+            const waitStart = Date.now();
             let status: StartupStatusType = await GetStartupStatus();
-            while (status === StartupStatus.StatusInProgress) {
+            while (status === StartupStatus.StatusInProgress && Date.now() - waitStart < STARTUP_TIMEOUT_MS) {
                 await new Promise(resolve => setTimeout(resolve, 100));
                 status = await GetStartupStatus();
+            }
+            if (status === StartupStatus.StatusInProgress) {
+                popup("Le démarrage prend plus de temps que prévu, certaines pages peuvent être incomplètes");
             }
             await initAllPages(status);
         } catch (e: any) {
@@ -134,11 +142,8 @@ async function connectDiscord(): Promise<void> {
     }
 }
 
-function updateActivity(state: string, details: string): void {
-    UpdateDiscordRPC(state, details)
-        .then(() => console.log("Discord RPC activity updated"))
-        .catch(error => console.error("Failed to update Discord RPC activity:", error));
-}
+// Once, before anything else: external links must open in the default browser
+initExternalLinks();
 
 start()
     .then(() => {
@@ -200,16 +205,9 @@ async function initializeSoftwareAccount(): Promise<void> {
 }
 
 async function initializeSchedulePart(): Promise<void> {
-    const modal = document.getElementById('modal') as HTMLElement | null;
+    // The course modal (#modal-event) is handled by schedule.ts (setupModal)
     const forceRefreshButton = document.getElementById("force-refresh") as HTMLElement | null;
     const forceNowButton = document.getElementById("force-now") as HTMLElement | null;
-    const closeBtn = document.getElementsByClassName('close')[0] as HTMLElement | undefined;
-
-    if (closeBtn && modal) {
-        closeBtn.onclick = function () {
-            modal.style.display = 'none';
-        };
-    }
 
     forceRefreshButton?.addEventListener("click", async () => {
         hideScheduleButtons();
@@ -222,10 +220,4 @@ async function initializeSchedulePart(): Promise<void> {
         try { await schedule(true); } catch (e) { console.log(e); }
         showScheduleButtons();
     });
-
-    window.onclick = function (event: MouseEvent) {
-        if (event.target === modal) {
-            if (modal) modal.style.display = 'none';
-        }
-    };
 }

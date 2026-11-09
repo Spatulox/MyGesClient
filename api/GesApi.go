@@ -8,11 +8,34 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"strings"
+	"net/url"
 	"time"
 )
+
+const (
+	authorizeURL = "https://authentication.kordis.fr/oauth/authorize?response_type=token&client_id=skolae-app"
+	httpTimeout  = 15 * time.Second
+)
+
+// apiBaseURL is a variable so tests can point it to a local server.
+var apiBaseURL = "https://api.kordis.fr"
+
+// ErrUnauthorized is returned when MyGes rejects the credentials or the token
+// (expired / revoked), so callers can tell it apart from a network error.
+var ErrUnauthorized = errors.New("MyGes : identifiants ou token invalides")
+
+// httpClient is shared by every API call. Without a timeout, a server that
+// never answers would block the refreshes forever.
+var httpClient = &http.Client{Timeout: httpTimeout}
+
+// loginClient does not follow redirects: the token is in the Location header.
+var loginClient = &http.Client{
+	Timeout: httpTimeout,
+	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	},
+}
 
 type AccessToken struct {
 	AccessToken string `json:"access_token"`
@@ -79,8 +102,6 @@ type agendaItem struct {
 	IsElectronicSignature bool             `json:"is_electronic_signature"`
 }
 
-const errMessage = "{'message':'Impossible to create a JSON with the result'}"
-
 func mapToStruct(m map[string]interface{}, v interface{}) error {
 	jsonData, err := json.Marshal(m)
 	if err != nil {
@@ -92,7 +113,7 @@ func mapToStruct(m map[string]interface{}, v interface{}) error {
 func convertToJSON(data map[string]interface{}) (string, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return errMessage, fmt.Errorf("erreur lors de la conversion en JSON") // %w", err)
+		return "", fmt.Errorf("erreur lors de la conversion en JSON : %w", err)
 	}
 	return string(jsonData), nil
 }
@@ -102,126 +123,129 @@ func convertToJSON(data map[string]interface{}) (string, error) {
 func GESLogin(username, password string) (*GESapi, error) {
 	token, err := generateAccessToken(username, password)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
-	}
-	if token == nil {
-		fmt.Println("Something went wrong")
-		return nil, fmt.Errorf("Credential is nil")
 	}
 	return &GESapi{token: token}, nil
 }
 
 func generateAccessToken(username string, password string) (*AccessToken, error) {
-
 	credentials := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password)))
 
-	client := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	req, err := http.NewRequest("GET", "https://authentication.kordis.fr/oauth/authorize?response_type=token&client_id=skolae-app", nil)
+	req, err := http.NewRequest("GET", authorizeURL, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	req.Header.Add("Authorization", fmt.Sprintf("Basic %s", credentials))
 
-	resp, err := client.Do(req)
+	resp, err := loginClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("connexion à MyGes impossible : %w", err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusFound {
-		return nil, errors.New("Bad username or password")
+	switch {
+	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
+		return nil, fmt.Errorf("%w : mauvais nom d'utilisateur ou mot de passe", ErrUnauthorized)
+	case resp.StatusCode != http.StatusFound:
+		return nil, fmt.Errorf("réponse inattendue de MyGes lors de la connexion : %s", resp.Status)
 	}
 
-	location := resp.Header.Get("Location")
-	if location == "" {
-		return nil, errors.New("Location header not found")
+	location, err := url.Parse(resp.Header.Get("Location"))
+	if err != nil || location.Fragment == "" {
+		return nil, errors.New("token absent de la réponse de MyGes")
 	}
 
-	hashIndex := strings.Index(location, "#")
-	if hashIndex == -1 {
-		return nil, errors.New("Hash not found in location")
+	properties, err := url.ParseQuery(location.Fragment)
+	if err != nil {
+		return nil, fmt.Errorf("token MyGes illisible : %w", err)
 	}
-
-	hash := location[hashIndex+1:]
-	properties := make(map[string]string)
-
-	for _, property := range strings.Split(hash, "&") {
-		parts := strings.SplitN(property, "=", 2)
-		if len(parts) == 2 {
-			properties[parts[0]] = parts[1]
-		}
+	if properties.Get("access_token") == "" {
+		return nil, errors.New("token absent de la réponse de MyGes")
 	}
 
 	return &AccessToken{
-		AccessToken: properties["access_token"],
-		TokenType:   properties["token_type"],
-		ExpiresIn:   properties["expires_in"],
-		Scope:       properties["scope"],
-		UID:         properties["uid"],
+		AccessToken: properties.Get("access_token"),
+		TokenType:   properties.Get("token_type"),
+		ExpiresIn:   properties.Get("expires_in"),
+		Scope:       properties.Get("scope"),
+		UID:         properties.Get("uid"),
 	}, nil
 }
 
 // --------------------------------------------------------------------------------------- //
 
-func (ges *GESapi) GetYears() (string, error) {
-	url := "/me/years"
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
+func (ges *GESapi) GetYears() (string, error) { return ges.getJSON("/me/years") }
+
+func (ges *GESapi) GetProfile() (string, error) { return ges.getJSON("/me/profile") }
+
+func (ges *GESapi) GetAbsences(year string) (string, error) {
+	return ges.getJSON(fmt.Sprintf("/me/%s/absences", year))
 }
 
-func (ges *GESapi) GetProfile() (string, error) {
-	url := "/me/profile"
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
+func (ges *GESapi) GetGrades(year string) (string, error) {
+	return ges.getJSON(fmt.Sprintf("/me/%s/grades", year))
 }
 
+func (ges *GESapi) GetCourses(year string) (string, error) {
+	return ges.getJSON(fmt.Sprintf("/me/%s/courses", year))
+}
+
+func (ges *GESapi) GetProjects(year string) (string, error) {
+	return ges.getJSON(fmt.Sprintf("/me/%s/projects", year))
+}
+
+func (ges *GESapi) GetProject(id int64) (string, error) {
+	return ges.getJSON(fmt.Sprintf("/me/projects/%d", id))
+}
+
+func (ges *GESapi) GetNews() (string, error) { return ges.getJSON("/me/news") }
+
+func (ges *GESapi) GetBanners() (string, error) { return ges.getJSON("/me/news/banners") }
+
+func (ges *GESapi) GetNewsPage(page string) (string, error) {
+	return ges.getJSON("/me/news?page=" + url.QueryEscape(page))
+}
+
+func (ges *GESapi) GetYearClasses(year string) (string, error) {
+	return ges.getJSON(fmt.Sprintf("/me/%s/classes", year))
+}
+
+func (ges *GESapi) GetYearTeacher(year string) (string, error) {
+	return ges.getJSON(fmt.Sprintf("/me/%s/teachers", year))
+}
+
+func (ges *GESapi) JoinProjectGroup(projectRcId int64, projectId int64, projectGroupId int64) (string, error) {
+	return ges.doJSON("POST", projectGroupPath(projectRcId, projectId, projectGroupId))
+}
+
+func (ges *GESapi) QuitProjectGroup(projectRcId int64, projectId int64, projectGroupId int64) (string, error) {
+	return ges.doJSON("DELETE", projectGroupPath(projectRcId, projectId, projectGroupId))
+}
+
+func projectGroupPath(projectRcId int64, projectId int64, projectGroupId int64) string {
+	return fmt.Sprintf("/me/courses/%d/projects/%d/groups/%d", projectRcId, projectId, projectGroupId)
+}
+
+// GetAgenda returns the schedule between start and end, both formatted as
+// "2006-01-02T15:04:05.000Z".
 func (ges *GESapi) GetAgenda(start string, end string) (string, error) {
+	const layout = "2006-01-02T15:04:05.000Z"
 
-	layout := "2006-01-02T15:04:05.000Z"
-
-	// Parser les chaînes en time.Time
 	startTime, err := time.Parse(layout, start)
 	if err != nil {
-		log.Fatalf("Erreur lors du parsing de la date de début GetAgenda: %v", err)
-		return "", err
+		return "", fmt.Errorf("date de début invalide pour GetAgenda : %w", err)
 	}
-
 	endTime, err := time.Parse(layout, end)
 	if err != nil {
-		log.Fatalf("Erreur lors du parsing de la date de fin GetAgenda: %v", err)
-		return "", err
+		return "", fmt.Errorf("date de fin invalide pour GetAgenda : %w", err)
 	}
 
-	// Convertir les time.Time en millisecondes Unix
-	startMs := startTime.UnixMilli()
-	endMs := endTime.UnixMilli()
-
-	url := fmt.Sprintf("/me/agenda?start=%d&end=%d", startMs, endMs)
-
-	result, err := ges.get(url)
+	result, err := ges.request("GET", fmt.Sprintf("/me/agenda?start=%d&end=%d", startTime.UnixMilli(), endTime.UnixMilli()), nil)
 	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		//println("ERROR : Impossible to fetch agenda")
 		return "", err
 	}
 
-	// Convertir le résultat en []AgendaItem
-	var agendaItems []agendaItem
+	agendaItems := []agendaItem{}
 	if items, ok := result["items"].([]interface{}); ok {
 		for _, item := range items {
 			if agendaItemVar, ok := item.(map[string]interface{}); ok {
@@ -234,186 +258,29 @@ func (ges *GESapi) GetAgenda(start string, end string) (string, error) {
 		}
 	}
 
-	// Convertir le slice d'AgendaItem en JSON
 	jsonData, err := json.Marshal(agendaItems)
 	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
 		return "", fmt.Errorf("erreur lors de la conversion des éléments d'agenda en JSON: %w", err)
 	}
-
 	return string(jsonData), nil
-}
-
-func (ges *GESapi) GetAbsences(year string) (string, error) {
-	url := fmt.Sprintf("/me/%s/absences", year)
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetGrades(year string) (string, error) {
-	url := fmt.Sprintf("/me/%s/grades", year)
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetCourses(year string) (string, error) {
-	url := fmt.Sprintf("/me/%s/courses", year)
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetProjects(year string) (string, error) {
-	url := fmt.Sprintf("/me/%s/projects", year)
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetProject(id int64) (string, error) {
-	url := fmt.Sprintf("/me/projects/%d", id)
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetNews() (string, error) {
-	url := "/me/news"
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetBanners() (string, error) {
-	url := "/me/news/banners"
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetNewsPage(page string) (string, error) {
-	url := fmt.Sprintf("/me/news?page=%s", page)
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetYearClasses(year string) (string, error) {
-	url := fmt.Sprintf("/me/%s/classes", year)
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) GetYearTeacher(year string) (string, error) {
-	url := fmt.Sprintf("/me/%s/teachers", year)
-	result, err := ges.get(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) JoinProjectGroup(projectRcId int64, projectId int64, projectGroupId int64) (string, error) {
-	url := fmt.Sprintf("/me/courses/%d/projects/%d/groups/%d", projectRcId, projectId, projectGroupId)
-	result, err := ges.post(url, nil)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
-}
-
-func (ges *GESapi) QuitProjectGroup(projectRcId int64, projectId int64, projectGroupId int64) (string, error) {
-	url := fmt.Sprintf("/me/courses/%d/projects/%d/groups/%d", projectRcId, projectId, projectGroupId)
-	result, err := ges.delete(url)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return errMessage, err
-	}
-	return convertToJSON(result)
 }
 
 // --------------------------------------------------------------------------------------- //
 
-func (ges *GESapi) get(url string) (map[string]interface{}, error) {
-	Log.Infos(fmt.Sprintf("Requesting GET API for %s", url))
-	result, err := ges.request("GET", url, nil)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return nil, fmt.Errorf("GET API call failed: %w", err)
-	}
-	Log.Infos(fmt.Sprintf("%s finished", url))
-	return result, nil
+// getJSON performs a GET request and returns the "result" field as JSON.
+func (ges *GESapi) getJSON(path string) (string, error) {
+	return ges.doJSON("GET", path)
 }
 
-func (ges *GESapi) post(url string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
-	Log.Infos(fmt.Sprintf("Requesting POST API for %s", url))
-	result, err := ges.request("POST", url, requestConfig)
+func (ges *GESapi) doJSON(method, path string) (string, error) {
+	result, err := ges.request(method, path, nil)
 	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return nil, fmt.Errorf("POST API call failed: %w", err)
+		return "", err
 	}
-	Log.Infos(fmt.Sprintf("%s finished", url))
-	return result, nil //ges.request("POST", url, requestConfig)
+	return convertToJSON(result)
 }
 
-func (ges *GESapi) put(url string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
-	//return ges.request("PUT", url, requestConfig)
-	Log.Infos(fmt.Sprintf("Requesting PUT API for %s", url))
-	result, err := ges.request("PUT", url, requestConfig)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return nil, fmt.Errorf("PUT API call failed: %w", err)
-	}
-	Log.Infos(fmt.Sprintf("%s finished", url))
-	return result, nil
-}
-
-func (ges *GESapi) delete(url string) (map[string]interface{}, error) {
-	//return ges.request("DELETE", url, nil)
-	Log.Infos(fmt.Sprintf("Requesting DELETE API for %s", url))
-	result, err := ges.request("DELETE", url, nil)
-	if err != nil {
-		fmt.Printf("Stack trace:\n%+v\n", err)
-		return nil, fmt.Errorf("DELETE API call failed: %w", err)
-	}
-	Log.Infos(fmt.Sprintf("%s finished", url))
-	return result, nil
-}
-
-func (ges *GESapi) request(method, url string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
-	client := &http.Client{}
+func (ges *GESapi) request(method, path string, requestConfig map[string]interface{}) (map[string]interface{}, error) {
 	if ges == nil {
 		return nil, errors.New("GESapi object is nil")
 	}
@@ -421,7 +288,7 @@ func (ges *GESapi) request(method, url string, requestConfig map[string]interfac
 		return nil, errors.New("GESapi token is nil")
 	}
 
-	fullURL := fmt.Sprintf("https://api.kordis.fr%s", url)
+	Log.Infos(fmt.Sprintf("Requesting %s API for %s", method, path))
 
 	var body io.Reader
 	if requestConfig != nil {
@@ -433,16 +300,14 @@ func (ges *GESapi) request(method, url string, requestConfig map[string]interfac
 			body = bytes.NewBuffer(jsonData)
 		}
 	}
-	req, err := http.NewRequest(method, fullURL, body)
+
+	req, err := http.NewRequest(method, apiBaseURL+path, body)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	// Set default headers
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("%s %s", ges.token.TokenType, ges.token.AccessToken))
-
-	// Add custom headers from requestConfig
 	if requestConfig != nil {
 		if headers, ok := requestConfig["headers"].(map[string]string); ok {
 			for key, value := range headers {
@@ -451,30 +316,30 @@ func (ges *GESapi) request(method, url string, requestConfig map[string]interfac
 		}
 	}
 
-	fmt.Printf("Sending request to: %s\n", fullURL)
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
-		fmt.Printf("Error sending request: %v\n", err)
-		return nil, fmt.Errorf("error sending request: %w", err)
+		return nil, fmt.Errorf("%s %s : %w", method, path, err)
 	}
-	fmt.Printf("Response received. Status: %s\n", resp.Status)
 	defer resp.Body.Close()
 
+	switch {
+	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
+		return nil, fmt.Errorf("%s %s : %w", method, path, ErrUnauthorized)
+	case resp.StatusCode < 200 || resp.StatusCode >= 300:
+		return nil, fmt.Errorf("%s %s : MyGes a répondu %s", method, path, resp.Status)
+	}
+
 	var result map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		fmt.Printf("Error decoding JSON: %v\n", err)
-		return nil, fmt.Errorf("error decoding response: %w", err)
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("%s %s : réponse illisible : %w", method, path, err)
 	}
+	Log.Infos(fmt.Sprintf("%s finished", path))
 
-	// Getting result field
-	if resultData, ok := result["result"].([]interface{}); ok {
+	switch resultData := result["result"].(type) {
+	case []interface{}:
 		return map[string]interface{}{"items": resultData}, nil
-	}
-
-	if resultData, ok := result["result"].(map[string]interface{}); ok {
+	case map[string]interface{}:
 		return resultData, nil
 	}
-
-	return nil, fmt.Errorf("no 'result' field in response or it's not a map")
+	return nil, fmt.Errorf("%s %s : pas de champ 'result' dans la réponse", method, path)
 }

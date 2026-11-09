@@ -3,7 +3,6 @@ package backend
 import (
 	. "MyGesClient/api"
 	. "MyGesClient/log"
-	. "MyGesClient/time"
 	"database/sql"
 	"fmt"
 
@@ -73,29 +72,10 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 		return "", fmt.Errorf("Wrong username or password: %v", err)
 	}
 
-	errour := 0
-	if err := a.initAPI(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrAPIInit
-		Log.Error("API init error")
-	}
+	a.connectOrWaitForInternet()
 
-	if err := a.initYear(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrYearsRequest
-		Log.Error("YEAR init error")
-	}
-
-	if errour != 0 {
-		a.stopInitIfInternetFunc()
-		a.initIfInternet()
-	}
-
-	// Doing a GlobalRefresh to hav data stored
-	//year := GetCurrentYear()
-	monday, sunday := GetWeekDates()
-	_, err = a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), sunday.Format("2006-01-02"))
-	//refresh, err := a.globalRefresh("2024", "2024-09-23", "2024-09-28")
+	// Doing a GlobalRefresh to have data stored
+	_, err = a.refreshCurrentWeek()
 	if err != nil {
 		return createMessage("Error when fetching your datas :/"), err
 	}
@@ -171,17 +151,26 @@ func (a *App) UpdateUserPassword(username string, password string) (bool, error)
 		return false, fmt.Errorf("Impossible to connect to MyGes, bad username or password")
 	}
 
-	a.setAPI(userApi)
-	boolean, err := UpdateUserPassword(a.db, username, password)
-
-	user, err2 := GetUser(a.db)
-	if err2 != nil {
-		return false, err2
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
+	ok, err := UpdateUserPassword(a.db, username, password)
+	a.dbMutex.Unlock()
+	a.dbWg.Done()
+	if !ok || err != nil {
+		return false, err
 	}
 
-	a.setAPIUser(user)
+	// Only switch the API session if the updated account is the one currently in use
+	if a.getAPIUser().Username == username {
+		user, err := GetUser(a.db)
+		if err != nil {
+			return false, err
+		}
+		a.setAPIUser(user)
+		a.setAPI(userApi)
+	}
 
-	return boolean, err
+	return true, nil
 }
 
 func (a *App) GetRegisteredUsers() ([]UserSettings, error) {
@@ -189,41 +178,34 @@ func (a *App) GetRegisteredUsers() ([]UserSettings, error) {
 }
 
 func (a *App) ConnectUser(username string, password string) (UserSettings, error) {
-
-	if ConnectUser(a.db, username, password) {
-		a.initUser()
-		/*user, err := GetUser(a.db)
-		if err != nil {
-			Log.Error(fmt.Sprintf("Impossible to select the user : %v", err))
-			return UserSettings{}, fmt.Errorf("This user don't exist : %v", err)
-		}
-		a.setAPIUser(user)
-		return user, nil*/
-	} else {
-		Log.Error("Impossible to connect, make sure the account exist and username and password are correct")
-		return UserSettings{}, fmt.Errorf("Impossible to connect, make sure the account exist and username and password are correct")
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
+	err := ConnectUser(a.db, username, password)
+	a.dbMutex.Unlock()
+	a.dbWg.Done()
+	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible to connect : %v", err))
+		return UserSettings{}, fmt.Errorf("Impossible to connect, make sure the account exist and username and password are correct: %w", err)
 	}
 
-	errour := 0
-	if err := a.initAPI(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrAPIInit
+	if err := a.initUser(); err != nil {
+		return UserSettings{}, err
 	}
 
-	if err := a.initYear(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrYearsRequest
-	}
-
-	if errour != 0 {
-		a.stopInitIfInternetFunc()
-		a.initIfInternet()
-	}
+	a.connectOrWaitForInternet()
 
 	return a.getAPIUser(), nil
 }
 
 func (a *App) DeleteOldData() bool {
-	//Log.Debug("Deleting !!!")
-	return DeleteOldData(a.db)
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
+	defer a.dbMutex.Unlock()
+	defer a.dbWg.Done()
+
+	if err := DeleteOldData(a.db); err != nil {
+		Log.Error(err.Error())
+		return false
+	}
+	return true
 }

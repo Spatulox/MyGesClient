@@ -1,6 +1,3 @@
-// Normal functions
-import { capitalizeFirstLetter } from "./functions";
-
 // GO functions
 import { UpdateDiscordRPC } from "../../wailsjs/go/backend/App";
 
@@ -28,89 +25,54 @@ export async function setIsPossibleToSwitchTabs(value: boolean): Promise<void> {
     isPossibleToSwitchTabs = value;
 }
 
-export async function loadPageGo(pageName: string, event?: Event): Promise<void> {
+type PageDefinition = {
+    title: string;
+    load?: () => Promise<void>;
+};
+
+// Every page: its title (header and Discord status) and how to load it
+const PAGES: Record<string, PageDefinition> = {
+    dashboard: { title: "Accueil", load: () => dashboard() },
+    schedule: { title: "Agenda", load: () => schedule() },
+    grades: { title: "Notes", load: () => grades() },
+    absences: { title: "Absences", load: () => absences() },
+    courses: { title: "Cours", load: () => courses() },
+    projects: { title: "Projets", load: () => projects() },
+    events: { title: "Évènements", load: () => events() },
+    account: { title: "Compte", load: () => account() },
+    softwareAccount: { title: "Compte" },
+    credits: { title: "Crédit" },
+};
+
+const DEFAULT_PAGE: PageDefinition = { title: "Accueil" };
+
+export async function loadPageGo(pageName: string): Promise<void> {
     if (!isPossibleToSwitchTabs) {
         return;
     }
 
-    let currPage: string = "Accueil";
-    try {
-        // Récupération du texte du bouton cliqué, ou "Accueil" par défaut
-        const srcElement = (event?.target as HTMLElement) || null;
-        if (srcElement && srcElement.innerText) {
-            currPage = capitalizeFirstLetter(srcElement.innerText);
-        }
+    const pageId = pageName.split(".html")[0];
+    const page = PAGES[pageId] ?? DEFAULT_PAGE;
 
+    try {
         // Masquer l'ancienne page
         if (leDocToShow) {
             leDocToShow.style.display = "none";
         }
         // Afficher la nouvelle page
-        const pageId = pageName.split(".html")[0];
         leDocToShow = document.getElementById(pageId);
         if (leDocToShow) {
             leDocToShow.style.display = "inherit";
         }
 
-        await updatePages(pageId);
+        renameMainTitle(page.title);
+        await page.load?.();
     } catch (e) {
         console.log(e);
     }
 
     try {
-        await UpdateDiscordRPC("Unofficial MyGes Client", currPage);
-    } catch (e) {
-        console.log(e);
-    }
-}
-
-async function updatePages(page: string): Promise<void> {
-    try {
-        switch (page) {
-            case 'account':
-                renameMainTitle("Compte");
-                await account();
-                break;
-            case 'softwareAccount':
-                renameMainTitle("Compte");
-                break;
-            case 'courses':
-                renameMainTitle("Cours");
-                await courses();
-                break;
-            case 'dashboard':
-                renameMainTitle("Accueil");
-                await dashboard();
-                break;
-            case 'events':
-                renameMainTitle("Évènements");
-                await events();
-                break;
-            case 'grades':
-                renameMainTitle("Notes");
-                await grades();
-                break;
-            case 'schedule':
-                renameMainTitle("Agenda");
-                await schedule();
-                break;
-            case 'projects':
-                renameMainTitle("Projets");
-                await projects();
-                break;
-            case 'absences':
-                renameMainTitle("Absences");
-                await absences();
-                break;
-            case 'credits':
-                renameMainTitle("Crédit");
-                await absences();
-                break;
-            default:
-                renameMainTitle("Accueil");
-                //console.log("Default option in switch case when loading page ??")
-                break;
-        }
+        await UpdateDiscordRPC("Unofficial MyGes Client", page.title);
     } catch (e) {
         console.log(e);
     }

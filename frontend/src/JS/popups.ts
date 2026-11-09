@@ -5,6 +5,22 @@ const MAX_POPUPS = 5;
 type PopupType = 'still' | 'normal';
 
 /**
+ * Crée le contenu d'une popup. Le message est inséré comme texte, jamais comme HTML.
+ */
+function createPopupContent(type: PopupType, message: string): HTMLDivElement {
+    const wrapper = document.createElement('div');
+    wrapper.className = type === 'still' ? 'flex flexStart no-wrap' : 'flex flexCenter';
+    if (type === 'still') {
+        const text = document.createElement('div');
+        text.textContent = message;
+        wrapper.appendChild(text);
+    } else {
+        wrapper.textContent = message;
+    }
+    return wrapper;
+}
+
+/**
  * Crée une popup de type donné avec le contenu spécifié.
  */
 function createPopup(type: PopupType, content: string): string {
@@ -20,15 +36,7 @@ function createPopup(type: PopupType, content: string): string {
     newPopup.classList.add('popup');
     newPopup.dataset.index = popupCounter.toString();
 
-    if (type === 'still') {
-        newPopup.innerHTML = `
-            <div class="flex flexStart no-wrap">
-                <!--<img src="./src/assets/images/circle-loading.gif" alt="loading circle">-->
-                <div>${content}</div>
-            </div>`;
-    } else {
-        newPopup.innerHTML = `<div class="flex flexCenter">${content}</div>`;
-    }
+    newPopup.appendChild(createPopupContent(type, content));
 
     popupContainer.appendChild(newPopup);
     newPopup.classList.add('active');
@@ -105,11 +113,7 @@ export function stillPopup(message: string = "Error when passing args to still p
 export function editStillPopup(popupId: string, message: string = "Error when passing args to still popup"): void {
     const pop = document.getElementById(popupId);
     if (pop) {
-        pop.innerHTML = `
-            <div class="flex flexStart no-wrap">
-                <!--<img src="./src/assets/images/circle-loading.gif" alt="loading circle">-->
-                <div>${message}</div>
-            </div>`;
+        pop.replaceChildren(createPopupContent('still', message));
     }
 }
 

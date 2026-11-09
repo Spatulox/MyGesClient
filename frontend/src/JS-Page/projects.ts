@@ -1,6 +1,6 @@
 import { popup } from "../JS/popups";
 import { GetProfile, GetProjects, JoinProjectGroup, QuitProjectGroup } from "../../wailsjs/go/backend/App";
-import { scrollMainPart } from "../JS/functions";
+import { escapeHtml, scrollMainPart } from "../JS/functions";
 
 // Types de base à adapter selon tes vrais modèles
 type Student = {
@@ -71,13 +71,12 @@ export async function projects(forceRefresh = false): Promise<void> {
     try {
         const mygesProjects = await GetProjects();
 
+        // Nothing changed since the last visit: keep the current display
         if (mygesProjectsRAM === mygesProjects && !forceRefresh) {
-            popup("No New Projects");
             return;
         }
 
         let profile: Profile = JSON.parse(await GetProfile());
-        mygesProjectsRAM = JSON.stringify(JSON.parse(mygesProjects));
 
         const projectItem = document.getElementById('projecttojoin') as HTMLElement;
         const myproject = document.getElementById('myproject') as HTMLElement;
@@ -85,6 +84,7 @@ export async function projects(forceRefresh = false): Promise<void> {
         myproject.innerHTML = "";
 
         populateData(JSON.parse(mygesProjects), profile.name, profile.firstname);
+        mygesProjectsRAM = mygesProjects;
     } catch (e: any) {
         console.error(e);
         popup(e.toString());
@@ -138,7 +138,8 @@ function populateData(projects: ProjectsResponse, name: string, firstname: strin
             let pfiles_out: string[] = [];
             if (pfiles) {
                 pfiles_out = pfiles.map(file => {
-                    return `${file.pf_title}.${file.pf_file.split(".")[1]}`;
+                    const extension = file.pf_file.includes(".") ? file.pf_file.split(".").pop() : "";
+                    return extension ? `${file.pf_title}.${extension}` : file.pf_title;
                 });
             }
 
@@ -261,8 +262,8 @@ function addProjectToJoin(projectName: string, professorName: string, subject: s
     div.classList.add("project-item");
 
     div.innerHTML += `
-        <span class="project-name">${projectName}</span>
-        <span class="project-info">${professorName} - ${subject}</span>
+        <span class="project-name">${escapeHtml(projectName)}</span>
+        <span class="project-info">${escapeHtml(professorName)} - ${escapeHtml(subject)}</span>
     `;
     projectItem.appendChild(div);
 }
@@ -352,10 +353,10 @@ function addMyProject(projectName: string, groupName: string, professorName: str
 
     div.innerHTML = `
         <div class="project-main-info">
-            <span class="project-name">${projectName}<span class="status-label status-${status.toLowerCase()}">${status}</span></span>
-            <span class="group-name">${groupName}</span>
+            <span class="project-name">${escapeHtml(projectName)}<span class="status-label status-${escapeHtml(status.toLowerCase())}">${escapeHtml(status)}</span></span>
+            <span class="group-name">${escapeHtml(groupName)}</span>
         </div>
-        <span class="project-info">${professorName} - ${subject}</span>
+        <span class="project-info">${escapeHtml(professorName)} - ${escapeHtml(subject)}</span>
     `;
 
     projectItem.appendChild(div);

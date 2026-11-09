@@ -36,7 +36,7 @@ func checkDateFormat(date string) (string, error) {
 /*
  * Refresh the local DB by asking the MyGes DB, and store it inside the LocalDB
  */
-func (a *App) globalRefresh(year string, start string, end string) (string, error) {
+func (a *App) globalRefresh(start string, end string) (string, error) {
 	var wg sync.WaitGroup
 	errChan := make(chan error, 3)
 
