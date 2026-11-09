@@ -171,17 +171,26 @@ func (a *App) UpdateUserPassword(username string, password string) (bool, error)
 		return false, fmt.Errorf("Impossible to connect to MyGes, bad username or password")
 	}
 
-	a.setAPI(userApi)
-	boolean, err := UpdateUserPassword(a.db, username, password)
-
-	user, err2 := GetUser(a.db)
-	if err2 != nil {
-		return false, err2
+	a.dbWg.Add(1)
+	a.dbMutex.Lock()
+	ok, err := UpdateUserPassword(a.db, username, password)
+	a.dbMutex.Unlock()
+	a.dbWg.Done()
+	if !ok || err != nil {
+		return false, err
 	}
 
-	a.setAPIUser(user)
+	// Only switch the API session if the updated account is the one currently in use
+	if a.getAPIUser().Username == username {
+		user, err := GetUser(a.db)
+		if err != nil {
+			return false, err
+		}
+		a.setAPIUser(user)
+		a.setAPI(userApi)
+	}
 
-	return boolean, err
+	return true, nil
 }
 
 func (a *App) GetRegisteredUsers() ([]UserSettings, error) {

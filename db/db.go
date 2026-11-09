@@ -79,9 +79,16 @@ func CheckUserExist(db *sql.DB, username string) (bool, error) {
 // ------------------------------------------------ //
 
 func UpdateUserPassword(db *sql.DB, username string, password string) (bool, error) {
-	_, err := db.Exec("UPDATE USER SET password = ? WHERE username = ?", username, password)
+	result, err := db.Exec("UPDATE USER SET password = ? WHERE username = ?", password, username)
 	if err != nil {
 		return false, fmt.Errorf("Erreur lors de l'update de l'utilisateurs %s : %w", username, err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+	}
+	if rowsAffected != 1 {
+		return false, fmt.Errorf("Aucun compte local ne correspond à l'utilisateur %s", username)
 	}
 	return true, nil
 }
