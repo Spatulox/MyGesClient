@@ -229,13 +229,19 @@ function showModal(course: structures.LocalAgenda): void {
     modalInfo.innerHTML = `
         <p><strong>Type :</strong> ${escapeHtml(course.type || 'Non spécifié')}</p>
         <p><strong>Horaire :</strong> ${toLocalHourString(new Date(course.start_date))} - ${toLocalHourString(new Date(course.end_date))}</p>
-        <p><strong>Salle :</strong> ${escapeHtml((course.type === "Examen" ? "Probably " : "") + (course.room.name?.String ?? '') + " " + (course.room.campus?.String ?? '') || 'Non spécifiée')}</p>
+        <p><strong>Salle :</strong> ${escapeHtml(formatRoom(course))}</p>
         <p><strong>Modalité :</strong> ${escapeHtml(course.modality || 'Non spécifiée')}</p>
         <p><strong>Discipline :</strong> ${escapeHtml(course.discipline?.trimester || 'Non spécifiée')}</p>
         <p><strong>Professeur(e) :</strong> ${escapeHtml(course.discipline?.Teacher?.teacher || 'Non spécifiée')}</p>
         <p><strong>Commentaire :</strong> ${escapeHtml(course.comment || 'Aucun')}</p>
     `;
     modal.style.display = 'block';
+}
+
+function formatRoom(course: structures.LocalAgenda): string {
+    const room = `${course.room.name?.String ?? ''} ${course.room.campus?.String ?? ''}`.trim();
+    if (!room) return 'Non spécifiée';
+    return (course.type === "Examen" ? "Probably " : "") + room;
 }
 
 function setupModal(): void {
