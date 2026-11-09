@@ -385,14 +385,23 @@ func (a *App) getLatestYear(jsonData string) (string, error) {
 
 // -------------------------------------------------------------------------- //
 
-func (a *App) startBackgroundTasks() {
-
+// currentWeekBounds returns the Monday and Sunday of the current week as "2006-01-02".
+func currentWeekBounds() (string, string) {
 	monday, sunday := GetWeekDates()
+	return monday.Format("2006-01-02"), sunday.Format("2006-01-02")
+}
 
+// refreshCurrentWeek refreshes the schedule of the current week, the grades and the absences.
+func (a *App) refreshCurrentWeek() (string, error) {
+	monday, sunday := currentWeekBounds()
+	return a.globalRefresh(monday, sunday)
+}
+
+func (a *App) startBackgroundTasks() {
 	// GlobalRefresh (Schedule / Grades / Absences...)
 	Log.Infos("Launching go routines")
 	go a.runEveryXMinutes(a.ctx, 60, func() {
-		msg, err := a.globalRefresh(fmt.Sprintf("%d", a.year), monday.Format("2006-01-02"), sunday.Format("2006-01-02"))
+		msg, err := a.refreshCurrentWeek()
 		if err != nil {
 			Log.Error(fmt.Sprintf("Global Refresh failed: %v", err))
 		} else {
@@ -402,9 +411,9 @@ func (a *App) startBackgroundTasks() {
 
 	// RefreshingSchedule
 	go a.runEveryXMinutes(a.ctx, 7, func() {
-		monday2 := monday.Format("2006-01-02")
-		sunday2 := sunday.Format("2006-01-02")
-		if _, err := a.RefreshAgenda(&monday2, &sunday2); err != nil {
+		// The week is computed at each tick: the app can stay open across several weeks
+		monday, sunday := currentWeekBounds()
+		if _, err := a.RefreshAgenda(&monday, &sunday); err != nil {
 			Log.Error(fmt.Sprintf("Agenda Refresh failed: %v", err))
 		}
 	})
