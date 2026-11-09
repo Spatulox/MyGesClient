@@ -32,13 +32,17 @@ const (
 	StatusFailed
 )
 
+// Startup error flags, combined with |
 const (
-	ErrDBInit       = 1
-	ErrUserInit     = 10
-	ErrAPIInit      = 100
-	ErrYearsRequest = 1000
-	ErrYearsParsing = 10000
+	ErrDBInit = 1 << iota
+	ErrUserInit
+	ErrAPIInit
+	ErrYearsRequest
 )
+
+// Without a network or an account, the app still starts (offline mode or
+// account creation). Only a DB failure is fatal.
+const allowedStartupErrors = ErrUserInit | ErrAPIInit | ErrYearsRequest
 
 // App struct
 type App struct {
@@ -168,66 +172,54 @@ func (a *App) runEveryXMinutes(ctx context.Context, x time.Duration, f func()) {
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 	a.startupStatus = StatusInProgress
-	errour := 0
+	startupErrors := 0
 
 	if err := a.initDB(); err != nil {
 		a.handleStartupError("DB initialization", err)
-		errour += ErrDBInit
+		startupErrors |= ErrDBInit
 	}
 
 	if err := a.initUser(); err != nil {
 		a.handleStartupError("User initialization", err)
-		errour += ErrUserInit
+		startupErrors |= ErrUserInit
 	}
 
 	if err := a.initAPI(); err != nil {
 		a.handleStartupError("API initialization", err)
-		errour += ErrAPIInit
+		startupErrors |= ErrAPIInit
 	}
 
 	if err := a.initYear(); err != nil {
-		a.handleStartupError("API initialization", err)
-		errour += ErrYearsRequest
+		a.handleStartupError("Year initialization", err)
+		startupErrors |= ErrYearsRequest
 	}
 
-	if errour != 0 {
-
-		allowedErrors := ErrYearsParsing | ErrAPIInit | ErrUserInit
-
-		// Vérifiez si les erreurs actuelles sont uniquement celles autorisées
-		if errour & ^allowedErrors == 0 {
-			// Les seules erreurs présentes sont celles autorisées, l'application peut démarrer
-			fmt.Println("Starting app without critic errors (No internet or no account)")
-		} else {
-			errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", errour)
-			_, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
-				Type:    runtime.ErrorDialog,
-				Title:   "Erreur de démarrage",
-				Message: errorMessage,
-			})
-			if err != nil {
-				return
-			}
-			runtime.Quit(ctx)
-		}
-
-		if errour&ErrUserInit != 0 {
-			a.startupStatus = StatusIncompleteNoUsers
-			Log.Infos("No Users")
-			Log.Infos("Startup incomplete.")
-		} else {
-			a.startupStatus = StatusIncompleteNoInternet
-			Log.Infos("No Internet")
-			Log.Infos("Startup incomplete, searching for internet...")
-
-			// Search for internet
-			a.initIfInternet()
-
-		}
-	} else {
+	switch {
+	case startupErrors == 0:
 		a.startBackgroundTasks()
 		a.startupStatus = StatusCompleted
 		Log.Infos("Startup completed successfully")
+
+	case startupErrors&^allowedStartupErrors != 0:
+		a.startupStatus = StatusFailed
+		errorMessage := fmt.Sprintf("L'application n'a pas pu démarrer. Error code : %d", startupErrors)
+		if _, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+			Type:    runtime.ErrorDialog,
+			Title:   "Erreur de démarrage",
+			Message: errorMessage,
+		}); err != nil {
+			return
+		}
+		runtime.Quit(ctx)
+
+	case startupErrors&ErrUserInit != 0:
+		Log.Infos("Starting app without critic errors (no account)")
+		a.startupStatus = StatusIncompleteNoUsers
+
+	default:
+		Log.Infos("Starting app without critic errors (no internet), searching for internet...")
+		a.startupStatus = StatusIncompleteNoInternet
+		a.initIfInternet()
 	}
 }
 
