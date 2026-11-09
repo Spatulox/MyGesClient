@@ -1,29 +1,3 @@
-import { GetParentDir, WriteLogFile } from "../../wailsjs/go/backend/App";
-
-// ------------------------------------------------ //
-
-export function log(str: string): void {
-    GetParentDir()
-        .then((parentDir: string) => {
-            const logDir = parentDir.split('\\src')[0] + "\\log";
-            const filePath = logDir + '\\log.txt';
-
-            const today = new Date();
-            const previousStr = `[${today.toLocaleDateString()} - ${today.toLocaleTimeString()}] `;
-
-            WriteLogFile(filePath, previousStr + str + '\n')
-                .then(() => {
-                    console.log(previousStr + str + '\n');
-                })
-                .catch((err: any) => {
-                    console.error("ERROR : Impossible to write the log file : " + err);
-                });
-        })
-        .catch((error: any) => {
-            console.error("Error getting parent directory:", error);
-        });
-}
-
 // ------------------------------------------------ //
 
 export function capitalizeFirstLetter(str: string): string {

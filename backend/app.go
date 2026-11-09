@@ -11,8 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"sync"
@@ -441,46 +439,6 @@ func (a *App) startBackgroundTasks() {
 
 func (a *App) GetStartStatus() StartupStatus {
 	return a.startupStatus
-}
-
-// -------------------------------------------------------------------------- //
-
-func (a *App) GetParentDir() string {
-	execPath, err := os.Executable()
-	if err != nil {
-		return ""
-	}
-
-	// Obtient le répertoire contenant l'exécutable
-	dir := filepath.Dir(execPath)
-
-	// Remonte d'un niveau pour obtenir le répertoire parent
-	parentDir := filepath.Dir(dir)
-
-	return parentDir
-}
-
-func (a *App) WriteLogFile(filePath string, content string) error {
-	dir := filepath.Dir(filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("Erreur lors de la création du répertoire: %w", err)
-	}
-
-	// Ouvrir le fichier en mode append (ou le créer s'il n'existe pas)
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("Erreur lors de l'ouverture du fichier: %w", err)
-	}
-	defer file.Close()
-
-	logEntry := fmt.Sprintf("%s", content)
-
-	// Écrire dans le fichier
-	if _, err := file.WriteString(logEntry); err != nil {
-		return fmt.Errorf("Erreur lors de l'écriture dans le fichier: %w", err)
-	}
-
-	return nil
 }
 
 // -------------------------------------------------------------------------- //
