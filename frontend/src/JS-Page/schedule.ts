@@ -28,7 +28,6 @@ export async function schedule(forceRefresh = false): Promise<void> {
 
 export async function getSchedule(monday: string, sunday: string, forceRefresh: boolean = false): Promise<structures.LocalAgenda[] | undefined> {
     try {
-        clearSchedule();
         let agenda: structures.LocalAgenda[] | undefined;
 
         // saved monday <= today monday's week || no internet connection => not refresh past/today's schedule OR get the local schedule when no internet
@@ -59,6 +58,7 @@ export async function getSchedule(monday: string, sunday: string, forceRefresh: 
 }
 
 async function updateSchedule(monday: Date, sunday: Date, forceRefresh: boolean): Promise<void> {
+    clearSchedule();
     printScheduleTitle(monday, sunday);
     const agenda = await getSchedule(toYMD(monday), toYMD(sunday), forceRefresh);
     if (agenda) {
