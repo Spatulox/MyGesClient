@@ -66,8 +66,9 @@ export async function grades(): Promise<void> {
         }
 
         // Gérer les clics sur les onglets
+        // onclick : un seul handler, même après plusieurs visites
         tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
+            button.onclick = () => {
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
 
@@ -75,7 +76,7 @@ export async function grades(): Promise<void> {
                 document.querySelectorAll('.grades-list').forEach(list => list.classList.remove('active'));
                 const list = document.getElementById(`grades-list-semester-${semester}`);
                 if (list) list.classList.add('active');
-            });
+            };
         });
     } finally {
         isStillRunning = false;

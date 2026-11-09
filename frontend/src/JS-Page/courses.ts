@@ -45,15 +45,15 @@ export async function courses(): Promise<void> {
 
             mygescourses = JSON.parse(rawCourses) as MyGesCourses;
 
-            // Recherche dynamique
-            search.addEventListener("input", () => {
+            // Recherche dynamique (oninput : un seul handler, même après plusieurs visites)
+            search.oninput = () => {
                 courseGrid.innerHTML = "";
                 mygescourses!.items.forEach(course => {
                     if (course.name.toLowerCase().includes(search.value.toLowerCase())) {
                         courseGrid.innerHTML += createCourseCard(course);
                     }
                 });
-            });
+            };
 
             // Affichage initial
             courseGrid.innerHTML = "";

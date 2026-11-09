@@ -43,6 +43,35 @@ function toggleSelect(this: HTMLElement, e: Event): void {
     this.classList.toggle('select-arrow-active');
 }
 
+// Handlers are defined at module level so removeEventListener() finds the
+// same function and the listeners are never attached twice.
+function handleItemClick(this: HTMLElement, e: Event): void {
+    const selectSelected = document.querySelector('.custom-select .select-selected') as HTMLElement | null;
+    const selectItems = document.querySelector('.custom-select .select-items') as HTMLElement | null;
+
+    if (this.textContent !== "Créer un compte") {
+        showUsernameField(false);
+        changeLoginButtonName("Se connecter");
+        changeTitle("Se connecter");
+    } else {
+        changeLoginButtonName("Créer un compte");
+        changeTitle("Créer un compte");
+        showUsernameField(true);
+    }
+
+    e.stopPropagation();
+    if (selectSelected) {
+        selectSelected.textContent = this.textContent;
+        selectSelected.classList.remove('select-arrow-active');
+    }
+    selectItems?.classList.add('select-hide');
+}
+
+function handleOutsideClick(): void {
+    document.querySelector('.custom-select .select-items')?.classList.add('select-hide');
+    document.querySelector('.custom-select .select-selected')?.classList.remove('select-arrow-active');
+}
+
 export function initializeDropDownMenu(): void {
     console.log("Initialize drop down menu");
     const customSelect = document.querySelector('.custom-select') as HTMLElement | null;
@@ -54,35 +83,13 @@ export function initializeDropDownMenu(): void {
     selectSelected.removeEventListener("click", toggleSelect as EventListener);
     selectSelected.addEventListener("click", toggleSelect as EventListener);
 
-    function handleItemClick(this: HTMLElement, e: Event): void {
-        if (this.textContent !== "Créer un compte") {
-            showUsernameField(false);
-            changeLoginButtonName("Se connecter");
-            changeTitle("Se connecter");
-        } else {
-            changeLoginButtonName("Créer un compte");
-            changeTitle("Créer un compte");
-            showUsernameField(true);
-        }
-
-        e.stopPropagation();
-        selectSelected!.textContent = this.textContent;
-        selectItems!.classList.add('select-hide');
-        selectSelected!.classList.remove('select-arrow-active');
-    }
-
-    function handleOutsideClick(): void {
-        selectItems!.classList.add('select-hide');
-        selectSelected!.classList.remove('select-arrow-active');
-    }
-
     selectItems.querySelectorAll('div').forEach(item => {
         item.removeEventListener('click', handleItemClick as EventListener);
         item.addEventListener('click', handleItemClick as EventListener);
     });
 
-    document.removeEventListener('click', handleOutsideClick as EventListener);
-    document.addEventListener('click', handleOutsideClick as EventListener);
+    document.removeEventListener('click', handleOutsideClick);
+    document.addEventListener('click', handleOutsideClick);
 }
 
 export async function changeLoginPassword(button: boolean = true): Promise<void> {
