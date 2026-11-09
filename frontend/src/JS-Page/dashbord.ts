@@ -174,6 +174,8 @@ export async function updateScheduleDashboard(agenda: structures.LocalAgenda[]):
         courseElement.className = 'course-card';
         const courseName = capitalizeFirstLetter(cleanCourseName(course.agenda_name));
         const color = safeColor(course.room.color?.Valid ? course.room.color.String : "", "#FFFFFF");
+        // Used by the light theme, which shows the room color as a border instead
+        courseElement.style.setProperty('--course-color', color);
         let html = `
             <h3 style="color: ${escapeHtml(color)}">${escapeHtml(courseName)}</h3>
             <p>${escapeHtml(course.start_date.split('T')[1].substring(0, 5))} - ${escapeHtml(course.end_date.split('T')[1].substring(0, 5))}</p>

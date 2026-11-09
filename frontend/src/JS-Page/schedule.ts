@@ -188,7 +188,10 @@ async function printSchedule(agenda: structures.LocalAgenda[] | undefined, monda
                 title.textContent = course.type === "Examen"
                     ? `${capitalizeFirstLetter(course_name)} - ${course.type}`
                     : capitalizeFirstLetter(course_name);
-                title.style.color = safeColor(course.room.color?.Valid ? course.room.color.String : "");
+                const roomColor = safeColor(course.room.color?.Valid ? course.room.color.String : "");
+                title.style.color = roomColor;
+                // Used by the light theme, which shows the room color as a border instead
+                if (roomColor) courseElement.style.setProperty('--course-color', roomColor);
                 courseElement.appendChild(title);
 
                 courseElement.addEventListener('click', () => {

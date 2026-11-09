@@ -6,31 +6,40 @@
     --bg-color: #36393f;
 }
 
+/* Light theme: light surfaces, dark text, same blue accent as the dark theme.
+   Rules that need more than a variable live in theme-light.css. */
 .light{
-    --rightPartColor: #364156;
-    --mainPartColor: rgb(212, 212, 212);
-	--colorMain: #9F9E9E;
-    --policeColor : white;
-    --mainPoliceColor : black;
+    --rightPartColor: #ffffff;
+    --mainPartColor: #f3f4f6;
+	--colorMain: #e9ecf0;
+    --policeColor : white;          /* text on the accent color (buttons, popups) */
+    --mainPoliceColor : #1f2328;
     --darkPoliceColor : #2f3136;
 
-    --popupColor : #364156;
-    --boxBackgroundColor : #536483;
+    --popupColor : #2e3338;
+    --boxBackgroundColor : #ffffff;
 
-    --sidebar-color: #2f3136;
-    --text-color: #dcddde;
-    --text-secondary-color: #b9bbbe;
-    --text-muted: #72767d;
-    --text-normal: #dcddde;
+    --sidebar-color: #ffffff;
+    --text-color: #1f2328;
+    --text-secondary-color: #4f5660;
+    --text-muted: #6a737d;
+    --text-normal: #1f2328;
     --highlight-color: #396aa1;
-    --card-bg: #40444b;
-    --hover-bg: #454950;
+    --hover-color: #2f5a8a;
+    --card-bg: #ffffff;
+    --hover-bg: #f0f2f5;
+    --bg-color: #f6f7f9;
 
-    --discord-dark: #2f3136;
-    --discord: #36393f;
-    --discord-light: #40444b;
-    --discord-lightlight: #56585c;
+    --discord-dark: #ffffff;
+    --discord: #f6f7f9;
+    --discord-light: #eef0f3;
+    --discord-lightlight: #e3e6ea;
     --discord-verylight : #abadb3;
+
+    /* Only used by theme-light.css */
+    --border-color: #dde1e6;
+    --shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+    --accent-soft: #e6eef8;
 
     transition: all ease-in-out 0.5s;
 
@@ -61,6 +70,7 @@
     --discord-light: #40444b;
     --discord-lightlight: #56585c;
     --discord-verylight : #abadb3;
+    --bg-color: #36393f;
 
     transition: all ease-in-out 0.5s;
 }
