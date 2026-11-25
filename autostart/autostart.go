@@ -3,7 +3,7 @@
 //
 // The OS is the source of truth: the service is enabled when its startup
 // entry exists (an XDG autostart file on Linux, a Run registry value on
-// Windows).
+// Windows, a LaunchAgent on macOS).
 package autostart
 
 import (

@@ -64,7 +64,7 @@ Les binaires sont disponibles sur la [page des releases](https://github.com/Spat
 | Système | Fichier | Architectures |
 |---|---|---|
 | Windows | `-setup.exe` (installeur) ou `-portable.exe` | x64, ARM64 (`-arm64`) |
-| Linux (Debian, Ubuntu…) | `.deb` | amd64, arm64 |
+| Linux (Debian, Ubuntu…) | `.deb` (prendre celui de sa version d'Ubuntu, ex. `+ubuntu24.04`) | amd64, arm64 |
 | macOS | `-macos-universal.zip` | Intel et Apple Silicon |
 
 ### macOS
@@ -73,6 +73,11 @@ Faites clic droit sur l'application > **Ouvrir**, ou lancez une fois :
 ```bash
 xattr -dr com.apple.quarantine /Applications/MyGesClient.app
 ```
+
+Rappels quand l'application est fermée (Compte > Rappels des évènements) : l'option installe un LaunchAgent
+(`~/Library/LaunchAgents/io.github.spatulox.MyGesClient.service.plist`). macOS signale alors un « élément ajouté en arrière-plan ».
+- Si vous le désactivez dans Réglages Système > Général > Ouverture, l'application ne peut pas le savoir : la case reste cochée. Décochez-la aussi dans MyGesClient.
+- Les notifications passent par `osascript` : elles s'affichent au nom de « Éditeur de script ».
 
 ### Linux : dépannage
 - **Mot de passe stocké sans chiffrement** : l'application range le mot de passe dans le trousseau du système (Secret Service).
