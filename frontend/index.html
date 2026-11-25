@@ -14,6 +14,7 @@
 
     <link rel="stylesheet" type="text/css" href="./src/CSS/schedule.css">
     <link rel="stylesheet" type="text/css" href="./src/CSS/projects.css">
+    <link rel="stylesheet" type="text/css" href="./src/CSS/pagesRework.css">
     <!-- Must stay last: light theme overrides -->
     <link rel="stylesheet" type="text/css" href="./src/CSS/theme-light.css">
 
@@ -306,28 +307,17 @@
                 <div id="grades" style="display: none">
                     <div id="allGradesContainer" class="marginAuto box width80">
                         <div class="main-content-grades">
-                            <h2>Mes Notes</h2>
-                            <div class="semester-tabs">
-                                <button class="tab-button active" data-semester="1">Semestre 1</button>
-                                <button class="tab-button" data-semester="2">Semestre 2</button>
-                            </div>
-                            <div class="grades-container">
-                                <div class="grades-header">
-                                    <span>Cours</span>
-                                    <span>ECTS</span>
-                                    <span>Coef</span>
-                                    <span>Professeur</span>
-                                    <span>Notes</span>
-                                    <span>Exam</span>
-                                    <span>Bonus</span>
-                                </div>
-                                <div id="grades-list-semester-1" class="grades-list active">
-                                    <!-- Les notes du premier semestre seront insérées ici -->
-                                </div>
-                                <div id="grades-list-semester-2" class="grades-list">
-                                    <!-- Les notes du deuxième semestre seront insérées ici -->
+                            <div class="page-title-row has-year-picker">
+                                <h2>Mes Notes</h2>
+                                <div id="grades-year-picker" class="year-picker" hidden>
+                                    <label for="year-grades">Année</label>
+                                    <select id="year-grades"></select>
                                 </div>
                             </div>
+                            <div id="grades-archive" class="archive-banner" hidden></div>
+                            <div id="grades-tabs" class="semester-tabs" role="group" aria-label="Période"></div>
+                            <!-- Résumé, liste des matières et détail : insérés par grades.ts -->
+                            <div id="grades-page-content"></div>
                         </div>
                     </div>
                 </div>
@@ -347,21 +337,16 @@
                 <div id="absences" style="display: none">
                     <div id="allContainerAbsences" class="flex flexCenter wrap">
                         <div class="box widthAuto">
-                            <h1>Mes Absences</h1>
-                            <table id="coursesTable">
-                                <thead>
-                                <tr>
-                                    <th>Nom du cours</th>
-                                    <th>Date</th>
-                                    <th>Justifié</th>
-                                    <th>Trimestre</th>
-                                    <th>Année</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <!-- Les données seront ajoutées ici via JavaScript -->
-                                </tbody>
-                            </table>
+                            <div class="page-title-row">
+                                <h1>Mes Absences</h1>
+                                <div id="absences-year-picker" class="year-picker" hidden>
+                                    <label for="year-absences">Année</label>
+                                    <select id="year-absences"></select>
+                                </div>
+                            </div>
+                            <div id="absences-archive" class="archive-banner" hidden></div>
+                            <!-- Statistiques, filtres et liste : insérés par absences.ts -->
+                            <div id="absences-content"></div>
                         </div>
                     </div>
                 </div>
@@ -369,10 +354,22 @@
                 <div id="courses" style="display: none">
                     <div class="container-courses">
                         <h1>Liste des Cours</h1>
+                        <div id="courses-archive" class="archive-banner" hidden></div>
+                        <label for="search-bar-courses" class="visually-hidden">Chercher un cours ou un professeur</label>
                         <input type="text" placeholder="Cherchez un cours..." id="search-bar-courses" autocomplete="off">
-                        <div id="courseGrid" class="course-grid">
-                            <!-- Les cartes de cours seront insérées ici par JavaScript -->
-                            <img src="./src/assets/images/circle-loading.gif" alt="loading.." id="loadingCourses">
+                        <div class="courses-toolbar">
+                            <div id="courses-filters" class="courses-filters" role="group" aria-label="Trimestre"></div>
+                            <div class="courses-toolbar-end">
+                                <span id="courses-count" class="courses-count"></span>
+                                <div id="courses-year-picker" class="year-picker" hidden>
+                                    <label for="year-courses">Année</label>
+                                    <select id="year-courses"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="./src/assets/images/circle-loading.gif" alt="loading.." id="loadingCourses">
+                        <div id="courseGrid">
+                            <!-- Les cours, groupés par trimestre, seront insérés ici par JavaScript -->
                         </div>
                     </div>
                 </div>

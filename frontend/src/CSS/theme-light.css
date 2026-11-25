@@ -130,32 +130,10 @@
     background-color: var(--popupColor);
 }
 
-/* ---------- Tables (grades, absences) ---------- */
+/* ---------- Tables (dashboard grades) ---------- */
 
-.light #allGradesContainer .grades-header,
-.light .main-content-dashboard .grades-header,
-.light #allContainerAbsences th {
+.light .main-content-dashboard .grades-header {
     color: #ffffff;
-}
-
-.light #allGradesContainer .grade-item {
-    border-bottom: 1px solid var(--border-color);
-}
-
-.light #allContainerAbsences tr:nth-child(even) {
-    background-color: var(--bg-color);
-}
-
-.light #allContainerAbsences tr:hover {
-    background-color: var(--accent-soft);
-}
-
-.light #allContainerAbsences .justified {
-    color: #1e7f4f;
-}
-
-.light #allContainerAbsences .not-justified {
-    color: #c62828;
 }
 
 .light .tab-button {

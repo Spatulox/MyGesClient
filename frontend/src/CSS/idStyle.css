@@ -299,38 +299,6 @@
     margin-bottom: 20px;
 }
 
-#allContainerAbsences table {
-    width: 100%;
-    border-collapse: collapse;
-    border-radius: 8px;
-    overflow: hidden; /* Pour arrondir les coins */
-}
-
-#allContainerAbsences th, #allContainerAbsences td {
-    padding: 12px 15px;
-    text-align: left;
-}
-
-#allContainerAbsences th {
-    background-color: var(--highlight-color); /* Couleur d'en-tête inspirée de Discord */
-}
-
-#allContainerAbsences tr:nth-child(even) {
-    background-color: var(--card-bg); /* Couleur des lignes paires */
-}
-
-#allContainerAbsences tr:hover {
-    background-color: #5C5F61; /* Couleur au survol */
-}
-
-#allContainerAbsences .justified {
-    color: #43B581; /* Couleur verte pour "Justifié" */
-}
-
-#allContainerAbsences .not-justified {
-    color: #F04747; /* Couleur rouge pour "Non Justifié" */
-}
-
 #allContainerSchedule{
     transform: translateY(-30px);
     min-width: 98%;
@@ -338,12 +306,8 @@
     margin: auto;
 }
 
-#allContainerAbsences div{
+#allContainerAbsences > div{
     margin-top: 0;
-}
-
-#allContainerAbsences div div{
-    max-width: 220px;
 }
 
 
@@ -375,7 +339,7 @@
     border-radius: 5px;
 }
 
-#allGradesContainer .grades-container, .main-content-dashboard .grades-container {
+.main-content-dashboard .grades-container {
     background-color: var(--card-bg);
     border-radius: 5px;
     display: flex;
@@ -385,24 +349,12 @@
     max-height: 70vh;
 }
 
-#allGradesContainer .grades-header, .main-content-dashboard .grades-header {
+.main-content-dashboard .grades-header {
     position: sticky;
     top: 0;
     z-index: 1;
     font-weight: bold;
     background-color: var(--highlight-color);
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 2fr 1fr 1fr 1fr;
-    padding: 10px;
-    align-items: center;
-}
-
-#allGradesContainer .grades-list {
-    overflow-y: auto;
-    flex-grow: 1;
-}
-
-#allGradesContainer .grade-item {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 2fr 1fr 1fr 1fr;
     padding: 10px;
@@ -417,28 +369,6 @@
     grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
     padding: 10px;
     align-items: center;
-}
-
-
-#allGradesContainer .grade-item:last-child {
-    border-bottom: none;
-}
-
-#allGradesContainer .grade-item:hover {
-    background-color: var(--hover-bg);
-}
-
-#allGradesContainer .grade-item span {
-    padding: 5px;
-}
-
-#allGradesContainer .grade-notes {
-    display: flex;
-    flex-direction: column;
-}
-
-#allGradesContainer .grade-notes span {
-    margin-bottom: 2px;
 }
 
 .loading-gif-account{
