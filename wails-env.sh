@@ -14,6 +14,26 @@ if ! command -v npm >/dev/null 2>&1 && [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; t
     set -u
 fi
 
+# version_ldflags ARGS... sets VERSION_LDFLAGS to the -ldflags that write the
+# version shown in "Informations de l'Application" (backend.AppVersion):
+# $MYGES_VERSION if set (the CI passes the release tag), else the nearest
+# release tag (git describe, v* tags only), else "dev". Nothing when -ldflags
+# is already given.
+# Not $APP_VERSION: PackagingOnLinux sets it to the packaging.toml version
+# when it runs this script, which isn't a tag.
+version_ldflags() {
+    local arg version
+    VERSION_LDFLAGS=()
+    for arg in "$@"; do
+        case "$arg" in -ldflags|-ldflags=*) return ;; esac
+    done
+    version="${MYGES_VERSION:-}"
+    if [ -z "$version" ]; then
+        version="$(git describe --tags --match 'v*' --dirty 2>/dev/null || true)"
+    fi
+    VERSION_LDFLAGS=(-ldflags "-X MyGesClient/backend.AppVersion=${version:-dev}")
+}
+
 # webkit_tags ARGS... sets WEBKIT_TAGS to the extra wails flags for these
 # arguments: -tags webkit2_41 for a Linux build when WebKitGTK 4.1 is
 # installed, like the CI (Ubuntu 24.04 and Debian 13 no longer ship
