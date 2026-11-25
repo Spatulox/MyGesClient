@@ -13,6 +13,7 @@ import {
 import {
     ConnectUser,
     DeleteOldData,
+    GetAppInfo,
     UpdateUserEula,
     UpdateUserPassword,
     UpdateUserTheme,
@@ -191,6 +192,19 @@ export async function showAppInfos(): Promise<void> {
     const softwareInfo = document.getElementById('softwareInfo') as HTMLElement | null;
     if (softwareInfo) {
         softwareInfo.classList.add('active');
+    }
+    try {
+        const info = await GetAppInfo();
+        const set = (id: string, value: string) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value || "inconnue";
+        };
+        set("appInfoVersion", info.version);
+        set("appInfoBuildDate", info.buildDate);
+        set("appInfoSystem", info.system);
+        set("appInfoRuntime", `Go ${info.goVersion} / Wails ${info.wailsVersion}`);
+    } catch (e) {
+        console.log(e);
     }
 }
 
