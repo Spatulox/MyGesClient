@@ -14,7 +14,8 @@ const USER = `CREATE TABLE IF NOT EXISTS USER (
     theme TEXT NOT NULL DEFAULT 'dark',
     eula BOOLEAN NOT NULL DEFAULT 0,
     selected BOOLEAN NOT NULL DEFAULT 0,
-	last_year TEXT NOT NULL DEFAULT '1970'
+	last_year TEXT NOT NULL DEFAULT '1970',
+	reminder_minutes INTEGER NOT NULL DEFAULT 15 -- events are reminded this many minutes before (-1: never)
 );`
 
 // To store the schedule of the user
@@ -83,6 +84,7 @@ const EVENTS = `CREATE TABLE IF NOT EXISTS EVENTS(
     end_date TEXT NOT NULL,
     color TEXT NOT NULL,
     user_id INT NOT NULL,
+    reminded BOOLEAN NOT NULL DEFAULT 0, -- the reminder notification has been sent
     FOREIGN KEY (user_id) REFERENCES USER(user_id)
 );`
 
@@ -167,6 +169,13 @@ var migrations = []func(tx *sql.Tx) error{
 			}
 		}
 		return nil
+	},
+	// 3: event reminders (see the service package)
+	func(tx *sql.Tx) error {
+		if err := addColumnIfMissing(tx, "USER", "reminder_minutes", "INTEGER NOT NULL DEFAULT 15"); err != nil {
+			return err
+		}
+		return addColumnIfMissing(tx, "EVENTS", "reminded", "BOOLEAN NOT NULL DEFAULT 0")
 	},
 }
 

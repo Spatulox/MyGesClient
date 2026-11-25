@@ -6,6 +6,10 @@ Le workflow de release publie le contenu de la section du tag poussé
 
 ## v1.3.1
 
+### Nouveautés
+- Rappels des évènements : une notification du système est envoyée avant chaque évènement (15 min avant par défaut, réglable dans Compte > Rappels des évènements, ou « Jamais ») (#56).
+- Option « Recevoir les rappels quand l'application est fermée » (Linux et Windows) : un service léger, sans fenêtre, démarre avec la session (`~/.config/autostart` sous Linux, clé `Run` de l'utilisateur sous Windows). Décocher l'option l'arrête et le retire du démarrage ; la désinstallation Windows le retire aussi.
+
 ### Sécurité
 - Le mot de passe MyGes est rangé dans le trousseau du système (Gestionnaire d'identification Windows, Trousseau macOS, Secret Service sous Linux) au lieu d'être en clair dans la base locale. Les mots de passe existants y sont déplacés au premier lancement (#65).
 - Sans trousseau disponible (Linux sans gnome-keyring ni KWallet), le mot de passe reste dans la base locale, et il est déplacé dans le trousseau dès que celui-ci devient disponible.

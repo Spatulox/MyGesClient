@@ -361,3 +361,77 @@ func GetEventPresets(db *sql.DB) ([]Preset, error) {
 
 	return presets, nil
 }
+
+// ------------------------------------------------ //
+
+// reminderGrace is how late a reminder can still be sent after the
+// reminder time, so that an event is not missed between two checks.
+const reminderGrace = "-2 minutes"
+
+// EventReminder is an event whose reminder is due.
+type EventReminder struct {
+	Id          int
+	Name        string
+	Description string
+	StartDate   time.Time // UTC
+}
+
+// GetEventsToRemindDB returns the events of the selected user whose reminder
+// is due and has not been sent yet: they start within the reminder delay of
+// the user (USER.reminder_minutes). Nothing is returned when the user turned
+// the reminders off.
+func GetEventsToRemindDB(db *sql.DB) ([]EventReminder, error) {
+	// start_date is stored as UTC "YYYY-MM-DD HH:MM:SS", like datetime('now'),
+	// so the dates can be compared as strings.
+	query := `
+		SELECT e.event_id, e.event_name, e.event_description, e.start_date
+		FROM EVENTS e
+		JOIN USER u ON u.user_id = e.user_id
+		WHERE u.selected = true
+		  AND u.reminder_minutes >= 0
+		  AND e.reminded = false
+		  AND e.start_date > datetime('now', ?)
+		  AND e.start_date <= datetime('now', '+' || u.reminder_minutes || ' minutes')
+		ORDER BY e.start_date ASC
+	`
+	rows, err := db.Query(query, reminderGrace)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de la récupération des rappels : %w", err)
+	}
+	defer rows.Close()
+
+	var reminders []EventReminder
+	for rows.Next() {
+		var r EventReminder
+		var description sql.NullString
+		var startDateStr string
+		if err := rows.Scan(&r.Id, &r.Name, &description, &startDateStr); err != nil {
+			return nil, fmt.Errorf("erreur lors de la lecture d'un rappel : %w", err)
+		}
+		r.StartDate, err = time.Parse("2006-01-02 15:04:05", startDateStr)
+		if err != nil {
+			return nil, fmt.Errorf("erreur lors de la conversion de la date de début : %w", err)
+		}
+		r.Description = description.String
+		reminders = append(reminders, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("erreur lors du parcours des rappels : %w", err)
+	}
+	return reminders, nil
+}
+
+// ClaimEventReminderDB marks the reminder of an event as sent. It returns
+// false when it was already marked: the GUI and the background service both
+// check the reminders, only the one that claims it sends the notification.
+func ClaimEventReminderDB(db *sql.DB, eventId int) (bool, error) {
+	result, err := db.Exec(`UPDATE EVENTS SET reminded = true WHERE event_id = ? AND reminded = false`, eventId)
+	if err != nil {
+		return false, fmt.Errorf("erreur lors de la mise à jour du rappel : %w", err)
+	}
+	n, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+	}
+	return n == 1, nil
+}

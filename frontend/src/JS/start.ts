@@ -25,6 +25,7 @@ import { courses } from "../JS-Page/courses";
 import { changeWeek, hideScheduleButtons, schedule, showScheduleButtons } from "../JS-Page/schedule";
 import { projects } from "../JS-Page/projects";
 import { initExternalLinks } from "./externalLinks";
+import { initReminderSettings } from "../JS-Page/softwareAccount";
 
 let initializedStart = false;
 
@@ -208,6 +209,8 @@ async function initializeSoftwareAccount(): Promise<void> {
     deconnectionFromMygesId?.addEventListener("click", () => {
         deconnectionFromMyges();
     });
+
+    initReminderSettings();
 }
 
 async function initializeSchedulePart(): Promise<void> {
