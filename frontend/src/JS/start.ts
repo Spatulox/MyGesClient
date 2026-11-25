@@ -8,6 +8,7 @@ import { initCreateEvent, loadEventPresets } from "./createEvents";
 
 import { popup, stillPopup, stopStillPopup } from './popups';
 import {
+    askPasswordAgain,
     changeLoginButtonName, changeLoginPassword,
     changeTitle,
     deconnectionFromMyges,
@@ -33,7 +34,8 @@ const StartupStatus = {
     StatusIncompleteNoUsers: 2,
     StatusIncompleteNoInternet: 3,
     StatusCompleted: 4,
-    StatusFailed: 5
+    StatusFailed: 5,
+    StatusPasswordMissing: 6
 } as const;
 
 type StartupStatusType = typeof StartupStatus[keyof typeof StartupStatus];
@@ -102,6 +104,9 @@ export async function start(): Promise<void> {
                 popup("Le démarrage prend plus de temps que prévu, certaines pages peuvent être incomplètes");
             }
             await initAllPages(status);
+            if (status === StartupStatus.StatusPasswordMissing) {
+                await askPasswordAgain(user.Username);
+            }
         } catch (e: any) {
             console.log(e);
             popup(e?.toString?.() ?? String(e));
@@ -124,6 +129,7 @@ async function initAllPages(startingStatus: StartupStatusType = 0): Promise<void
             await courses();
         // fallthrough
         case StartupStatus.StatusIncompleteNoInternet:
+        case StartupStatus.StatusPasswordMissing:
             await grades();
             await events();
             await absences();

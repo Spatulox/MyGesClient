@@ -92,7 +92,12 @@ export function initializeDropDownMenu(): void {
     document.addEventListener('click', handleOutsideClick);
 }
 
+// True while the password form is open because the password could not be
+// retrieved at startup: once it is saved, the app has to finish starting.
+let passwordRecovery = false;
+
 export async function changeLoginPassword(button: boolean = true): Promise<void> {
+    passwordRecovery = false;
     changeTitle("Modifier le mot de passe");
     changeLoginButtonName("Modifier");
     showDropDownMenu(false);
@@ -100,6 +105,23 @@ export async function changeLoginPassword(button: boolean = true): Promise<void>
     showButtonCancelConnection();
     showUsernameField();
     await openConnexion();
+}
+
+// The password of username is neither in the OS keyring nor in the local DB:
+// ask the user to type it again.
+export async function askPasswordAgain(username: string): Promise<void> {
+    await changeLoginPassword();
+    passwordRecovery = true;
+    const usernameInput = document.getElementById("username") as HTMLInputElement | null;
+    if (usernameInput) usernameInput.value = username;
+    showConnectionError("Mot de passe introuvable dans le trousseau du système, merci de le ressaisir");
+}
+
+// Returns true (once) if the password form was opened by askPasswordAgain.
+export function consumePasswordRecovery(): boolean {
+    const recovery = passwordRecovery;
+    passwordRecovery = false;
+    return recovery;
 }
 
 export async function deconnectionFromMyges(): Promise<void> {

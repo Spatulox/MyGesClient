@@ -3,7 +3,9 @@ package backend
 import (
 	. "MyGesClient/api"
 	. "MyGesClient/log"
+	"crypto/subtle"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	. "MyGesClient/structures"
@@ -56,12 +58,17 @@ func (a *App) VerifyUser(username string, password string) (string, error) {
 	//Log.Debug(fmt.Sprintf("CreateUser"))
 	a.dbWg.Add(1)
 	a.dbMutex.Lock()
-	user, err := CreateUser(a.db, username, password)
+	user, err := CreateUser(a.db, username)
 	a.dbMutex.Unlock()
 	a.dbWg.Done()
 	if !user {
 		Log.Error(fmt.Sprintf("Impossible to save your info in local DB : %v", err))
 		return createMessage("Impossible to save your info in local DB"), err
+	}
+
+	if err := a.setPassword(username, password); err != nil {
+		Log.Error(fmt.Sprintf("Impossible to save your password : %v", err))
+		return createMessage("Impossible to save your password"), err
 	}
 
 	//Log.Debug(fmt.Sprintf("InitPart()"))
@@ -151,12 +158,15 @@ func (a *App) UpdateUserPassword(username string, password string) (bool, error)
 		return false, fmt.Errorf("Impossible to connect to MyGes, bad username or password")
 	}
 
-	a.dbWg.Add(1)
-	a.dbMutex.Lock()
-	ok, err := UpdateUserPassword(a.db, username, password)
-	a.dbMutex.Unlock()
-	a.dbWg.Done()
-	if !ok || err != nil {
+	exists, err := CheckUserExist(a.db, username)
+	if err != nil {
+		return false, err
+	}
+	if !exists {
+		return false, fmt.Errorf("Aucun compte local ne correspond à l'utilisateur %s", username)
+	}
+
+	if err := a.setPassword(username, password); err != nil {
 		return false, err
 	}
 
@@ -166,11 +176,54 @@ func (a *App) UpdateUserPassword(username string, password string) (bool, error)
 		if err != nil {
 			return false, err
 		}
+		user.Password = password
 		a.setAPIUser(user)
 		a.setAPI(userApi)
+
+		// The password was missing at startup: finish starting the app
+		if a.GetStartupStatus() == StatusPasswordMissing {
+			a.connectOrWaitForInternet()
+		}
 	}
 
 	return true, nil
+}
+
+// setPassword stores the password of username (OS keyring, or DB as a fallback).
+func (a *App) setPassword(username, password string) error {
+	a.dbWg.Add(1)
+	defer a.dbWg.Done()
+	return a.creds.SetPassword(username, password)
+}
+
+// checkPassword checks password against the one saved for username. If the
+// saved one cannot be retrieved (keyring wiped or locked), MyGes checks it
+// and it is saved again.
+func (a *App) checkPassword(username, password string) error {
+	saved, err := a.creds.GetPassword(username)
+	switch {
+	case err == nil:
+		if subtle.ConstantTimeCompare([]byte(saved), []byte(password)) != 1 {
+			return ErrBadCredentials
+		}
+		return nil
+
+	case isPasswordError(err):
+		Log.Infos(fmt.Sprintf("Saved password unavailable (%v), checking it with MyGes", err))
+		if _, err := GESLogin(username, password); err != nil {
+			if errors.Is(err, ErrUnauthorized) {
+				return ErrBadCredentials
+			}
+			return fmt.Errorf("mot de passe introuvable localement et impossible de le vérifier auprès de MyGes : %w", err)
+		}
+		return a.setPassword(username, password)
+
+	default:
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrBadCredentials
+		}
+		return err
+	}
 }
 
 func (a *App) GetRegisteredUsers() ([]UserSettings, error) {
@@ -178,11 +231,14 @@ func (a *App) GetRegisteredUsers() ([]UserSettings, error) {
 }
 
 func (a *App) ConnectUser(username string, password string) (UserSettings, error) {
-	a.dbWg.Add(1)
-	a.dbMutex.Lock()
-	err := ConnectUser(a.db, username, password)
-	a.dbMutex.Unlock()
-	a.dbWg.Done()
+	err := a.checkPassword(username, password)
+	if err == nil {
+		a.dbWg.Add(1)
+		a.dbMutex.Lock()
+		err = ConnectUser(a.db, username)
+		a.dbMutex.Unlock()
+		a.dbWg.Done()
+	}
 	if err != nil {
 		Log.Error(fmt.Sprintf("Impossible to connect : %v", err))
 		return UserSettings{}, fmt.Errorf("Impossible to connect, make sure the account exist and username and password are correct: %w", err)

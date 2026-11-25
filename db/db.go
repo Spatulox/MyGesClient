@@ -56,12 +56,13 @@ func InitDBConnexion() (*sql.DB, error) {
 // ------------------------------------------------ //
 
 // CreateUser creates a new account and makes it the only selected one.
-func CreateUser(db *sql.DB, username string, password string) (bool, error) {
+// The password is not stored here: see the credentials package.
+func CreateUser(db *sql.DB, username string) (bool, error) {
 	err := withTx(db, func(tx *sql.Tx) error {
 		if _, err := tx.Exec("UPDATE USER SET selected = false"); err != nil {
 			return fmt.Errorf("Erreur lors de l'update des utilisateurs existants (selected column) : %w", err)
 		}
-		if _, err := tx.Exec("INSERT INTO USER (username, password, selected) VALUES (?, ?, true)", username, password); err != nil {
+		if _, err := tx.Exec("INSERT INTO USER (username, password, selected) VALUES (?, '', true)", username); err != nil {
 			return fmt.Errorf("Erreur lors de l'insertion du nouvel utilisateur : %w", err)
 		}
 		return nil
@@ -80,19 +81,64 @@ func CheckUserExist(db *sql.DB, username string) (bool, error) {
 
 // ------------------------------------------------ //
 
-func UpdateUserPassword(db *sql.DB, username string, password string) (bool, error) {
+// The USER.password column only holds a password when the OS keyring was not
+// available to store it (see the credentials package). An empty value means
+// "the password is in the keyring". These functions are meant to be used by
+// the credentials package only.
+
+// GetStoredPassword returns the password stored in the database for username,
+// or "" if there is none.
+func GetStoredPassword(db *sql.DB, username string) (string, error) {
+	var password string
+	err := db.QueryRow("SELECT password FROM USER WHERE username = ?", username).Scan(&password)
+	if err != nil {
+		return "", fmt.Errorf("Erreur lors de la lecture du mot de passe de %s : %w", username, err)
+	}
+	return password, nil
+}
+
+// SetStoredPassword stores password in the database for username ("" clears it).
+func SetStoredPassword(db *sql.DB, username string, password string) error {
 	result, err := db.Exec("UPDATE USER SET password = ? WHERE username = ?", password, username)
 	if err != nil {
-		return false, fmt.Errorf("Erreur lors de l'update de l'utilisateurs %s : %w", username, err)
+		return fmt.Errorf("Erreur lors de l'update de l'utilisateurs %s : %w", username, err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return false, fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+		return fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
 	}
 	if rowsAffected != 1 {
-		return false, fmt.Errorf("Aucun compte local ne correspond à l'utilisateur %s", username)
+		return fmt.Errorf("Aucun compte local ne correspond à l'utilisateur %s", username)
 	}
-	return true, nil
+	return nil
+}
+
+// ListUsersWithStoredPassword returns the accounts whose password is still in the database.
+func ListUsersWithStoredPassword(db *sql.DB) ([]string, error) {
+	rows, err := db.Query("SELECT username FROM USER WHERE password <> ''")
+	if err != nil {
+		return nil, fmt.Errorf("Erreur lors de la lecture des comptes : %w", err)
+	}
+	defer rows.Close()
+
+	var users []string
+	for rows.Next() {
+		var username string
+		if err := rows.Scan(&username); err != nil {
+			return nil, err
+		}
+		users = append(users, username)
+	}
+	return users, rows.Err()
+}
+
+// Vacuum rebuilds the database file, so that deleted values (like a password
+// moved to the keyring) do not stay in its free pages.
+func Vacuum(db *sql.DB) error {
+	if _, err := db.Exec("VACUUM"); err != nil {
+		return fmt.Errorf("Erreur lors du VACUUM de la base : %w", err)
+	}
+	return nil
 }
 
 // ------------------------------------------------ //
@@ -109,8 +155,8 @@ func UpdateUserLastYear(db *sql.DB, year string) (bool, error) {
 
 func GetUser(db *sql.DB) (UserSettings, error) {
 	var user UserSettings
-	query := `SELECT user_id, username, password, theme, eula, last_year FROM USER WHERE selected = true`
-	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Password, &user.Theme, &user.EULA, &user.Year)
+	query := `SELECT user_id, username, theme, eula, last_year FROM USER WHERE selected = true`
+	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year)
 	if err != nil {
 		Log.Error(fmt.Sprintf("1 %v", err))
 		return UserSettings{}, err
@@ -134,7 +180,7 @@ func GetLastYearInDB(db *sql.DB) (string, error) {
 // ------------------------------------------------ //
 
 func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
-	query := `SELECT user_id, username, password, theme, eula, last_year FROM USER` // WHERE selected = 0`
+	query := `SELECT user_id, username, theme, eula, last_year FROM USER` // WHERE selected = 0`
 	rows, err := db.Query(query)
 	if err != nil {
 		Log.Error(fmt.Sprintf("3 %v", err))
@@ -145,7 +191,7 @@ func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
 	var users []UserSettings
 	for rows.Next() {
 		var user UserSettings
-		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Theme, &user.EULA, &user.Year)
+		err := rows.Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year)
 		if err != nil {
 			return nil, err
 		}
@@ -177,14 +223,15 @@ func DeconnectUser(db *sql.DB) error {
 
 // ------------------------------------------------ //
 
-// ErrBadCredentials is returned by ConnectUser when no local account matches.
+// ErrBadCredentials is returned when the username or the password is wrong.
 var ErrBadCredentials = errors.New("nom d'utilisateur ou mot de passe incorrect")
 
-// ConnectUser selects the account matching username and password, and
-// deselects every other account. Nothing changes if the credentials are wrong.
-func ConnectUser(db *sql.DB, username string, password string) error {
+// ConnectUser selects the account username and deselects every other account.
+// The password must have been checked by the caller. Nothing changes if the
+// account does not exist.
+func ConnectUser(db *sql.DB, username string) error {
 	return withTx(db, func(tx *sql.Tx) error {
-		result, err := tx.Exec(`UPDATE USER SET selected = true WHERE username = ? AND password = ?`, username, password)
+		result, err := tx.Exec(`UPDATE USER SET selected = true WHERE username = ?`, username)
 		if err != nil {
 			return fmt.Errorf("Error when connecting the user : %w", err)
 		}

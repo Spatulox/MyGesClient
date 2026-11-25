@@ -27,6 +27,7 @@ MyGesClient vous offre une vue d'ensemble de votre vie étudiante :
 
 ## Avantages clés
 - Accès hors ligne : Grâce à SQLite, vos données sont stockées localement pour un accès rapide
+- Mot de passe protégé : il est rangé dans le trousseau du système (Gestionnaire d'identification Windows, Trousseau macOS, gnome-keyring / KWallet sous Linux), pas dans la base locale. Sans trousseau disponible (certains environnements Linux), il reste dans la base locale comme avant
 - Synchronisation régulière : Mise à jour fréquente avec MyGes pour des informations précises
 - Support multi-comptes : Gérez plusieurs profils MyGes dans une seule application
   - <img src="./README-src/omar-sy.gif" width="120px" style="position: absolute; transform: translateX(10px);">

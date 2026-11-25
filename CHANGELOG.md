@@ -4,6 +4,14 @@ Une section par tag, avec un titre `## <tag>` (ex. `## v1.2.0_beta`).
 Le workflow de release publie le contenu de la section du tag poussé
 (repli sur `## v1.2.0` si la section exacte n'existe pas).
 
+## v1.3.1
+
+### Sécurité
+- Le mot de passe MyGes est rangé dans le trousseau du système (Gestionnaire d'identification Windows, Trousseau macOS, Secret Service sous Linux) au lieu d'être en clair dans la base locale. Les mots de passe existants y sont déplacés au premier lancement (#65).
+- Sans trousseau disponible (Linux sans gnome-keyring ni KWallet), le mot de passe reste dans la base locale, et il est déplacé dans le trousseau dès que celui-ci devient disponible.
+- Si le mot de passe est introuvable (trousseau vidé, base copiée sur une autre machine), l'application démarre avec les données locales et demande de le ressaisir.
+- Attention : une version antérieure ne trouvera plus le mot de passe (il n'est plus dans la base) ; il faudra le ressaisir via « Modifier le mot de passe ».
+
 ## v1.3.0_release
 
 ### Nouveautés
