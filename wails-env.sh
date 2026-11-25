@@ -16,15 +16,18 @@ fi
 
 # version_ldflags ARGS... sets VERSION_LDFLAGS to the -ldflags that write the
 # version shown in "Informations de l'Application" (backend.AppVersion):
-# $APP_VERSION if set, else the nearest release tag (git describe, v* tags
-# only), else "dev". Nothing when -ldflags is already given.
+# $MYGES_VERSION if set (the CI passes the release tag), else the nearest
+# release tag (git describe, v* tags only), else "dev". Nothing when -ldflags
+# is already given.
+# Not $APP_VERSION: PackagingOnLinux sets it to the packaging.toml version
+# when it runs this script, which isn't a tag.
 version_ldflags() {
     local arg version
     VERSION_LDFLAGS=()
     for arg in "$@"; do
         case "$arg" in -ldflags|-ldflags=*) return ;; esac
     done
-    version="${APP_VERSION:-}"
+    version="${MYGES_VERSION:-}"
     if [ -z "$version" ]; then
         version="$(git describe --tags --match 'v*' --dirty 2>/dev/null || true)"
     fi

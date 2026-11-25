@@ -12,8 +12,9 @@ import (
 // AppVersion is the git tag of the build, set at build time with
 // -ldflags "-X MyGesClient/backend.AppVersion=<tag>":
 //   - the CI passes the release tag (v1.4.0_beta);
-//   - wailsbuild.sh / wailsdev.sh pass `git describe --tags --match 'v*' --dirty`
-//     (v1.3.2_beta-13-g6202d81 between two releases).
+//   - wailsbuild.sh / wailsdev.sh pass $MYGES_VERSION if set, else
+//     `git describe --tags --match 'v*' --dirty` (v1.3.2_beta-13-g6202d81
+//     between two releases).
 //
 // Nothing to update by hand: tagging the release is enough.
 var AppVersion = "dev"
