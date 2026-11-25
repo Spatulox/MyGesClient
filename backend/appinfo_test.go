@@ -6,6 +6,7 @@ func TestFormatVersion(t *testing.T) {
 	cases := map[string]string{
 		"":                              "dev",
 		"dev":                           "dev",
+		"v1.4.0_alpha":                  "1.4.0 (alpha)",
 		"v1.4.0_beta":                   "1.4.0 (bêta)",
 		"v1.4.0_rc":                     "1.4.0 (rc)",
 		"v1.4.0_release":                "1.4.0",
