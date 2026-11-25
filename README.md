@@ -57,6 +57,37 @@ Découvrez MyGesClient pour une gestion optimisée de votre parcours étudiant !
 > [Voir l'avancement](https://github.com/users/Spatulox/projects/5/views/1)
 
 <br><br><hr>
+# Installation
+
+Les binaires sont disponibles sur la [page des releases](https://github.com/Spatulox/MyGesClient/releases) :
+
+| Système | Fichier | Architectures |
+|---|---|---|
+| Windows | `-setup.exe` (installeur) ou `-portable.exe` | x64, ARM64 (`-arm64`) |
+| Linux (Debian, Ubuntu…) | `.deb` | amd64, arm64 |
+| macOS | `-macos-universal.zip` | Intel et Apple Silicon |
+
+### macOS
+L'application n'est pas signée par Apple : au premier lancement, macOS refuse de l'ouvrir.
+Faites clic droit sur l'application > **Ouvrir**, ou lancez une fois :
+```bash
+xattr -dr com.apple.quarantine /Applications/MyGesClient.app
+```
+
+### Linux : dépannage
+- **Mot de passe stocké sans chiffrement** : l'application range le mot de passe dans le trousseau du système (Secret Service).
+  Sans trousseau (bureau minimal, WSL…), elle le garde dans sa base locale et le signale.
+  Installez `gnome-keyring`, KWallet ou KeePassXC (avec l'intégration Secret Service) puis relancez l'application.
+- **Fenêtre blanche** (pilote NVIDIA, machine virtuelle) : lancez avec `MYGES_GPU_POLICY=never MyGesClient`
+  (ou `ondemand`), ou avec `WEBKIT_DISABLE_DMABUF_RENDERER=1 MyGesClient`.
+
+### Logs
+L'application écrit ses logs dans `MyGes/logs/MyGesClient.log` du dossier de cache de l'utilisateur :
+- Windows : `%LocalAppData%\MyGes\logs`
+- Linux : `~/.cache/MyGes/logs`
+- macOS : `~/Library/Caches/MyGes/logs`
+
+<br><br><hr>
 # How to run the code
 
 This code use the official [Wails](https://wails.io/) Vanilla template.
