@@ -48,7 +48,8 @@
 }
 
 .calendar-container {
-    background-color: #36393f;
+    /* #36393f in the dark theme */
+    background-color: var(--discord);
     border-radius: 8px;
     padding: 16px;
     /*font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
@@ -299,6 +300,234 @@
     gap: 16px;
 }
 
+/* ---------- Events page: filters + timeline ---------- */
+
+.event-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.event-toolbar .toggle-group {
+    gap: 8px;
+}
+
+.event-toolbar .toggle-button {
+    padding: 8px 14px;
+}
+
+.event-summary {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.event-empty {
+    padding: 32px 16px;
+    text-align: center;
+    border: 1px dashed #4f545c;
+    border-radius: 8px;
+    color: var(--text-secondary-color);
+}
+
+.timeline-month {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.timeline-month-line {
+    flex: 1 1 auto;
+    height: 1px;
+    background-color: #4f545c;
+}
+
+.timeline-month-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--mainPoliceColor);
+}
+
+.timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-item {
+    display: grid;
+    grid-template-columns: 46px 22px minmax(0, 1fr);
+    gap: 0 8px;
+}
+
+.timeline-item.is-past {
+    opacity: 0.6;
+}
+
+.timeline-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 14px;
+}
+
+.timeline-dow {
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--text-secondary-color);
+}
+
+.timeline-day {
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 1.1;
+    color: var(--mainPoliceColor);
+    font-variant-numeric: tabular-nums;
+}
+
+.timeline-rail {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+/* Vertical line of the timeline */
+.timeline-rail::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--discord-light);
+}
+
+.timeline-dot {
+    position: relative;
+    margin-top: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background-color: var(--highlight-color);
+    /* Gap between the dot and the line, in the container color */
+    box-shadow: 0 0 0 3px var(--discord);
+}
+
+.timeline-card {
+    margin: 5px 0 8px;
+    padding: 12px 14px;
+    background-color: var(--discord-dark);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.timeline-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+}
+
+.timeline-name {
+    margin: 0;
+    font-size: 16px;
+    color: var(--mainPoliceColor);
+    overflow-wrap: anywhere;
+}
+
+.timeline-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+    background-color: var(--highlight-color);
+    color: #ffffff;
+}
+
+.timeline-badge.is-done {
+    background-color: #4f545c;
+}
+
+.timeline-badge.is-soon {
+    background-color: var(--soon-bg);
+    color: var(--soon-text);
+}
+
+.timeline-when {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.timeline-description {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-color);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.timeline-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+}
+
+.event-delete-button {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 5px;
+    background-color: transparent;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.event-delete-button:hover {
+    background-color: var(--discord-light);
+    color: #f04747;
+}
+
+.event-confirm-question {
+    font-size: 13px;
+}
+
+.event-confirm .btn {
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.event-confirm .btn-cancel {
+    background-color: #4f545c;
+}
+
+.event-confirm .btn-cancel:hover {
+    background-color: #5d6269;
+}
+
+.event-confirm .btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
 .event-header {
     display: flex;
     justify-content: space-between;
@@ -334,17 +563,12 @@
     gap: 16px;
 }
 
-.event-item, .event-card, .course-card {
+.event-card, .course-card {
     background-color: var(--discord-dark);
     border-radius: 8px;
     padding: 16px;
     border-left: 4px solid;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.event-item button{
-    position: relative;
-    right: -80%;
 }
 
 .event-card {
@@ -721,6 +945,52 @@
     background-color: var(--hover-color);
 }
 
+/* Toggle buttons (S1 / S2, event filters): same look as .tab-button, the
+   pressed one is highlighted. Separate class because grades.ts drives every
+   .tab-button of the page. */
+.toggle-group {
+    display: flex;
+    gap: 6px;
+}
+
+.toggle-group[hidden] {
+    display: none;
+}
+
+.toggle-button {
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    background-color: var(--discord-dark);
+    color: var(--text-color);
+}
+
+.toggle-button:hover {
+    background-color: var(--discord-light);
+}
+
+.toggle-button[aria-pressed="true"] {
+    background-color: var(--highlight-color);
+    color: #ffffff;
+}
+
+.toggle-button[aria-pressed="true"]:hover {
+    background-color: var(--hover-color);
+}
+
+.toggle-button:focus-visible,
+.grades-recap-link:focus-visible,
+.event-delete-button:focus-visible,
+.event-confirm .btn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
 .textCenter{
     text-align: center;
 }
@@ -958,13 +1228,284 @@
 
 /* Styles pour les sections de contenu */
 /*.main-content-dashboard #schedule-content,*/
-.main-content-dashboard #grades-content,
 .main-content-dashboard #event-content {
     max-height: 280px;
     overflow: auto;
     background-color: var(--card-bg);
     border-radius: 5px;
     padding: 15px;
+}
+
+/* ---------- Dashboard: grades recap (S1 / S2) ---------- */
+
+.grades-recap {
+    display: flex;
+    flex-direction: column;
+}
+
+.grades-recap-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+}
+
+.main-content-dashboard .grades-recap-head > h2 {
+    margin: 0;
+}
+
+.main-content-dashboard #grades-content {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.grades-recap-empty {
+    padding: 15px;
+}
+
+.grades-recap-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.grades-recap-bar {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding: 10px 14px;
+    background-color: var(--highlight-color);
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.grades-recap-count {
+    font-weight: normal;
+}
+
+.grades-recap-overview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px 22px;
+    padding: 18px;
+}
+
+.grades-recap-ring {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex: 0 0 120px;
+}
+
+.grades-recap-ring svg {
+    display: block;
+    width: 120px;
+    height: 120px;
+}
+
+.grades-recap-ring circle {
+    fill: none;
+    stroke-width: 12;
+}
+
+.grades-recap-ring-track {
+    stroke: var(--discord-dark);
+}
+
+.grades-recap-ring-value {
+    stroke: var(--highlight-color);
+    stroke-linecap: round;
+}
+
+.grades-recap-ring-value.is-low {
+    stroke: var(--warn-bar);
+}
+
+.grades-recap-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.grades-recap-ring-average {
+    font-size: 26px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    color: var(--mainPoliceColor);
+}
+
+.grades-recap-ring-unit {
+    font-size: 12px;
+    color: var(--text-secondary-color);
+}
+
+.grades-recap-stats {
+    flex: 1 1 220px;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 18px;
+}
+
+.grades-recap-stats > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.grades-recap-stats dt {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.grades-recap-stats dd {
+    margin: 0;
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--mainPoliceColor);
+    font-variant-numeric: tabular-nums;
+}
+
+.grades-recap-stats dd.grades-recap-best {
+    display: flex;
+    gap: 4px;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.grades-recap-best-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.grades-recap-watch {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 18px 16px;
+}
+
+.grades-recap-watch-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--discord-dark);
+}
+
+.grades-recap-watch-head h3 {
+    margin: 0;
+    font-size: 15px;
+    color: var(--mainPoliceColor);
+}
+
+.grades-recap-watch-head span,
+.grades-recap-note,
+.grades-recap-none {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.grades-recap-note {
+    font-size: 12px;
+}
+
+.grades-recap-watch-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.grades-recap-course {
+    display: grid;
+    grid-template-columns: minmax(80px, 170px) minmax(60px, 1fr) 52px;
+    align-items: center;
+    gap: 12px;
+}
+
+.grades-recap-course-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.grades-recap-track {
+    position: relative;
+    height: 10px;
+    background-color: var(--discord-dark);
+    border-radius: 999px;
+}
+
+.grades-recap-fill {
+    height: 100%;
+    border-radius: 999px;
+    background-color: var(--neutral-bar);
+}
+
+.grades-recap-fill.is-low {
+    background-color: var(--warn-bar);
+}
+
+.grades-recap-fill.is-high {
+    background-color: var(--good-bar);
+}
+
+/* Marks 10/20 */
+.grades-recap-tick {
+    position: absolute;
+    left: 50%;
+    top: -4px;
+    width: 2px;
+    height: 18px;
+    margin-left: -1px;
+    background-color: var(--text-secondary-color);
+}
+
+.grades-recap-course-average {
+    text-align: right;
+    font-size: 15px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    color: var(--mainPoliceColor);
+}
+
+.grades-recap-course-average.is-low,
+.grades-recap-stats dd.is-low {
+    color: var(--warn-text);
+}
+
+.grades-recap-course-average.is-high {
+    color: var(--good-text);
+}
+
+.grades-recap-link {
+    align-self: flex-end;
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--mainPoliceColor);
+    text-decoration: underline;
+}
+
+.grades-recap-link:hover {
+    color: var(--text-color);
 }
 
 .main-content-dashboard #schedule-content > h3 {

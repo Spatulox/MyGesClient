@@ -41,6 +41,17 @@
     --shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
     --accent-soft: #e6eef8;
 
+    /* Grades / events accents (below 10 or soon: orange, from 14: blue).
+       Text colors are darker than in the dark theme to stay readable on white. */
+    --warn-text: #b35900;
+    --warn-bar: #d9822b;
+    --good-text: #2f5a8a;
+    --good-bar: #4f86c6;
+    --neutral-bar: #8a8f96;
+    --soon-bg: #f0a868;
+    --soon-text: #1f2328;
+    --focus-ring: #396aa1;
+
     transition: all ease-in-out 0.5s;
 
 }
@@ -71,6 +82,16 @@
     --discord-lightlight: #56585c;
     --discord-verylight : #abadb3;
     --bg-color: #36393f;
+
+    /* Grades / events accents (below 10 or soon: orange, from 14: blue) */
+    --warn-text: #f0a868;
+    --warn-bar: #d9822b;
+    --good-text: #9cc0ea;
+    --good-bar: #4f86c6;
+    --neutral-bar: #8a8f96;
+    --soon-bg: #f0a868;
+    --soon-text: #1f2328;
+    --focus-ring: #9cc0ea;
 
     transition: all ease-in-out 0.5s;
 }

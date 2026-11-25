@@ -76,7 +76,6 @@
 .light #account-presentation .card,
 .light #courses-container .container,
 .light #projects .project-list,
-.light .event-item,
 .light .event-card,
 .light .course-card {
     box-shadow: var(--shadow);
@@ -84,7 +83,6 @@
 }
 
 /* Keep the colored left border of events / courses */
-.light .event-item,
 .light .event-card,
 .light .course-card {
     border-left-width: 4px;
@@ -174,6 +172,74 @@
 .light .tab-button.active:hover {
     background-color: var(--hover-color);
     color: #ffffff;
+}
+
+/* Toggle buttons (dashboard S1 / S2, event filters) */
+.light .toggle-button {
+    background-color: var(--discord-light);
+}
+
+.light .toggle-button:hover {
+    background-color: var(--discord-lightlight);
+}
+
+.light .toggle-button[aria-pressed="true"] {
+    background-color: var(--highlight-color);
+    color: #ffffff;
+}
+
+.light .toggle-button[aria-pressed="true"]:hover {
+    background-color: var(--hover-color);
+}
+
+/* ---------- Dashboard: grades recap ---------- */
+
+/* The panel is white like its box: draw its edge */
+.light .main-content-dashboard #grades-content {
+    border: 1px solid var(--border-color);
+}
+
+/* --discord-dark is white in this theme: tracks would vanish on the white panel */
+.light .grades-recap-ring-track {
+    stroke: var(--discord-lightlight);
+}
+
+.light .grades-recap-track {
+    background-color: var(--discord-lightlight);
+}
+
+.light .grades-recap-watch-head {
+    border-top-color: var(--border-color);
+}
+
+.light .grades-recap-link:hover {
+    color: var(--highlight-color);
+}
+
+/* ---------- Events page: timeline ---------- */
+
+.light .timeline-card {
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.light .timeline-rail::before,
+.light .timeline-month-line {
+    background-color: var(--border-color);
+}
+
+.light .event-empty {
+    border-color: var(--discord-verylight);
+}
+
+.light .timeline-badge.is-done {
+    background-color: var(--discord-lightlight);
+    color: var(--text-secondary-color);
+}
+
+.light .event-delete-button:hover {
+    background-color: var(--hover-bg);
+    color: #c62828;
 }
 
 /* ---------- Forms ---------- */
