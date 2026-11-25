@@ -121,7 +121,7 @@ export async function account(): Promise<void> {
                 country: profileParsed.country,
                 birth_country: profileParsed.birth_country,
                 birth_place: profileParsed.birthplace,
-                birthday: (new Date(profileParsed.birthday)).toLocaleDateString(),
+                birthday: (new Date(profileParsed.birthday)).toLocaleDateString('fr-FR'),
                 nationality: profileParsed.nationality,
                 nom_avant_mariage: profileParsed.maiden_name ? profileParsed.maiden_name : "N/A",
                 mobile: profileParsed.mobile,
