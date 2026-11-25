@@ -2,6 +2,7 @@ package backend
 
 import (
 	. "MyGesClient/api"
+	"MyGesClient/credentials"
 	. "MyGesClient/db"
 	. "MyGesClient/log"
 	. "MyGesClient/structures"
@@ -9,6 +10,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -31,6 +33,7 @@ const (
 	StatusIncompleteNoInternet
 	StatusCompleted
 	StatusFailed
+	StatusPasswordMissing // the password is neither in the keyring nor in the DB: the user must type it again
 )
 
 // Startup error flags, combined with |
@@ -39,17 +42,19 @@ const (
 	ErrUserInit
 	ErrAPIInit
 	ErrYearsRequest
+	ErrPasswordInit
 )
 
-// Without a network or an account, the app still starts (offline mode or
-// account creation). Only a DB failure is fatal.
-const allowedStartupErrors = ErrUserInit | ErrAPIInit | ErrYearsRequest
+// Without a network, an account or a password, the app still starts (offline
+// mode, account creation or password prompt). Only a DB failure is fatal.
+const allowedStartupErrors = ErrUserInit | ErrAPIInit | ErrYearsRequest | ErrPasswordInit
 
 // App struct
 type App struct {
 	ctx                context.Context
 	year               string // use getYear / setYear
 	db                 *sql.DB
+	creds              *credentials.Store // passwords, in the OS keyring when available
 	dbMutex            sync.Mutex
 	dbWg               sync.WaitGroup
 	api                *GESapi
@@ -197,12 +202,19 @@ func (a *App) Startup(ctx context.Context) {
 
 	if err := a.initUser(); err != nil {
 		a.handleStartupError("User initialization", err)
-		startupErrors |= ErrUserInit
+		if isPasswordError(err) {
+			startupErrors |= ErrPasswordInit
+		} else {
+			startupErrors |= ErrUserInit
+		}
 	}
 
-	if err := a.initAPI(); err != nil {
-		a.handleStartupError("API initialization", err)
-		startupErrors |= ErrAPIInit
+	// Without a password, a login attempt would only be rejected by MyGes
+	if startupErrors&(ErrUserInit|ErrPasswordInit) == 0 {
+		if err := a.initAPI(); err != nil {
+			a.handleStartupError("API initialization", err)
+			startupErrors |= ErrAPIInit
+		}
 	}
 
 	if err := a.initYear(); err != nil {
@@ -231,6 +243,10 @@ func (a *App) Startup(ctx context.Context) {
 	case startupErrors&ErrUserInit != 0:
 		Log.Infos("Starting app without critic errors (no account)")
 		a.setStartupStatus(StatusIncompleteNoUsers)
+
+	case startupErrors&ErrPasswordInit != 0:
+		Log.Infos("Starting app without critic errors (password missing), waiting for the user to type it again")
+		a.setStartupStatus(StatusPasswordMissing)
 
 	default:
 		Log.Infos("Starting app without critic errors (no internet), searching for internet...")
@@ -262,21 +278,43 @@ func (a *App) initDB() error {
 		return fmt.Errorf("failed to ping DB: %w", err)
 	}
 	Log.Infos("DB connection Initialized")
+
+	a.creds = credentials.New(a.db)
+	// Passwords saved by older versions (or while the keyring was unavailable)
+	// are moved to the keyring. Not fatal: they stay usable from the DB.
+	if err := a.creds.MigrateAll(); err != nil {
+		Log.Error(fmt.Sprintf("Impossible to move the passwords to the OS keyring: %v", err))
+	}
 	return nil
 }
 
+// isPasswordError reports whether err means the password of the user could
+// not be retrieved (the user has to type it again).
+func isPasswordError(err error) bool {
+	return errors.Is(err, credentials.ErrPasswordMissing) || errors.Is(err, credentials.ErrKeyringUnavailable)
+}
+
+// initUser loads the selected account and its password. The account is set
+// even when the password cannot be retrieved, so the local data stays usable.
 func (a *App) initUser() error {
 	userLocal, err := GetUser(a.db)
 	if err != nil {
 		return fmt.Errorf("impossible to initialize the user: %w", err)
 	}
+	userLocal.Password, err = a.creds.GetPassword(userLocal.Username)
 	a.setAPIUser(userLocal)
+	if err != nil {
+		return fmt.Errorf("impossible to retrieve the password of the user: %w", err)
+	}
 	Log.Infos("User Initialized")
 	return nil
 }
 
 func (a *App) initAPI() error {
 	userApiLocal := a.getAPIUser()
+	if userApiLocal.Password == "" {
+		return errors.New("impossible to initialize the API part: no password for the user")
+	}
 	userApi, err := GESLogin(userApiLocal.Username, userApiLocal.Password)
 	if err != nil {
 		return fmt.Errorf("impossible to initialize the API part: %w", err)

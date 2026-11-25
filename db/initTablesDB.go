@@ -10,7 +10,7 @@ import (
 const USER = `CREATE TABLE IF NOT EXISTS USER (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
+    password TEXT NOT NULL, -- '' when the password is in the OS keyring (see the credentials package)
     theme TEXT NOT NULL DEFAULT 'dark',
     eula BOOLEAN NOT NULL DEFAULT 0,
     selected BOOLEAN NOT NULL DEFAULT 0,

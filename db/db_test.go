@@ -43,20 +43,34 @@ func count(t *testing.T, db *sql.DB, q string, args ...any) int {
 	return n
 }
 
-func TestUpdateUserPassword(t *testing.T) {
+func TestStoredPassword(t *testing.T) {
 	db := newTestDB(t)
-	mustExec(t, db, `INSERT INTO USER (username, password, selected) VALUES ('alice', 'old', 1)`)
-
-	ok, err := UpdateUserPassword(db, "alice", "new")
-	if !ok || err != nil {
-		t.Fatalf("UpdateUserPassword() = %v, %v", ok, err)
+	if ok, err := CreateUser(db, "alice"); !ok || err != nil {
+		t.Fatalf("CreateUser() = %v, %v", ok, err)
 	}
-	if n := count(t, db, `SELECT COUNT(*) FROM USER WHERE username = 'alice' AND password = 'new'`); n != 1 {
-		t.Fatalf("password not updated")
+	if pw, err := GetStoredPassword(db, "alice"); err != nil || pw != "" {
+		t.Fatalf("new account: GetStoredPassword() = %q, %v; want no password in the DB", pw, err)
 	}
 
-	if ok, err := UpdateUserPassword(db, "bob", "x"); ok || err == nil {
-		t.Fatalf("UpdateUserPassword(unknown user) = %v, %v; want failure", ok, err)
+	if err := SetStoredPassword(db, "alice", "new"); err != nil {
+		t.Fatal(err)
+	}
+	if pw, err := GetStoredPassword(db, "alice"); err != nil || pw != "new" {
+		t.Fatalf("GetStoredPassword() = %q, %v; want new", pw, err)
+	}
+	if users, err := ListUsersWithStoredPassword(db); err != nil || len(users) != 1 || users[0] != "alice" {
+		t.Fatalf("ListUsersWithStoredPassword() = %v, %v; want [alice]", users, err)
+	}
+
+	if err := SetStoredPassword(db, "alice", ""); err != nil {
+		t.Fatal(err)
+	}
+	if users, err := ListUsersWithStoredPassword(db); err != nil || len(users) != 0 {
+		t.Fatalf("ListUsersWithStoredPassword() = %v, %v; want none", users, err)
+	}
+
+	if err := SetStoredPassword(db, "bob", "x"); err == nil {
+		t.Fatal("SetStoredPassword(unknown user) succeeded")
 	}
 }
 
@@ -202,16 +216,16 @@ func TestReadsAreScopedToUser(t *testing.T) {
 
 func TestConnectUser(t *testing.T) {
 	db := newTestDB(t)
-	mustExec(t, db, `INSERT INTO USER (username, password, selected) VALUES ('alice', 'pa', 1), ('bob', 'pb', 0)`)
+	mustExec(t, db, `INSERT INTO USER (username, password, selected) VALUES ('alice', '', 1), ('bob', '', 0)`)
 
-	if err := ConnectUser(db, "bob", "wrong"); err == nil {
-		t.Fatal("ConnectUser with a wrong password succeeded")
+	if err := ConnectUser(db, "carol"); err == nil {
+		t.Fatal("ConnectUser with an unknown account succeeded")
 	}
 	if got := count(t, db, `SELECT COUNT(*) FROM USER WHERE selected = 1 AND username = 'alice'`); got != 1 {
 		t.Fatal("a failed connection must not change the selected account")
 	}
 
-	if err := ConnectUser(db, "bob", "pb"); err != nil {
+	if err := ConnectUser(db, "bob"); err != nil {
 		t.Fatal(err)
 	}
 	if got := count(t, db, `SELECT COUNT(*) FROM USER WHERE selected = 1`); got != 1 {

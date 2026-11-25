@@ -5,6 +5,7 @@ import { popup, stillPopup, stopStillPopup } from "./popups";
 import {
     changeLoginButtonName,
     closeConnexion,
+    consumePasswordRecovery,
     hideConnectionError,
     shakeConnexion,
     showConnectionError
@@ -158,6 +159,10 @@ buttonConnection?.addEventListener("click", async function () {
             return;
         }
         closeConnexion();
+        // The password was missing at startup: reload the pages now that the app is connected
+        if (consumePasswordRecovery()) {
+            start();
+        }
     }
     hideConnectionError();
     loadingConnectionButton(oldInnerHtmlLoginBtn, false);
