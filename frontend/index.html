@@ -197,19 +197,16 @@
 
                                 </div>
 
-                                <div class="recapSection">
-                                    <h2>Récapitulatif des notes</h2>
-                                    <div class="grades-container">
-                                        <div class="grades-header">
-                                            <span>Cours</span>
-                                            <span>Coef</span>
-                                            <span>Professeur</span>
-                                            <span>Notes</span>
-                                            <span>Exam</span>
-                                            <span>Bonus</span>
+                                <div class="recapSection grades-recap">
+                                    <div class="grades-recap-head">
+                                        <h2>Récapitulatif des notes</h2>
+                                        <div id="grades-recap-semesters" class="toggle-group" role="group" aria-label="Semestre affiché" hidden>
+                                            <button type="button" class="toggle-button" data-semester="1" aria-pressed="false">S1</button>
+                                            <button type="button" class="toggle-button" data-semester="2" aria-pressed="false">S2</button>
                                         </div>
-                                        <div id="grades-content"></div>
                                     </div>
+                                    <div id="grades-content"></div>
+                                    <a href="#" id="grades-recap-link" class="grades-recap-link">Voir toutes les notes</a>
                                 </div>
                             </div>
                         </div>
@@ -336,7 +333,15 @@
                     <div id="event-manager">
                         <div class="calendar-container">
                             <h2 class="calendar-title">Calendrier des événements</h2>
-                            <input type="text" placeholder="Rechercher un évènement" id="searchBar" autocomplete="off">
+                            <input type="text" placeholder="Rechercher un évènement" id="searchBar" autocomplete="off" aria-label="Rechercher un évènement">
+                            <div class="event-toolbar">
+                                <div id="event-filters" class="toggle-group" role="group" aria-label="Période">
+                                    <button type="button" class="toggle-button" data-filter="upcoming" aria-pressed="true">À venir</button>
+                                    <button type="button" class="toggle-button" data-filter="past" aria-pressed="false">Passés</button>
+                                    <button type="button" class="toggle-button" data-filter="all" aria-pressed="false">Tous</button>
+                                </div>
+                                <span id="event-summary" class="event-summary"></span>
+                            </div>
                             <div class="event-list">
                                 <!-- Ajoutez des événements ici -->
                             </div>
