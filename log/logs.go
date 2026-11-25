@@ -25,6 +25,25 @@ const MaxLogSize = 1 << 20
 
 // -----------------------------------------------------
 
+// LogDir returns the folder of the log files, <user cache dir>/MyGes/logs:
+// %LocalAppData% on Windows, ~/.cache on Linux, ~/Library/Caches on macOS.
+func LogDir() (string, error) {
+	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(cacheDir, "MyGes", "logs"), nil
+}
+
+// InitDefaultFile also writes the logs to LogDir()/name.
+func (l *LogHelper) InitDefaultFile(name string) error {
+	dir, err := LogDir()
+	if err != nil {
+		return err
+	}
+	return l.InitFile(dir, name)
+}
+
 // InitFile also writes the logs to dir/name, created readable by the user
 // only. The release builds have no console (Windows GUI app, app started from
 // the desktop menu), so without it their logs are lost.

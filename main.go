@@ -7,7 +7,6 @@ import (
 	"embed"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/wailsapp/wails/v2"
@@ -38,18 +37,6 @@ func (l *SilentLogger) Fatal(message string)   {}
 // Linux (see packaging.toml and the CI).
 const appID = "io.github.spatulox.MyGesClient"
 
-// initLogFile also writes the logs to <user cache dir>/MyGes/logs/name:
-// %LocalAppData% on Windows, ~/.cache on Linux, ~/Library/Caches on macOS.
-func initLogFile(name string) {
-	cacheDir, err := os.UserCacheDir()
-	if err == nil {
-		err = Log.InitFile(filepath.Join(cacheDir, "MyGes", "logs"), name)
-	}
-	if err != nil {
-		Log.Error(fmt.Sprintf("Impossible to create the log file, logging to stdout only: %v", err))
-	}
-}
-
 // gpuPolicy returns the WebKitGTK hardware acceleration policy (Linux only).
 // Always by default; MYGES_GPU_POLICY=ondemand|never works around a blank
 // window with some drivers (NVIDIA, VMs).
@@ -74,7 +61,9 @@ func main() {
 	}
 
 	Log.DebugBool = true
-	initLogFile("MyGesClient.log")
+	if err := Log.InitDefaultFile("MyGesClient.log"); err != nil {
+		Log.Error(fmt.Sprintf("Impossible to create the log file, logging to stdout only: %v", err))
+	}
 	defer Log.Close()
 	Log.Infos("Launching...")
 	// Create an instance of the app structure

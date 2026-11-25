@@ -87,10 +87,12 @@ Rappels quand l'application est fermée (Compte > Rappels des évènements) : l'
   (ou `ondemand`), ou avec `WEBKIT_DISABLE_DMABUF_RENDERER=1 MyGesClient`.
 
 ### Logs
-L'application écrit ses logs dans `MyGes/logs/MyGesClient.log` du dossier de cache de l'utilisateur :
+L'application écrit ses logs dans le dossier `MyGes/logs` du dossier de cache de l'utilisateur :
 - Windows : `%LocalAppData%\MyGes\logs`
 - Linux : `~/.cache/MyGes/logs`
 - macOS : `~/Library/Caches/MyGes/logs`
+
+On y trouve `MyGesClient.log` pour l'application, et `MyGesClient-service.log` pour le service de rappels en arrière-plan.
 
 <br><br><hr>
 # How to run the code

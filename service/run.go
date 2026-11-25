@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	checkInterval  = time.Minute
-	maxLogFileSize = 1 << 20 // 1 MiB, then the log is rotated (service.log.old)
+	checkInterval = time.Minute
+	logFileName   = "MyGesClient-service.log" // in LogDir(), rotated by the log package
 )
 
 // IsServiceMode reports whether the program was started as the background
@@ -36,18 +36,21 @@ func IsServiceMode(args []string) bool {
 // turned off in the GUI), or until it is stopped by a signal. It returns the
 // exit code of the process.
 func Run() int {
+	// Nobody reads the output of a process started with the session: the
+	// logs go to LogDir()/MyGesClient-service.log, next to the log of the GUI
+	// (stdout stays as is, colored only when it is a terminal)
+	Log.DebugBool = true
+	if err := Log.InitDefaultFile(logFileName); err != nil {
+		Log.Error(fmt.Sprintf("Background service: impossible to create the log file: %v", err))
+	}
+	defer Log.Close()
+
 	dir, err := AppDataDir()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		Log.Error(fmt.Sprintf("Background service: %v", err))
 		return 1
 	}
-	// Nobody reads the output of a process started with the session
-	if logFile, err := openLogFile(filepath.Join(dir, "service.log")); err == nil {
-		defer logFile.Close()
-		os.Stdout = logFile
-		os.Stderr = logFile
-	}
-	Log.DebugBool = true
+	removeOldLogFiles(dir)
 
 	if !autostart.Supported {
 		Log.Error("Background service: not supported on this OS")
@@ -116,9 +119,10 @@ func isEnabled() bool {
 	return enabled
 }
 
-func openLogFile(path string) (*os.File, error) {
-	if info, err := os.Stat(path); err == nil && info.Size() > maxLogFileSize {
-		_ = os.Rename(path, path+".old")
+// removeOldLogFiles deletes the log files of the previous versions, written
+// in the data folder (dir) instead of the log folder.
+func removeOldLogFiles(dir string) {
+	for _, name := range []string{"service.log", "service.log.old"} {
+		_ = os.Remove(filepath.Join(dir, name)) // absent most of the time
 	}
-	return os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 }
