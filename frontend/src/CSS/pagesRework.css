@@ -6,29 +6,7 @@
  * the file fix what needs more than a variable.
  */
 
-/* Accent colors. Same names and values as the #53/#54 branch, which adds
-   them to variables.css: delete this block once both branches are merged. */
-.dark {
-    --warn-text: #f0a868;
-    --warn-bar: #d9822b;
-    --good-text: #9cc0ea;
-    --good-bar: #4f86c6;
-    --neutral-bar: #8a8f96;
-    --soon-bg: #f0a868;
-    --soon-text: #1f2328;
-    --focus-ring: #9cc0ea;
-}
-
-.light {
-    --warn-text: #b35900;
-    --warn-bar: #d9822b;
-    --good-text: #2f5a8a;
-    --good-bar: #4f86c6;
-    --neutral-bar: #8a8f96;
-    --soon-bg: #f0a868;
-    --soon-text: #1f2328;
-    --focus-ring: #396aa1;
-}
+/* Accent colors (--warn-*, --good-*, --soon-*, --focus-ring): see variables.css */
 
 /* ---------- Shared ---------- */
 

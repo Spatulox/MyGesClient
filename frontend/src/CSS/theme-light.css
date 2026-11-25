@@ -89,7 +89,6 @@
 }
 
 .light .main-content-dashboard .course-item,
-.light .main-content-dashboard .grade-item,
 .light .main-content-dashboard .day-column {
     background-color: var(--bg-color);
 }
@@ -126,12 +125,6 @@
 
 .light .tooltip {
     background-color: var(--popupColor);
-}
-
-/* ---------- Tables (dashboard grades) ---------- */
-
-.light .main-content-dashboard .grades-header {
-    color: #ffffff;
 }
 
 .light .tab-button {

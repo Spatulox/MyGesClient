@@ -1,5 +1,5 @@
 import { structures } from "../../wailsjs/go/models";
-import { cleanCourseName, escapeHtml, scrollMainPart } from "../JS/functions";
+import { escapeHtml, scrollMainPart } from "../JS/functions";
 import { formatGrade, semesterOf } from "../JS/gradesCalc";
 import { CourseEntry, CoursePart, Period, buildEntries, periodAverage } from "../JS/gradesPeriods";
 import { popup } from "../JS/popups";
@@ -392,26 +392,4 @@ function formulas(entry: CourseEntry): string[] {
             : "Année : " + graded.map(p => `${formatGrade(p.average!)} × coef ${formatGrade(p.coef)}`).join(" + ") + ` → ${gradeOrDash(entry.average)}`);
     }
     return lines;
-}
-
-// ------------------------------------------------ //
-
-/**
- * Kept for the dashboard grades recap (dashbord.ts), which still uses it on this branch.
- */
-export function initGradesDisplay(grade: structures.LocalGrades): {
-    gradeElement: HTMLDivElement;
-    courseName: string;
-    gradesHtml: string;
-    examHtml: string;
-} {
-    const gradeElement = document.createElement('div');
-    gradeElement.className = 'grade-item';
-
-    const gradesHtml = grade.grades != null ? grade.grades.join(', ') : "";
-    const examHtml = grade.exam != null ? String(grade.exam) : "";
-
-    // Enlever le préfixe "S1 -" ou "S2 -" du nom du cours
-    const courseName = cleanCourseName(grade.course);
-    return { gradeElement, courseName, gradesHtml, examHtml };
 }

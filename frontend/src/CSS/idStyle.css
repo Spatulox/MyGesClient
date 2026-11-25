@@ -339,38 +339,6 @@
     border-radius: 5px;
 }
 
-.main-content-dashboard .grades-container {
-    background-color: var(--card-bg);
-    border-radius: 5px;
-    display: flex;
-    height: 80%;
-    overflow: auto;
-    flex-direction: column;
-    max-height: 70vh;
-}
-
-.main-content-dashboard .grades-header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    font-weight: bold;
-    background-color: var(--highlight-color);
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 2fr 1fr 1fr 1fr;
-    padding: 10px;
-    align-items: center;
-}
-
-.main-content-dashboard .grades-header{
-    grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
-}
-.main-content-dashboard .grade-item {
-    display: grid;
-    grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
-    padding: 10px;
-    align-items: center;
-}
-
 .loading-gif-account{
     margin: auto;
     display: block;

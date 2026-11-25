@@ -697,14 +697,6 @@
     align-items: center;
 }
 
-.grades-list {
-    display: none;
-}
-
-.grades-list.active {
-    display: block;
-}
-
 .lesson{
     background-color: white;
     color: black;
@@ -1524,7 +1516,6 @@
 }
 
 .main-content-dashboard .course-item,
-.main-content-dashboard .grade-item,
 .main-content-dashboard .absence-item {
     background-color: var(--bg-color);
     margin-bottom: 10px;
@@ -1533,14 +1524,12 @@
 }
 
 .main-content-dashboard .course-item h3,
-.main-content-dashboard .grade-item h3,
 .main-content-dashboard .absence-item h3 {
     margin-top: 0;
     color: var(--highlight-color);
 }
 
 .main-content-dashboard .course-item p,
-.main-content-dashboard .grade-item p,
 .main-content-dashboard .absence-item p {
     margin: 5px 0;
 }
