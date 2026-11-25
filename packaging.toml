@@ -8,6 +8,7 @@ summary = "Unofficial Client for MyGES website. Created with GO and Wails"
 description = "Unofficial Client for MyGES website. Created with GO and Wails"
 license = "GPL-3.0-or-later"
 maintainer = "Spatulox"
+homepage = "https://github.com/Spatulox/MyGesClient"
 categories = ["Education"]
 
 [linux]
@@ -19,6 +20,15 @@ icon = "build/appicon.png"
 command = "bash wailsbuild.sh -platform windows/amd64"
 binary = "build/bin/MyGesClient.exe"
 icon = "build/windows/icon.ico"
+
+[deps]
+# Depends: detected from the binary (dpkg-shlibdeps), per Ubuntu release in the CI.
+# The OS keyring stores the MyGes password; without one it stays in the local DB.
+deb_suggests = ["gnome-keyring | kwalletmanager | keepassxc"]
+rpm_suggests = ["(gnome-keyring or kwalletmanager or keepassxc)"]
+
+# The version above is replaced by the release tag in the CI (.github/workflows/build.yml).
+# The window's WM_CLASS is already the app id: no wm_class needed.
 
 [output]
 formats = ["deb", "rpm", "zip", "nsis"]
