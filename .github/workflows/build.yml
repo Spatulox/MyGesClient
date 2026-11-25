@@ -169,22 +169,12 @@ jobs:
           jq --arg v "$VERSION" '.info.productVersion = $v' wails.json > wails.tmp.json
           mv wails.tmp.json wails.json
 
-      # One build per architecture: each one writes build/bin/MyGesClient.exe,
-      # so the files are copied before the next build. Windows needs no CGO:
-      # arm64 is cross-compiled from the x64 runner.
-      - name: Build amd64
+      - name: Build
         run: |
           wails build -platform windows/amd64 -nsis
           mkdir -p dist
           cp build/bin/MyGesClient-amd64-installer.exe "dist/MyGesClient-${TAG}-setup.exe"
           cp build/bin/MyGesClient.exe "dist/MyGesClient-${TAG}-portable.exe"
-
-      - name: Build arm64
-        run: |
-          rm -f build/bin/MyGesClient.exe
-          wails build -platform windows/arm64 -nsis -s
-          cp build/bin/MyGesClient-arm64-installer.exe "dist/MyGesClient-${TAG}-setup-arm64.exe"
-          cp build/bin/MyGesClient.exe "dist/MyGesClient-${TAG}-portable-arm64.exe"
           ls -l dist
 
       - uses: actions/upload-artifact@v7

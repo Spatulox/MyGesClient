@@ -1,10 +1,6 @@
 # Changelog
 
-Une section par tag, avec un titre `## <tag>` (ex. `## v1.2.0_beta`).
-Le workflow de release publie le contenu de la section du tag poussé
-(repli sur `## v1.2.0` si la section exacte n'existe pas).
-
-## v1.3.1
+## v1.3.2_beta
 
 ### Nouveautés
 - Rappels des évènements : une notification du système est envoyée avant chaque évènement (15 min avant par défaut, réglable dans Compte > Rappels des évènements, ou « Jamais ») (#56).
