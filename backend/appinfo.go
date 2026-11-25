@@ -20,7 +20,7 @@ import (
 var AppVersion = "dev"
 
 // v1.4.0_beta, v1.4.0_beta-13-g6202d81, v1.4.0_release-dirty...
-var versionFormat = regexp.MustCompile(`^v?(\d+\.\d+\.\d+)(?:_(beta|rc|release))?(?:-(\d+)-g([0-9a-f]+))?(-dirty)?$`)
+var versionFormat = regexp.MustCompile(`^v?(\d+\.\d+\.\d+)(?:_(alpha|beta|rc|release))?(?:-(\d+)-g([0-9a-f]+))?(-dirty)?$`)
 
 // FormatVersion turns a git tag into the text of the popup:
 // "v1.4.0_beta" -> "1.4.0 (bêta)", "v1.4.0_release" -> "1.4.0",
@@ -37,6 +37,8 @@ func FormatVersion(tag string) string {
 	}
 	text := m[1]
 	switch m[2] {
+	case "alpha":
+		text += " (alpha)"
 	case "beta":
 		text += " (bêta)"
 	case "rc":
