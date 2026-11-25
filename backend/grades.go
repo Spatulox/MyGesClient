@@ -12,7 +12,20 @@ func (a *App) ReturnRefreshGradesState() bool {
 	return a.isFetchingGrades.Load()
 }
 
+// GetGrades returns the cached grades of the current school year.
 func (a *App) GetGrades() ([]LocalGrades, error) {
+	return a.GetGradesForYear("")
+}
+
+// GetGradesForYear returns the cached grades of the given school year ("2024"
+// for 2024-2025, "" for the current one). Empty until RefreshGradesForYear has
+// fetched that year once.
+func (a *App) GetGradesForYear(year string) ([]LocalGrades, error) {
+	year, err := a.resolveYear(year)
+	if err != nil {
+		return nil, err
+	}
+
 	a.dbWg.Add(1)
 	a.dbMutex.Lock()
 	defer a.dbMutex.Unlock()
@@ -22,13 +35,24 @@ func (a *App) GetGrades() ([]LocalGrades, error) {
 	if err != nil {
 		return nil, fmt.Errorf("récupération de l'utilisateur : %w", err)
 	}
-	return GetDBUserGrades(a.db, user.ID, a.getYear())
+	return GetDBUserGrades(a.db, user.ID, year)
 }
 
 /*
  * Refresh the Grades by asking the MyGes DB, and store it inside the LocalDB and sent back the fresh datas
  */
 func (a *App) RefreshGrades() ([]LocalGrades, error) {
+	return a.RefreshGradesForYear("")
+}
+
+// RefreshGradesForYear fetches the grades of the given school year ("" for the
+// current one) from MyGes, replaces that year in the local cache (the other
+// years are kept) and returns them.
+func (a *App) RefreshGradesForYear(year string) ([]LocalGrades, error) {
+	year, err := a.resolveYear(year)
+	if err != nil {
+		return nil, err
+	}
 
 	if a.getAPI() == nil {
 		return []LocalGrades{}, fmt.Errorf("GES instance is nil")
@@ -39,9 +63,7 @@ func (a *App) RefreshGrades() ([]LocalGrades, error) {
 	}
 	defer a.isFetchingGrades.Store(false)
 
-	year := a.getYear()
-
-	Log.Infos("Refreshing Grades")
+	Log.Infos(fmt.Sprintf("Refreshing Grades of %s", year))
 
 	api := a.getAPI()
 	if api == nil {
