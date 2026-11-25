@@ -8,10 +8,10 @@ Le workflow de release publie le contenu de la section du tag poussé
 
 ### Nouveautés
 - Rappels des évènements : une notification du système est envoyée avant chaque évènement (15 min avant par défaut, réglable dans Compte > Rappels des évènements, ou « Jamais ») (#56).
-- Option « Recevoir les rappels quand l'application est fermée » (Linux et Windows) : un service léger, sans fenêtre, démarre avec la session (`~/.config/autostart` sous Linux, clé `Run` de l'utilisateur sous Windows). Décocher l'option l'arrête et le retire du démarrage ; la désinstallation Windows le retire aussi.
+- Option « Recevoir les rappels quand l'application est fermée » (Linux, Windows et macOS) : un service léger, sans fenêtre, démarre avec la session (`~/.config/autostart` sous Linux, clé `Run` de l'utilisateur sous Windows, LaunchAgent `~/Library/LaunchAgents` sous macOS). Décocher l'option l'arrête et le retire du démarrage ; la désinstallation Windows le retire aussi.
 - Nouveau paramètre « Afficher MyGesClient dans mon statut Discord » (Compte > Confidentialité), activé par défaut.
 - Builds macOS (universel Intel + Apple Silicon, non signé) et ARM64 pour Linux (.deb) et Windows (installeur et portable).
-- Les logs sont aussi écrits dans un fichier (voir le README), y compris sous Windows où ils étaient perdus.
+- Les logs sont aussi écrits dans un fichier (voir le README), y compris sous Windows où ils étaient perdus. Le service de rappels écrit le sien au même endroit (`MyGesClient-service.log`).
 
 ### Sécurité
 - Le mot de passe MyGes est rangé dans le trousseau du système (Gestionnaire d'identification Windows, Trousseau macOS, Secret Service sous Linux) au lieu d'être en clair dans la base locale. Les mots de passe existants y sont déplacés au premier lancement (#65).

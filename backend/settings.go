@@ -9,7 +9,7 @@ import (
 )
 
 // GetBackgroundServiceSupported reports whether the background service can be
-// enabled on this OS (Linux and Windows).
+// enabled on this OS (Linux, Windows and macOS).
 func (a *App) GetBackgroundServiceSupported() bool {
 	return autostart.Supported
 }

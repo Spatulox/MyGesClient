@@ -689,6 +689,11 @@
     margin: auto;
 }
 
+/* Odd number of sections: the last one takes the whole row */
+#softwareAccount > div > .credits-section:last-child:nth-child(odd){
+    grid-column: 1 / -1;
+}
+
 #stillpopup > div{
     position: fixed;
     z-index: 2409;

@@ -64,7 +64,7 @@ Les binaires sont disponibles sur la [page des releases](https://github.com/Spat
 | Système | Fichier | Architectures |
 |---|---|---|
 | Windows | `-setup.exe` (installeur) ou `-portable.exe` | x64, ARM64 (`-arm64`) |
-| Linux (Debian, Ubuntu…) | `.deb` | amd64, arm64 |
+| Linux (Debian, Ubuntu…) | `.deb` (prendre celui de sa version d'Ubuntu, ex. `+ubuntu24.04`) | amd64, arm64 |
 | macOS | `-macos-universal.zip` | Intel et Apple Silicon |
 
 ### macOS
@@ -74,6 +74,11 @@ Faites clic droit sur l'application > **Ouvrir**, ou lancez une fois :
 xattr -dr com.apple.quarantine /Applications/MyGesClient.app
 ```
 
+Rappels quand l'application est fermée (Compte > Rappels des évènements) : l'option installe un LaunchAgent
+(`~/Library/LaunchAgents/io.github.spatulox.MyGesClient.service.plist`). macOS signale alors un « élément ajouté en arrière-plan ».
+- Si vous le désactivez dans Réglages Système > Général > Ouverture, l'application ne peut pas le savoir : la case reste cochée. Décochez-la aussi dans MyGesClient.
+- Les notifications passent par `osascript` : elles s'affichent au nom de « Éditeur de script ».
+
 ### Linux : dépannage
 - **Mot de passe stocké sans chiffrement** : l'application range le mot de passe dans le trousseau du système (Secret Service).
   Sans trousseau (bureau minimal, WSL…), elle le garde dans sa base locale et le signale.
@@ -82,10 +87,12 @@ xattr -dr com.apple.quarantine /Applications/MyGesClient.app
   (ou `ondemand`), ou avec `WEBKIT_DISABLE_DMABUF_RENDERER=1 MyGesClient`.
 
 ### Logs
-L'application écrit ses logs dans `MyGes/logs/MyGesClient.log` du dossier de cache de l'utilisateur :
+L'application écrit ses logs dans le dossier `MyGes/logs` du dossier de cache de l'utilisateur :
 - Windows : `%LocalAppData%\MyGes\logs`
 - Linux : `~/.cache/MyGes/logs`
 - macOS : `~/Library/Caches/MyGes/logs`
+
+On y trouve `MyGesClient.log` pour l'application, et `MyGesClient-service.log` pour le service de rappels en arrière-plan.
 
 <br><br><hr>
 # How to run the code
@@ -94,11 +101,15 @@ This code use the official [Wails](https://wails.io/) Vanilla template.
 
 ## Live Development
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
+To run in live development mode, run `./wailsdev.sh` (or `wails dev`) in the project directory. This will run a Vite development
 server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
 and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
 to this in your browser, and you can call your Go code from devtools.
 
 ## Building
 
-To build a redistributable, production mode package, use `wails build`.
+To build a redistributable, production mode package, use `./wailsbuild.sh` (or `wails build`).
+
+Both scripts (environment in `wails-env.sh`) add Go's `bin` folder and nvm to the `PATH`, pin the Go toolchain of
+`go.mod` (Wails' binding generator breaks with recent Go releases) and, on Linux, build with WebKitGTK 4.1
+(`-tags webkit2_41`) when it is installed.
