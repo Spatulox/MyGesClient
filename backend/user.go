@@ -143,6 +143,7 @@ func (a *App) GetYears() (string, error) {
 func (a *App) DeconnectUser() error {
 	a.deleteAPI()
 	a.deleteAPIUser()
+	a.setKnownYears(nil) // the years of the next account are read at its connection
 	return DeconnectUser(a.db)
 }
 

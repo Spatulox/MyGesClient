@@ -53,6 +53,28 @@ func TestGetJSONReturnsResult(t *testing.T) {
 	}
 }
 
+func TestNullResultIsEmpty(t *testing.T) {
+	ges := testAPI(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"result":null}`))
+	})
+	got, err := ges.GetGrades("2023")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != `{"items":[]}` {
+		t.Fatalf("got %s", got)
+	}
+}
+
+func TestMissingResultIsAnError(t *testing.T) {
+	ges := testAPI(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"message":"oops"}`))
+	})
+	if _, err := ges.GetGrades("2023"); err == nil {
+		t.Fatal("expected an error without a 'result' field")
+	}
+}
+
 func TestGetAgendaRejectsBadDateWithoutExiting(t *testing.T) {
 	ges := &GESapi{token: &AccessToken{}}
 	if _, err := ges.GetAgenda("2025-01-01", "2025-01-07"); err == nil {

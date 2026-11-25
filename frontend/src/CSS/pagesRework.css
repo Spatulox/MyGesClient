@@ -1,0 +1,902 @@
+/*
+ * Cours, Absences and Notes pages (issue #66): year select, archive banner,
+ * course cards, absences list, grades summary / list / detail.
+ *
+ * Dark theme values are the defaults below; the .light rules at the end of
+ * the file fix what needs more than a variable.
+ */
+
+/* Accent colors (--warn-*, --good-*, --soon-*, --focus-ring): see variables.css */
+
+/* ---------- Shared ---------- */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+#courses button:focus-visible,
+#courses select:focus-visible,
+#courses input:focus-visible,
+#absences button:focus-visible,
+#absences select:focus-visible,
+#grades button:focus-visible,
+#grades select:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* Title on the left, "Année" select on the right */
+.page-title-row.has-year-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.page-title-row.has-year-picker h1,
+.page-title-row.has-year-picker h2 {
+    margin: 0;
+}
+
+.year-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--mainPoliceColor);
+}
+
+/* appearance: none, otherwise WebKitGTK draws the select with the (light)
+   system theme and keeps our white text: white on white in dark mode. */
+.year-picker select {
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: dark;
+    padding: 8px 32px 8px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid var(--discord-lightlight);
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: var(--discord-dark);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23dcddde' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    color: var(--text-color);
+}
+
+.year-picker select:hover {
+    background-color: var(--discord-light);
+}
+
+.year-picker select option {
+    background-color: var(--discord-dark);
+    color: var(--text-color);
+}
+
+#courses .year-picker select {
+    background-color: var(--card-bg);
+}
+
+.archive-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    border: 1px solid var(--soon-bg);
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: var(--discord-dark);
+    color: var(--mainPoliceColor);
+}
+
+#courses .archive-banner {
+    background-color: var(--card-bg);
+}
+
+.year-picker[hidden],
+.archive-banner[hidden],
+.tab-button[hidden],
+#loadingCourses[hidden] {
+    display: none;
+}
+
+/* ---------- Cours ---------- */
+
+.courses-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 16px 0 4px;
+}
+
+.courses-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.courses-filters .tab-button {
+    padding: 8px 14px;
+    background-color: var(--card-bg);
+}
+
+.courses-filters .tab-button:hover {
+    background-color: var(--hover-bg);
+}
+
+.courses-filters .tab-button.active,
+.courses-filters .tab-button.active:hover {
+    background-color: var(--highlight-color);
+}
+
+.courses-toolbar-end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.courses-count {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.courses-group {
+    margin-top: 18px;
+}
+
+.courses-group h2 {
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    font-size: 16px;
+    color: var(--mainPoliceColor);
+    border-bottom: 1px solid var(--card-bg);
+}
+
+.courses-group-count {
+    font-weight: normal;
+    color: var(--text-secondary-color);
+}
+
+.courses-cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.course-tile-card {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px;
+    border-radius: 8px;
+    background-color: var(--card-bg);
+}
+
+.course-tile {
+    flex: 0 0 40px;
+    height: 40px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.tile-color-0 { background-color: #396aa1; }
+.tile-color-1 { background-color: #5b4a8a; }
+.tile-color-2 { background-color: #2e6b5e; }
+.tile-color-3 { background-color: #8a5a2b; }
+.tile-color-4 { background-color: #6b6430; }
+
+.course-tile-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-wrap: anywhere;
+}
+
+.course-tile-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--mainPoliceColor);
+}
+
+.course-tile-teacher {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--good-text);
+}
+
+.course-tile-group {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.courses-empty {
+    margin-top: 18px;
+    padding: 32px 16px;
+    text-align: center;
+    border: 1px dashed var(--discord-lightlight);
+    border-radius: 8px;
+    color: var(--text-secondary-color);
+}
+
+/* ---------- Absences ---------- */
+
+#allContainerAbsences > .box {
+    width: 720px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.absences-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.absences-stat {
+    padding: 12px 14px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background-color: var(--card-bg);
+}
+
+.absences-stat-label {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.absences-stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.absences-stat-warn {
+    color: var(--warn-text);
+}
+
+.absences-stat-course {
+    font-size: 16px;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.absences-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.absences-filters .tab-button {
+    padding: 8px 14px;
+}
+
+.absences-list {
+    border-radius: 5px;
+    overflow: hidden;
+    background-color: var(--card-bg);
+}
+
+.absences-month {
+    margin: 0;
+    padding: 8px 14px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: var(--highlight-color);
+}
+
+.absences-list ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.absence-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+}
+
+.absence-row + .absence-row {
+    border-top: 1px solid var(--discord-dark);
+}
+
+.absence-day {
+    flex: 0 0 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.absence-weekday {
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--text-secondary-color);
+}
+
+.absence-daynum {
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.absence-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.absence-course {
+    font-size: 15px;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.absence-details {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.absence-pill {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.absence-pill-ok {
+    background-color: var(--discord-dark);
+    color: var(--text-color);
+}
+
+.absence-pill-ko {
+    background-color: var(--soon-bg);
+    color: var(--soon-text);
+}
+
+.absences-empty {
+    padding: 28px 14px;
+    text-align: center;
+    color: var(--text-secondary-color);
+}
+
+/* ---------- Notes ---------- */
+
+#allGradesContainer .main-content-grades {
+    min-width: 0;
+}
+
+#grades-tabs:empty {
+    display: none;
+}
+
+.tone-low { color: var(--warn-text); }
+.tone-high { color: var(--good-text); }
+.tone-none { color: var(--text-secondary-color); }
+
+.grades-muted {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.grades-empty {
+    padding: 28px 14px;
+    text-align: center;
+    border-radius: 5px;
+    color: var(--text-secondary-color);
+    background-color: var(--card-bg);
+}
+
+.grades-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.grades-card {
+    padding: 14px 16px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background-color: var(--card-bg);
+}
+
+.grades-card-average,
+.grades-card-semesters {
+    flex: 1 1 200px;
+}
+
+.grades-card-ects {
+    flex: 2 1 340px;
+    gap: 8px;
+}
+
+.grades-card-semesters {
+    gap: 8px;
+}
+
+.grades-card-head,
+.grades-semester-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.grades-semester-row {
+    font-size: 15px;
+}
+
+.grades-semester-average {
+    font-size: 20px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.grades-big {
+    font-size: 34px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.grades-big-unit {
+    font-size: 16px;
+    font-weight: normal;
+    color: var(--text-secondary-color);
+}
+
+.ects-bar {
+    display: flex;
+    gap: 3px;
+    height: 12px;
+}
+
+.ects-segment {
+    min-width: 6px;
+    border-radius: 3px;
+}
+
+.ects-ok { background-color: var(--good-bar); }
+.ects-low { background-color: var(--warn-bar); }
+.ects-pending { background-color: var(--text-muted); }
+
+.ects-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    font-size: 12px;
+    color: var(--text-color);
+}
+
+.ects-legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ects-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+/* Master / detail */
+.grades-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.grades-courses {
+    flex: 1 1 280px;
+    max-width: 100%;
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background-color: var(--card-bg);
+}
+
+.grades-course {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 4px;
+    text-align: left;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--mainPoliceColor);
+}
+
+.grades-course:hover {
+    background-color: var(--hover-bg);
+}
+
+.grades-course.active,
+.grades-course.active:hover {
+    background-color: var(--highlight-color);
+    color: #ffffff;
+}
+
+.grades-course-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.grades-course-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.grades-course-tag {
+    font-size: 12px;
+    color: var(--text-secondary-color);
+}
+
+.grades-course.active .grades-course-tag {
+    color: #ffffff;
+}
+
+.grades-badge {
+    flex: 0 0 auto;
+    min-width: 48px;
+    box-sizing: border-box;
+    text-align: center;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.badge-low { background-color: var(--soon-bg); color: var(--soon-text); }
+.badge-high { background-color: #9cc0ea; color: #1f2328; }
+.badge-mid { background-color: var(--discord-dark); color: var(--mainPoliceColor); }
+.badge-none { background-color: var(--discord-dark); color: var(--text-secondary-color); }
+
+.grades-detail {
+    flex: 999 1 420px;
+    min-width: 0;
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--card-bg);
+}
+
+.grades-detail-head {
+    padding: 12px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: var(--highlight-color);
+}
+
+#allGradesContainer .grades-detail-head h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.grades-detail-body {
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.grades-tiles {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.grades-tile {
+    padding: 12px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background-color: var(--discord-dark);
+}
+
+.grades-tile dt {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+}
+
+.grades-tile dd {
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.grades-parts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.grades-part {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: var(--discord-dark);
+}
+
+.grades-part-average {
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.grades-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#allGradesContainer .grades-notes h4 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.grades-notes-empty {
+    padding: 28px;
+    text-align: center;
+    border: 1px dashed var(--discord-lightlight);
+    border-radius: 5px;
+    color: var(--text-secondary-color);
+}
+
+/* Bar chart: a 20/20 bar is 150px high, so the 10 line is at 75px */
+.grades-chart-scroll {
+    overflow-x: auto;
+}
+
+.grades-chart {
+    position: relative;
+    height: 170px;
+    min-width: max-content;
+    padding: 0 24px 0 8px;
+    border-bottom: 1px solid var(--discord-lightlight);
+}
+
+.grades-chart-ten {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 75px;
+    border-top: 1px dashed var(--text-secondary-color);
+}
+
+.grades-chart-ten span {
+    position: absolute;
+    right: 0;
+    bottom: 3px;
+    font-size: 11px;
+    color: var(--text-secondary-color);
+}
+
+.grades-chart-bars,
+.grades-chart-captions {
+    display: flex;
+    gap: 14px;
+}
+
+.grades-chart-bars {
+    position: relative;
+    height: 100%;
+    align-items: flex-end;
+}
+
+.grades-chart-captions {
+    padding: 4px 24px 0 8px;
+    min-width: max-content;
+}
+
+.grade-column {
+    flex: 0 0 52px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.grade-gap {
+    margin-left: 18px;
+}
+
+.grade-value {
+    font-size: 14px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.grade-bar {
+    width: 36px;
+    box-sizing: border-box;
+    border-radius: 4px 4px 0 0;
+    background-color: var(--neutral-bar);
+}
+
+.grade-bar-low {
+    background-color: var(--warn-bar);
+}
+
+.grade-bar-exam {
+    background-color: var(--highlight-color);
+    border: 2px solid #9cc0ea;
+}
+
+.grade-caption {
+    flex: 0 0 52px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary-color);
+}
+
+.grades-calc {
+    padding: 12px 14px;
+    border-radius: 5px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+    background-color: var(--discord-dark);
+}
+
+@media only screen and (max-width: 1100px) {
+    .grades-tiles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .absences-stats {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ---------- Light theme ---------- */
+
+.light .year-picker select,
+.light #courses .year-picker select {
+    color-scheme: light;
+    background-color: var(--card-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234f5660' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    border: 1px solid var(--border-color);
+}
+
+.light .year-picker select:hover {
+    background-color: var(--hover-bg);
+}
+
+.light .year-picker select option {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.light .archive-banner,
+.light #courses .archive-banner {
+    background-color: var(--accent-soft);
+}
+
+.light .courses-filters .tab-button {
+    background-color: var(--discord-light);
+}
+
+.light .courses-filters .tab-button:hover {
+    background-color: var(--discord-lightlight);
+}
+
+.light .courses-filters .tab-button.active {
+    background-color: var(--highlight-color);
+}
+
+.light .courses-group h2 {
+    border-bottom-color: var(--border-color);
+}
+
+.light .course-tile-card,
+.light .absences-stat,
+.light .absences-list,
+.light .grades-card,
+.light .grades-empty,
+.light .grades-courses,
+.light .grades-detail {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.light .absence-row + .absence-row {
+    border-top-color: var(--border-color);
+}
+
+.light .absence-pill-ok,
+.light .badge-mid,
+.light .badge-none {
+    background-color: var(--discord-lightlight);
+}
+
+.light .absence-pill-ok {
+    color: var(--mainPoliceColor);
+}
+
+.light .grades-tile,
+.light .grades-part,
+.light .grades-calc {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+}
+
+.light .courses-empty,
+.light .grades-notes-empty {
+    border-color: var(--border-color);
+}
+
+.light .grades-chart {
+    border-bottom-color: var(--border-color);
+}
+
+.light .grade-bar-exam {
+    border-color: var(--good-bar);
+}

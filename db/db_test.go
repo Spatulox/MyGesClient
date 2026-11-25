@@ -289,3 +289,61 @@ func TestMigrationAddsLastYear(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestGradesAndAbsencesAreKeptPerYear(t *testing.T) {
+	db := newTestDB(t)
+	addUsers(t, db, 1, 2)
+	g := func(course string, year int) string {
+		return fmt.Sprintf(`{"items":[{"bonus":0,"coef":"1","course":%q,"ects":"2","grades":[12],"trimester":1,"year":%d}]}`, course, year)
+	}
+	abs := func(year int) string {
+		return fmt.Sprintf(`{"items":[{"course_name":"Go","date":1700000000000,"justified":false,"trimester":1,"trimester_name":"S1","type":"absence","year":%d}]}`, year)
+	}
+	if err := ReplaceGrades(db, 1, "2025", g("Current", 2025)); err != nil {
+		t.Fatal(err)
+	}
+	// A row whose "year" differs from the requested one is still stored under
+	// the requested year, so the next refresh of that year replaces it.
+	if err := ReplaceGrades(db, 1, "2024", g("Past", 0)); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceGrades(db, 1, "2024", g("Past again", 0)); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceAbsences(db, 1, "2023", abs(2023)); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReplaceGrades(db, 2, "2022", g("Bob", 2022)); err != nil {
+		t.Fatal(err)
+	}
+
+	current, err := GetDBUserGrades(db, 1, "2025")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(current) != 1 || current[0].CourseName != "Current" || current[0].Year != 2025 {
+		t.Fatalf("2025 grades = %+v", current)
+	}
+	past, err := GetDBUserGrades(db, 1, "2024")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(past) != 1 || past[0].CourseName != "Past again" || past[0].Year != 2024 {
+		t.Fatalf("2024 grades = %+v", past)
+	}
+	absences, err := GetDBUserAbsences(db, 1, "2023")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(absences) != 1 || absences[0].Year != "2023" {
+		t.Fatalf("2023 absences = %+v", absences)
+	}
+
+	years, err := GetDBUserYears(db, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(years, ",") != "2025,2024,2023" {
+		t.Fatalf("years = %v, want [2025 2024 2023]", years)
+	}
+}

@@ -49,8 +49,10 @@ func ReplaceGrades(db *sql.DB, userID int64, year string, gradesJSON string) err
 
 		for _, item := range response.Result {
 			teacherName := fmt.Sprintf("%s %s", item.TeacherLastName, item.TeacherFirstName)
+			// Stored under the requested year, not item.Year: the DELETE above
+			// and GetDBUserGrades select on it, so the years never mix.
 			res, err := stmtNotes.Exec(item.Bonus, item.Coef, item.CourseName, item.ECTS, item.Exam,
-				item.Trimester, item.Year, teacherName, userID)
+				item.Trimester, year, teacherName, userID)
 			if err != nil {
 				return fmt.Errorf("insertion dans NOTES : %w", err)
 			}

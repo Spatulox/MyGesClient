@@ -9,12 +9,9 @@ import (
 	. "MyGesClient/time"
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -51,7 +48,8 @@ const allowedStartupErrors = ErrUserInit | ErrAPIInit | ErrYearsRequest | ErrPas
 // App struct
 type App struct {
 	ctx                context.Context
-	year               string // use getYear / setYear
+	year               string   // current school year, use getYear / setYear
+	years              []string // years listed by MyGes, use getKnownYears / setKnownYears
 	db                 *sql.DB
 	creds              *credentials.Store // passwords, in the OS keyring when available
 	dbMutex            sync.Mutex
@@ -60,7 +58,7 @@ type App struct {
 	apiRWMutex         sync.RWMutex
 	user               UserSettings
 	startupStatus      atomic.Int32 // StartupStatus
-	yearMutex          sync.RWMutex // protects year
+	yearMutex          sync.RWMutex // protects year and years
 	isFetchingGrades   atomic.Bool
 	isFetchingAbsences atomic.Bool
 	isFetchingSchedule atomic.Bool
@@ -347,7 +345,7 @@ func (a *App) initYear() error {
 	}
 
 	var year string
-	years, err := api.GetYears()
+	yearsJSON, err := api.GetYears()
 	if err != nil {
 		a.handleStartupError("Years initialization request", err)
 		year, err = GetLastYearInDB(a.db)
@@ -356,10 +354,12 @@ func (a *App) initYear() error {
 		}
 		Log.Infos("Local Year Retrieved")
 	} else {
-		year, err = a.getLatestYear(years)
+		years, err := parseYears(yearsJSON)
 		if err != nil {
 			return fmt.Errorf("impossible to parse the retrieved year: %w", err)
 		}
+		year = years[0]
+		a.setKnownYears(years)
 	}
 	a.setYear(year)
 
@@ -445,29 +445,6 @@ func (a *App) handleStartupError(step string, err error) {
 	Log.Error(fmt.Sprintf("Startup failed during %s: %v", step, err))
 }
 
-func (a *App) getLatestYear(jsonData string) (string, error) {
-	type Years struct {
-		Items []int `json:"items"`
-	}
-	var years Years
-	err := json.Unmarshal([]byte(jsonData), &years)
-	if err != nil {
-		return "0", err
-	}
-
-	if len(years.Items) == 0 {
-		return "0", fmt.Errorf("no years found in the data")
-	}
-
-	latestYear := years.Items[0]
-	for _, year := range years.Items {
-		if year > latestYear {
-			latestYear = year
-		}
-	}
-	return strconv.Itoa(latestYear), nil
-}
-
 // -------------------------------------------------------------------------- //
 
 // currentWeekBounds returns the Monday and Sunday of the current week as "2006-01-02".
@@ -546,7 +523,6 @@ func (a *App) GetStartStatus() StartupStatus {
 	return a.GetStartupStatus()
 }
 
-
 // -------------------------------------------------------------------------- //
 
 func (a *App) CheckInternetConnection() bool {
@@ -593,13 +569,19 @@ func (a *App) CheckXTimeInternetConnection(attempts int) bool {
 
 // -------------------------------------------------------------------------- //
 
+// GetCourses returns the courses of the current school year (MyGes JSON).
 func (a *App) GetCourses() (string, error) {
-	year := a.getYear()
-	if year == "" {
-		return "", fmt.Errorf("Year is undefined")
-	}
+	return a.GetCoursesForYear("")
+}
 
-	if !regexp.MustCompile(`^20\d{2}$`).MatchString(year) {
+// GetCoursesForYear returns the courses of the given school year ("2024" for
+// 2024-2025, "" for the current one), as MyGes JSON. Not cached locally.
+func (a *App) GetCoursesForYear(year string) (string, error) {
+	year, err := a.resolveYear(year)
+	if err != nil {
+		return "", err
+	}
+	if !yearFormat.MatchString(year) {
 		Log.Error(fmt.Sprintf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year))
 		return "", fmt.Errorf("format d'année invalide: %s. Le format attendu est YYYY (ex: 2024)", year)
 	}

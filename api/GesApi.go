@@ -335,7 +335,14 @@ func (ges *GESapi) request(method, path string, requestConfig map[string]interfa
 	}
 	Log.Infos(fmt.Sprintf("%s finished", path))
 
-	switch resultData := result["result"].(type) {
+	resultField, hasResult := result["result"]
+	switch resultData := resultField.(type) {
+	case nil:
+		// {"result": null}: other clients read it as "nothing", e.g. a past
+		// year without grades (Bot-Myges: `(await getGrades(...)) || []`).
+		if hasResult {
+			return map[string]interface{}{"items": []interface{}{}}, nil
+		}
 	case []interface{}:
 		return map[string]interface{}{"items": resultData}, nil
 	case map[string]interface{}:

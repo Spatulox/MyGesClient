@@ -76,7 +76,6 @@
 .light #account-presentation .card,
 .light #courses-container .container,
 .light #projects .project-list,
-.light .event-item,
 .light .event-card,
 .light .course-card {
     box-shadow: var(--shadow);
@@ -84,14 +83,12 @@
 }
 
 /* Keep the colored left border of events / courses */
-.light .event-item,
 .light .event-card,
 .light .course-card {
     border-left-width: 4px;
 }
 
 .light .main-content-dashboard .course-item,
-.light .main-content-dashboard .grade-item,
 .light .main-content-dashboard .day-column {
     background-color: var(--bg-color);
 }
@@ -130,34 +127,6 @@
     background-color: var(--popupColor);
 }
 
-/* ---------- Tables (grades, absences) ---------- */
-
-.light #allGradesContainer .grades-header,
-.light .main-content-dashboard .grades-header,
-.light #allContainerAbsences th {
-    color: #ffffff;
-}
-
-.light #allGradesContainer .grade-item {
-    border-bottom: 1px solid var(--border-color);
-}
-
-.light #allContainerAbsences tr:nth-child(even) {
-    background-color: var(--bg-color);
-}
-
-.light #allContainerAbsences tr:hover {
-    background-color: var(--accent-soft);
-}
-
-.light #allContainerAbsences .justified {
-    color: #1e7f4f;
-}
-
-.light #allContainerAbsences .not-justified {
-    color: #c62828;
-}
-
 .light .tab-button {
     background-color: var(--discord-light);
 }
@@ -174,6 +143,74 @@
 .light .tab-button.active:hover {
     background-color: var(--hover-color);
     color: #ffffff;
+}
+
+/* Toggle buttons (dashboard S1 / S2, event filters) */
+.light .toggle-button {
+    background-color: var(--discord-light);
+}
+
+.light .toggle-button:hover {
+    background-color: var(--discord-lightlight);
+}
+
+.light .toggle-button[aria-pressed="true"] {
+    background-color: var(--highlight-color);
+    color: #ffffff;
+}
+
+.light .toggle-button[aria-pressed="true"]:hover {
+    background-color: var(--hover-color);
+}
+
+/* ---------- Dashboard: grades recap ---------- */
+
+/* The panel is white like its box: draw its edge */
+.light .main-content-dashboard #grades-content {
+    border: 1px solid var(--border-color);
+}
+
+/* --discord-dark is white in this theme: tracks would vanish on the white panel */
+.light .grades-recap-ring-track {
+    stroke: var(--discord-lightlight);
+}
+
+.light .grades-recap-track {
+    background-color: var(--discord-lightlight);
+}
+
+.light .grades-recap-watch-head {
+    border-top-color: var(--border-color);
+}
+
+.light .grades-recap-link:hover {
+    color: var(--highlight-color);
+}
+
+/* ---------- Events page: timeline ---------- */
+
+.light .timeline-card {
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.light .timeline-rail::before,
+.light .timeline-month-line {
+    background-color: var(--border-color);
+}
+
+.light .event-empty {
+    border-color: var(--discord-verylight);
+}
+
+.light .timeline-badge.is-done {
+    background-color: var(--discord-lightlight);
+    color: var(--text-secondary-color);
+}
+
+.light .event-delete-button:hover {
+    background-color: var(--hover-bg);
+    color: #c62828;
 }
 
 /* ---------- Forms ---------- */
@@ -313,4 +350,22 @@
 .light .login-container .select-items div:hover,
 .light .same-as-selected {
     background-color: var(--hover-bg);
+}
+
+/* ---------- Settings select ---------- */
+
+.light .setting-row select {
+    color-scheme: light;
+    background-color: var(--card-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234f5660' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    border-color: var(--border-color);
+}
+
+.light .setting-row select:hover {
+    background-color: var(--hover-bg);
+}
+
+.light .setting-row select option {
+    background-color: var(--card-bg);
+    color: var(--text-color);
 }
