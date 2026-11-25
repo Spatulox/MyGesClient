@@ -279,6 +279,9 @@ func TestMigrationAddsLastYear(t *testing.T) {
 	if user.Year != "1970" {
 		t.Fatalf("Year = %q, want the default 1970", user.Year)
 	}
+	if !user.DiscordRPC {
+		t.Fatal("DiscordRPC = false, want the default true (behaviour before the option)")
+	}
 
 	// Opening again must not re-run the migrations
 	db.Close()

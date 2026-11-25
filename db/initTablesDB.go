@@ -15,7 +15,8 @@ const USER = `CREATE TABLE IF NOT EXISTS USER (
     eula BOOLEAN NOT NULL DEFAULT 0,
     selected BOOLEAN NOT NULL DEFAULT 0,
 	last_year TEXT NOT NULL DEFAULT '1970',
-	reminder_minutes INTEGER NOT NULL DEFAULT 15 -- events are reminded this many minutes before (-1: never)
+	reminder_minutes INTEGER NOT NULL DEFAULT 15, -- events are reminded this many minutes before (-1: never)
+	discord_rpc BOOLEAN NOT NULL DEFAULT 1 -- show the app in the Discord status of the user
 );`
 
 // To store the schedule of the user
@@ -176,6 +177,11 @@ var migrations = []func(tx *sql.Tx) error{
 			return err
 		}
 		return addColumnIfMissing(tx, "EVENTS", "reminded", "BOOLEAN NOT NULL DEFAULT 0")
+	},
+	// 4: option to hide the app from the Discord status (shown by default,
+	// as before the option existed)
+	func(tx *sql.Tx) error {
+		return addColumnIfMissing(tx, "USER", "discord_rpc", "BOOLEAN NOT NULL DEFAULT 1")
 	},
 }
 

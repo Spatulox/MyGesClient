@@ -9,4 +9,6 @@ type UserSettings struct {
 	Year     string
 	// Events are reminded this many minutes before they start (-1: never)
 	ReminderMinutes int
+	// Show the app in the Discord status of the user (Rich Presence)
+	DiscordRPC bool
 }

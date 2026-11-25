@@ -26,6 +26,7 @@ import { changeWeek, hideScheduleButtons, schedule, showScheduleButtons } from "
 import { projects } from "../JS-Page/projects";
 import { initExternalLinks } from "./externalLinks";
 import { initReminderSettings } from "../JS-Page/softwareAccount";
+import { initPrivacySettings, warnIfPasswordStoredInClear } from "../JS-Page/privacy";
 
 let initializedStart = false;
 
@@ -107,6 +108,8 @@ export async function start(): Promise<void> {
             await initAllPages(status);
             if (status === StartupStatus.StatusPasswordMissing) {
                 await askPasswordAgain(user.Username);
+            } else {
+                await warnIfPasswordStoredInClear();
             }
         } catch (e: any) {
             console.log(e);
@@ -211,6 +214,7 @@ async function initializeSoftwareAccount(): Promise<void> {
     });
 
     initReminderSettings();
+    initPrivacySettings();
 }
 
 async function initializeSchedulePart(): Promise<void> {

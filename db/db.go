@@ -195,10 +195,29 @@ func UpdateUserLastYear(db *sql.DB, year string) (bool, error) {
 
 // ------------------------------------------------ //
 
+// UpdateUserDiscordRPC sets whether the app is shown in the Discord status of
+// the selected user.
+func UpdateUserDiscordRPC(db *sql.DB, enabled bool) error {
+	result, err := db.Exec(`UPDATE USER SET discord_rpc = ? WHERE selected = true`, enabled)
+	if err != nil {
+		return fmt.Errorf("Erreur lors de la mise à jour du paramètre Discord : %w", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("Aucun utilisateur sélectionné trouvé pour la mise à jour du paramètre Discord")
+	}
+	return nil
+}
+
+// ------------------------------------------------ //
+
 func GetUser(db *sql.DB) (UserSettings, error) {
 	var user UserSettings
-	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes FROM USER WHERE selected = true`
-	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes)
+	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes, discord_rpc FROM USER WHERE selected = true`
+	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes, &user.DiscordRPC)
 	if err != nil {
 		Log.Error(fmt.Sprintf("1 %v", err))
 		return UserSettings{}, err
@@ -222,7 +241,7 @@ func GetLastYearInDB(db *sql.DB) (string, error) {
 // ------------------------------------------------ //
 
 func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
-	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes FROM USER` // WHERE selected = 0`
+	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes, discord_rpc FROM USER` // WHERE selected = 0`
 	rows, err := db.Query(query)
 	if err != nil {
 		Log.Error(fmt.Sprintf("3 %v", err))
@@ -233,7 +252,7 @@ func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
 	var users []UserSettings
 	for rows.Next() {
 		var user UserSettings
-		err := rows.Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes)
+		err := rows.Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes, &user.DiscordRPC)
 		if err != nil {
 			return nil, err
 		}
