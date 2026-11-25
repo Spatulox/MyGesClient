@@ -39,7 +39,8 @@ func ReplaceAbsences(db *sql.DB, userID int64, year string, absJSON string) erro
 		defer stmt.Close()
 
 		for _, a := range response.Items {
-			if _, err := stmt.Exec(a.CourseName, a.Date, a.Justified, a.Trimester, a.TrimesterName, a.Type, a.Year, userID); err != nil {
+			// Stored under the requested year (see ReplaceGrades)
+			if _, err := stmt.Exec(a.CourseName, a.Date, a.Justified, a.Trimester, a.TrimesterName, a.Type, year, userID); err != nil {
 				return fmt.Errorf("insertion dans ABSENCES : %w", err)
 			}
 		}
