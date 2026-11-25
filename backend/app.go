@@ -19,7 +19,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/hugolgst/rich-go/client"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	_ "modernc.org/sqlite"
 )
@@ -286,9 +285,15 @@ func (a *App) initDB() error {
 	a.creds = credentials.New(a.db)
 	// Passwords saved by older versions (or while the keyring was unavailable)
 	// are moved to the keyring. Not fatal: they stay usable from the DB.
-	if err := a.creds.MigrateAll(); err != nil {
-		Log.Error(fmt.Sprintf("Impossible to move the passwords to the OS keyring: %v", err))
-	}
+	// In the background: a keyring waiting for an unlock prompt must not
+	// delay the startup (the selected account is moved by initUser anyway).
+	a.dbWg.Add(1)
+	go func() {
+		defer a.dbWg.Done()
+		if err := a.creds.MigrateAll(); err != nil {
+			Log.Error(fmt.Sprintf("Impossible to move the passwords to the OS keyring: %v", err))
+		}
+	}()
 	return nil
 }
 
@@ -541,39 +546,6 @@ func (a *App) GetStartStatus() StartupStatus {
 	return a.GetStartupStatus()
 }
 
-// -------------------------------------------------------------------------- //
-
-func (a *App) InitDiscordRPC() error {
-	err := client.Login("1196836862447329351")
-	if err != nil {
-		return err
-	}
-
-	err = client.SetActivity(client.Activity{
-		Details:    "Unofficial MyGes Client",
-		State:      "Dashboard",
-		LargeImage: "ges_logo",
-		LargeText:  "GES_logo",
-		Buttons: []*client.Button{
-			{
-				Label: "Obtenez le logiciel",
-				Url:   "https://github.com/Spatulox/MyGesClient/releases",
-			},
-		},
-	})
-	return err
-}
-
-// -------------------------------------------------------------------------- //
-
-func (a *App) UpdateDiscordRPC(details string, state string) error {
-	return client.SetActivity(client.Activity{
-		Details:    details,
-		State:      state,
-		LargeImage: "ges_logo",
-		LargeText:  "GES_logo",
-	})
-}
 
 // -------------------------------------------------------------------------- //
 

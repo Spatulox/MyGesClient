@@ -37,7 +37,7 @@ export async function absences(): Promise<void> {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${escapeHtml(course.course_name)}</td>
-                    <td>${escapeHtml(new Date(course.date).toLocaleString())}</td>
+                    <td>${escapeHtml(new Date(course.date).toLocaleString('fr-FR'))}</td>
                     <td class="${course.justified ? 'justified' : 'not-justified'}">${course.justified ? 'Oui' : 'Non'}</td>
                     <td>${escapeHtml(course.trimester_name)}</td>
                     <td>${escapeHtml(course.year)}</td>

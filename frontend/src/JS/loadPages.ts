@@ -11,6 +11,7 @@ import { courses } from "../JS-Page/courses";
 import { absences } from "../JS-Page/absences";
 import { projects } from "../JS-Page/projects";
 import { softwareAccount } from "../JS-Page/softwareAccount";
+import { loadPrivacySettings } from "../JS-Page/privacy";
 
 let leDocToShow: HTMLElement | null = document.getElementById("weirdPlace");
 let isPossibleToSwitchTabs = true;
@@ -41,7 +42,13 @@ const PAGES: Record<string, PageDefinition> = {
     projects: { title: "Projets", load: () => projects() },
     events: { title: "Évènements", load: () => events() },
     account: { title: "Compte", load: () => account() },
-    softwareAccount: { title: "Compte", load: () => softwareAccount() },
+    softwareAccount: {
+        title: "Compte",
+        load: async () => {
+            await softwareAccount();
+            await loadPrivacySettings();
+        }
+    },
     credits: { title: "Crédit" },
 };
 

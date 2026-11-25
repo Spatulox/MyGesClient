@@ -84,8 +84,9 @@ func GetDBUserAbsences(db *sql.DB, userID int64, year string) ([]LocalAbsences, 
 		// Convertir en nanosecondes et créer un time.Time
 		t := time.Unix(0, int64(timestampFloat*1e6))
 
-		// Formater la date comme vous le souhaitez
-		abs.Date = t.Format("2006-01-02 15:04:05")
+		// RFC 3339 (ISO 8601 with the time zone): parsed the same way by
+		// every webview (Chromium on Windows, WebKit on Linux and macOS)
+		abs.Date = t.Format(time.RFC3339)
 
 		absences = append(absences, abs)
 	}

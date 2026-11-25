@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -47,8 +48,8 @@ func AppDataDir() (string, error) {
 	}
 
 	dir := filepath.Join(appDataPath, "MyGes")
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", fmt.Errorf("erreur lors de la création du dossier MyGes: %w", err)
+	if err := prepareDataDir(dir); err != nil {
+		return "", err
 	}
 	return dir, nil
 }
@@ -59,7 +60,39 @@ func InitDBConnexion() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return OpenDB(filepath.Join(dir, "db.sqlite"))
+	dbPath := filepath.Join(dir, "db.sqlite")
+	db, err := OpenDB(dbPath)
+	if err != nil {
+		return nil, err
+	}
+	restrictToOwner(dbPath, 0600)
+	return db, nil
+}
+
+// prepareDataDir creates the application data folder, readable by its owner
+// only. It holds the database, which may contain a password in clear text
+// (when the OS keyring is unavailable, see the credentials package) and
+// personal data.
+func prepareDataDir(dir string) error {
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return fmt.Errorf("erreur lors de la création du dossier MyGes: %w", err)
+	}
+	// MkdirAll leaves the permissions of an existing folder unchanged
+	// (0755 for the folders created by older versions)
+	restrictToOwner(dir, 0700)
+	return nil
+}
+
+// restrictToOwner sets the Unix permissions of path. Not fatal: the app works
+// without it. Skipped on Windows, where os.Chmod only toggles the read-only
+// attribute (the ACL of %AppData% already restrict it to the user).
+func restrictToOwner(path string, mode os.FileMode) {
+	if runtime.GOOS == "windows" {
+		return
+	}
+	if err := os.Chmod(path, mode); err != nil {
+		Log.Error(fmt.Sprintf("Impossible to restrict the permissions of %s: %v", path, err))
+	}
 }
 
 // ------------------------------------------------ //
@@ -162,10 +195,29 @@ func UpdateUserLastYear(db *sql.DB, year string) (bool, error) {
 
 // ------------------------------------------------ //
 
+// UpdateUserDiscordRPC sets whether the app is shown in the Discord status of
+// the selected user.
+func UpdateUserDiscordRPC(db *sql.DB, enabled bool) error {
+	result, err := db.Exec(`UPDATE USER SET discord_rpc = ? WHERE selected = true`, enabled)
+	if err != nil {
+		return fmt.Errorf("Erreur lors de la mise à jour du paramètre Discord : %w", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("Aucun utilisateur sélectionné trouvé pour la mise à jour du paramètre Discord")
+	}
+	return nil
+}
+
+// ------------------------------------------------ //
+
 func GetUser(db *sql.DB) (UserSettings, error) {
 	var user UserSettings
-	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes FROM USER WHERE selected = true`
-	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes)
+	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes, discord_rpc FROM USER WHERE selected = true`
+	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes, &user.DiscordRPC)
 	if err != nil {
 		Log.Error(fmt.Sprintf("1 %v", err))
 		return UserSettings{}, err
@@ -189,7 +241,7 @@ func GetLastYearInDB(db *sql.DB) (string, error) {
 // ------------------------------------------------ //
 
 func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
-	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes FROM USER` // WHERE selected = 0`
+	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes, discord_rpc FROM USER` // WHERE selected = 0`
 	rows, err := db.Query(query)
 	if err != nil {
 		Log.Error(fmt.Sprintf("3 %v", err))
@@ -200,7 +252,7 @@ func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
 	var users []UserSettings
 	for rows.Next() {
 		var user UserSettings
-		err := rows.Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes)
+		err := rows.Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes, &user.DiscordRPC)
 		if err != nil {
 			return nil, err
 		}

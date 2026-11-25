@@ -56,9 +56,10 @@ type Store struct {
 	kr Keyring
 }
 
-// New returns a Store backed by the OS keyring.
+// New returns a Store backed by the OS keyring. Every keyring call gives up
+// after KeyringTimeout.
 func New(db *sql.DB) *Store {
-	return NewWithKeyring(db, systemKeyring{})
+	return NewWithKeyring(db, timeoutKeyring{inner: systemKeyring{}, d: KeyringTimeout})
 }
 
 // NewWithKeyring returns a Store backed by kr (used by the tests).
@@ -102,6 +103,16 @@ func (s *Store) SetPassword(username, password string) error {
 	return SetStoredPassword(s.db, username, "")
 }
 
+// IsStoredInDatabase reports whether the password of username is stored in
+// the local database (in clear text) because the keyring was unavailable.
+func (s *Store) IsStoredInDatabase(username string) (bool, error) {
+	stored, err := GetStoredPassword(s.db, username)
+	if err != nil {
+		return false, err
+	}
+	return stored != "", nil
+}
+
 // DeletePassword removes the password of username from the keyring and the database.
 func (s *Store) DeletePassword(username string) error {
 	if err := s.kr.Delete(Service, username); err != nil && !errors.Is(err, keyring.ErrNotFound) {
@@ -131,7 +142,7 @@ func (s *Store) MigrateAll() error {
 		}
 		if !ok {
 			Log.Error("OS keyring unavailable: the passwords stay in the local database")
-			break // no need to wait for the keyring timeout for every account
+			break // unavailable or not answering: no need to try every account
 		}
 		moved++
 	}

@@ -5,7 +5,10 @@ import (
 	. "MyGesClient/log"
 	"MyGesClient/service"
 	"embed"
+	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -31,6 +34,36 @@ func (l *SilentLogger) Warning(message string) {}
 func (l *SilentLogger) Error(message string)   {}
 func (l *SilentLogger) Fatal(message string)   {}
 
+// appID is the reverse-DNS id of the app: the name of its .desktop file on
+// Linux (see packaging.toml and the CI).
+const appID = "io.github.spatulox.MyGesClient"
+
+// initLogFile also writes the logs to <user cache dir>/MyGes/logs/name:
+// %LocalAppData% on Windows, ~/.cache on Linux, ~/Library/Caches on macOS.
+func initLogFile(name string) {
+	cacheDir, err := os.UserCacheDir()
+	if err == nil {
+		err = Log.InitFile(filepath.Join(cacheDir, "MyGes", "logs"), name)
+	}
+	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible to create the log file, logging to stdout only: %v", err))
+	}
+}
+
+// gpuPolicy returns the WebKitGTK hardware acceleration policy (Linux only).
+// Always by default; MYGES_GPU_POLICY=ondemand|never works around a blank
+// window with some drivers (NVIDIA, VMs).
+func gpuPolicy() linux.WebviewGpuPolicy {
+	switch strings.ToLower(os.Getenv("MYGES_GPU_POLICY")) {
+	case "ondemand":
+		return linux.WebviewGpuPolicyOnDemand
+	case "never":
+		return linux.WebviewGpuPolicyNever
+	default:
+		return linux.WebviewGpuPolicyAlways
+	}
+}
+
 func main() {
 	service.SetIcon(appIcon)
 
@@ -41,6 +74,8 @@ func main() {
 	}
 
 	Log.DebugBool = true
+	initLogFile("MyGesClient.log")
+	defer Log.Close()
 	Log.Infos("Launching...")
 	// Create an instance of the app structure
 	app := NewApp()
@@ -62,8 +97,10 @@ func main() {
 			app,
 		},
 		Linux: &linux.Options{
-			WebviewGpuPolicy: linux.WebviewGpuPolicyAlways,
-			ProgramName:      "MyGesClient",
+			WebviewGpuPolicy: gpuPolicy(),
+			// WM_CLASS / Wayland app_id: must match the .desktop file name
+			// so that the desktop shows the icon of the app on its window
+			ProgramName: appID,
 		},
 	})
 

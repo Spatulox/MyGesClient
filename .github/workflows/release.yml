@@ -3,6 +3,7 @@ name: Release
 # Pousser un tag vX.Y.Z_beta, vX.Y.Z_rc ou vX.Y.Z_release (ou vX.Y.Z) :
 #   1. release-kit décode le tag,
 #   2. build.yml construit Linux (.deb) + Windows (installeur NSIS + .exe portable),
+#      en amd64 et arm64, et macOS (.app universelle zippée, non signée),
 #   3. release-kit crée la release GitHub avec la section du CHANGELOG.md.
 # Voir https://github.com/Spatulox/release-kit
 on:

@@ -1,7 +1,10 @@
 name: Build
 
 # CI de build propre à MyGesClient, appelée par release.yml une fois le tag
-# décodé par release-kit : Linux (.deb) + Windows (installeur NSIS + .exe portable).
+# décodé par release-kit :
+#   - Linux : .deb amd64 et arm64,
+#   - Windows : installeur NSIS + .exe portable, amd64 et arm64,
+#   - macOS : .app universelle (Intel + Apple Silicon) zippée, non signée.
 # Les livrables sont uploadés dans des artifacts "release-*", que release-kit
 # joint à la release GitHub.
 on:
@@ -23,10 +26,18 @@ env:
 
 jobs:
   linux:
-    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     env:
       VERSION: ${{ inputs.version }}
       DEBVERSION: ${{ inputs.debversion }}
+      ARCH: ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v7
 
@@ -75,6 +86,7 @@ jobs:
           Icon=$app_id
           Terminal=false
           Categories=Education;
+          StartupWMClass=$app_id
           EOF
 
           cat > "$root/DEBIAN/control" <<EOF
@@ -82,21 +94,22 @@ jobs:
           Version: $DEBVERSION
           Section: education
           Priority: optional
-          Architecture: amd64
+          Architecture: $ARCH
           Maintainer: Spatulox
           Depends: libgtk-3-0t64 | libgtk-3-0, libwebkit2gtk-4.1-0
+          Suggests: gnome-keyring | kwalletmanager | keepassxc
           Homepage: https://github.com/Spatulox/MyGesClient
           Description: Unofficial Client for MyGES website
            Unofficial Client for MyGES website. Created with GO and Wails.
           EOF
 
           mkdir -p dist
-          dpkg-deb --build --root-owner-group "$root" "dist/MyGesClient_${DEBVERSION}_amd64.deb"
-          dpkg-deb --info "dist/MyGesClient_${DEBVERSION}_amd64.deb"
+          dpkg-deb --build --root-owner-group "$root" "dist/MyGesClient_${DEBVERSION}_${ARCH}.deb"
+          dpkg-deb --info "dist/MyGesClient_${DEBVERSION}_${ARCH}.deb"
 
       - uses: actions/upload-artifact@v7
         with:
-          name: release-linux
+          name: release-linux-${{ matrix.arch }}
           path: dist/*.deb
           if-no-files-found: error
 
@@ -134,18 +147,68 @@ jobs:
           jq --arg v "$VERSION" '.info.productVersion = $v' wails.json > wails.tmp.json
           mv wails.tmp.json wails.json
 
-      - name: Build
-        run: wails build -platform windows/amd64 -nsis
-
-      - name: Renommer les livrables
+      # One build per architecture: each one writes build/bin/MyGesClient.exe,
+      # so the files are copied before the next build. Windows needs no CGO:
+      # arm64 is cross-compiled from the x64 runner.
+      - name: Build amd64
         run: |
+          wails build -platform windows/amd64 -nsis
           mkdir -p dist
           cp build/bin/MyGesClient-amd64-installer.exe "dist/MyGesClient-${TAG}-setup.exe"
           cp build/bin/MyGesClient.exe "dist/MyGesClient-${TAG}-portable.exe"
+
+      - name: Build arm64
+        run: |
+          rm -f build/bin/MyGesClient.exe
+          wails build -platform windows/arm64 -nsis -s
+          cp build/bin/MyGesClient-arm64-installer.exe "dist/MyGesClient-${TAG}-setup-arm64.exe"
+          cp build/bin/MyGesClient.exe "dist/MyGesClient-${TAG}-portable-arm64.exe"
           ls -l dist
 
       - uses: actions/upload-artifact@v7
         with:
           name: release-windows
           path: dist/*.exe
+          if-no-files-found: error
+
+  macos:
+    runs-on: macos-latest
+    env:
+      TAG: ${{ inputs.tag }}
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Installer Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@${WAILS_VERSION}
+
+      - name: Version dans wails.json
+        run: |
+          jq --arg v "$VERSION" '.info.productVersion = $v' wails.json > wails.tmp.json
+          mv wails.tmp.json wails.json
+
+      - name: Build
+        # Universal binary: Intel + Apple Silicon
+        run: wails build -platform darwin/universal
+
+      - name: Zip de l'application
+        # Not signed nor notarized: see the README to open it the first time.
+        # ditto keeps the bundle's symlinks and extended attributes.
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent build/bin/MyGesClient.app "dist/MyGesClient-${TAG}-macos-universal.zip"
+          ls -l dist
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-macos
+          path: dist/*.zip
           if-no-files-found: error

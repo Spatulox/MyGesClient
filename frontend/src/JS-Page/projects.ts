@@ -130,7 +130,7 @@ function populateData(projects: ProjectsResponse, name: string, firstname: strin
             if (plogs && plogs.length > 0) {
                 plog_out = plogs.map(log => {
                     const date = new Date(log.pgl_date);
-                    return `${date.toLocaleDateString()} - ${log.pgl_describe}`;
+                    return `${date.toLocaleDateString('fr-FR')} - ${log.pgl_describe}`;
                 });
             }
 
@@ -159,7 +159,7 @@ function populateData(projects: ProjectsResponse, name: string, firstname: strin
             addMyProjectDetails({
                 "Sujet": psubject,
                 "Détails": pdetailed,
-                "Date de Présentation": pdate_presentation ? new Date(pdate_presentation).toLocaleDateString() : "",
+                "Date de Présentation": pdate_presentation ? new Date(pdate_presentation).toLocaleDateString('fr-FR') : "",
                 "Type de sujet": ptype,
                 "Type de groupe": ptype_group,
                 "Membres maximum": pmax_student,

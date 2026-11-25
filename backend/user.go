@@ -189,6 +189,22 @@ func (a *App) UpdateUserPassword(username string, password string) (bool, error)
 	return true, nil
 }
 
+// IsPasswordStoredInClear reports whether the password of the selected
+// account is stored in clear text in the local database, because no OS
+// keyring was available (e.g. a Linux desktop without gnome-keyring/KWallet).
+func (a *App) IsPasswordStoredInClear() bool {
+	username := a.getAPIUser().Username
+	if username == "" || a.creds == nil {
+		return false
+	}
+	stored, err := a.creds.IsStoredInDatabase(username)
+	if err != nil {
+		Log.Error(fmt.Sprintf("Impossible to check where the password is stored: %v", err))
+		return false
+	}
+	return stored
+}
+
 // setPassword stores the password of username (OS keyring, or DB as a fallback).
 func (a *App) setPassword(username, password string) error {
 	a.dbWg.Add(1)
