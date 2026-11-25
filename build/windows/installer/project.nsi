@@ -107,6 +107,9 @@ Section "uninstall"
     Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
     Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
 
+    # Background service of the event reminders (autostart/autostart_windows.go)
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "MyGesClientService"
+
     !insertmacro wails.unassociateFiles
     !insertmacro wails.unassociateCustomProtocols
 

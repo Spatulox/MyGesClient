@@ -482,6 +482,28 @@
                             </ul>
                         </div>
                         <div class="credits-section width80">
+                            <h1 class="section-title">Rappels des évènements</h1>
+                            <label class="setting-row" for="reminderMinutes-select">
+                                <span>Me rappeler un évènement</span>
+                                <select id="reminderMinutes-select">
+                                    <option value="-1">Jamais</option>
+                                    <option value="0">Au début</option>
+                                    <option value="5">5 min avant</option>
+                                    <option value="10">10 min avant</option>
+                                    <option value="15">15 min avant</option>
+                                    <option value="30">30 min avant</option>
+                                    <option value="60">1 h avant</option>
+                                    <option value="120">2 h avant</option>
+                                    <option value="1440">1 jour avant</option>
+                                </select>
+                            </label>
+                            <label class="setting-row" id="backgroundService-row" for="backgroundService-toggle">
+                                <span>Recevoir les rappels quand l'application est fermée<br>
+                                    <small>Lance un service léger en arrière-plan à l'ouverture de votre session</small></span>
+                                <input type="checkbox" id="backgroundService-toggle">
+                            </label>
+                        </div>
+                        <div class="credits-section width80">
                             <h1 class="section-title">Encrypter le mot de passe</h1>
                             <p>A chaque démarrage de l'application, vous devrez renseigner votre phrase secrète permettant de décrypter votre mot de passe</p>
                             <input type="text" id="encrypt-input" placeholder="Renseignez votre phrase secrète">

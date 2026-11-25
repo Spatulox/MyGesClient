@@ -198,7 +198,11 @@ func (a *App) Startup(ctx context.Context) {
 	if err := a.initDB(); err != nil {
 		a.handleStartupError("DB initialization", err)
 		startupErrors |= ErrDBInit
+	} else {
+		// Events are local: the reminders work offline and without a password
+		a.startReminders()
 	}
+	refreshAutostartPath()
 
 	if err := a.initUser(); err != nil {
 		a.handleStartupError("User initialization", err)

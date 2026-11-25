@@ -7,4 +7,6 @@ type UserSettings struct {
 	Theme    string
 	EULA     bool
 	Year     string
+	// Events are reminded this many minutes before they start (-1: never)
+	ReminderMinutes int
 }

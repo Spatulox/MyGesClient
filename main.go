@@ -3,7 +3,9 @@ package main
 import (
 	. "MyGesClient/backend"
 	. "MyGesClient/log"
+	"MyGesClient/service"
 	"embed"
+	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -13,6 +15,11 @@ import (
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+// Icon of the event reminder notifications
+//
+//go:embed build/appicon.png
+var appIcon []byte
 
 type SilentLogger struct{}
 
@@ -25,6 +32,14 @@ func (l *SilentLogger) Error(message string)   {}
 func (l *SilentLogger) Fatal(message string)   {}
 
 func main() {
+	service.SetIcon(appIcon)
+
+	// MyGesClient --service: event reminders only, no window (started with
+	// the session when the option is enabled, see the autostart package)
+	if service.IsServiceMode(os.Args) {
+		os.Exit(service.Run())
+	}
+
 	Log.DebugBool = true
 	Log.Infos("Launching...")
 	// Create an instance of the app structure

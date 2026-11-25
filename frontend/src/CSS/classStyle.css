@@ -232,6 +232,41 @@
     padding-left: 5px;
 }
 
+/* A setting: its label on the left, its control on the right */
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 8px 0;
+    cursor: pointer;
+}
+
+.setting-row small {
+    color: var(--text-muted);
+}
+
+.setting-row select {
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--discord-light);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.setting-row select:hover {
+    background-color: var(--discord-lightlight);
+}
+
+.setting-row input[type="checkbox"] {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--highlight-color);
+    cursor: pointer;
+}
+
 .credits-container ul {
     list-style-type: none;
     padding: 0;

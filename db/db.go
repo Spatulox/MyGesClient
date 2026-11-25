@@ -38,19 +38,28 @@ func OpenDB(path string) (*sql.DB, error) {
 	return db, nil
 }
 
-// InitDBConnexion opens the application database, in <config dir>/MyGes/db.sqlite.
-func InitDBConnexion() (*sql.DB, error) {
+// AppDataDir returns the folder of the application data (<config dir>/MyGes),
+// and creates it if needed.
+func AppDataDir() (string, error) {
 	appDataPath, err := os.UserConfigDir()
 	if err != nil {
-		return nil, fmt.Errorf("erreur lors de l'obtention du dossier AppData: %w", err)
+		return "", fmt.Errorf("erreur lors de l'obtention du dossier AppData: %w", err)
 	}
 
-	dbFolder := filepath.Join(appDataPath, "MyGes")
-	if err := os.MkdirAll(dbFolder, 0755); err != nil {
-		return nil, fmt.Errorf("erreur lors de la création du dossier MyGes: %w", err)
+	dir := filepath.Join(appDataPath, "MyGes")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", fmt.Errorf("erreur lors de la création du dossier MyGes: %w", err)
 	}
+	return dir, nil
+}
 
-	return OpenDB(filepath.Join(dbFolder, "db.sqlite"))
+// InitDBConnexion opens the application database, in <config dir>/MyGes/db.sqlite.
+func InitDBConnexion() (*sql.DB, error) {
+	dir, err := AppDataDir()
+	if err != nil {
+		return nil, err
+	}
+	return OpenDB(filepath.Join(dir, "db.sqlite"))
 }
 
 // ------------------------------------------------ //
@@ -155,8 +164,8 @@ func UpdateUserLastYear(db *sql.DB, year string) (bool, error) {
 
 func GetUser(db *sql.DB) (UserSettings, error) {
 	var user UserSettings
-	query := `SELECT user_id, username, theme, eula, last_year FROM USER WHERE selected = true`
-	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year)
+	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes FROM USER WHERE selected = true`
+	err := db.QueryRow(query).Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes)
 	if err != nil {
 		Log.Error(fmt.Sprintf("1 %v", err))
 		return UserSettings{}, err
@@ -180,7 +189,7 @@ func GetLastYearInDB(db *sql.DB) (string, error) {
 // ------------------------------------------------ //
 
 func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
-	query := `SELECT user_id, username, theme, eula, last_year FROM USER` // WHERE selected = 0`
+	query := `SELECT user_id, username, theme, eula, last_year, reminder_minutes FROM USER` // WHERE selected = 0`
 	rows, err := db.Query(query)
 	if err != nil {
 		Log.Error(fmt.Sprintf("3 %v", err))
@@ -191,7 +200,7 @@ func GetRegisteredUsers(db *sql.DB) ([]UserSettings, error) {
 	var users []UserSettings
 	for rows.Next() {
 		var user UserSettings
-		err := rows.Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year)
+		err := rows.Scan(&user.ID, &user.Username, &user.Theme, &user.EULA, &user.Year, &user.ReminderMinutes)
 		if err != nil {
 			return nil, err
 		}
@@ -268,6 +277,36 @@ func UpdateUserEula(db *sql.DB) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// ------------------------------------------------ //
+
+// Bounds of USER.reminder_minutes: ReminderDisabled turns the event
+// reminders off, 0 reminds when the event starts, at most one day before.
+const (
+	ReminderDisabled   = -1
+	ReminderMaxMinutes = 24 * 60
+)
+
+// UpdateUserReminderMinutes sets how many minutes before an event the
+// selected user is reminded of it.
+func UpdateUserReminderMinutes(db *sql.DB, minutes int) error {
+	if minutes < ReminderDisabled || minutes > ReminderMaxMinutes {
+		return fmt.Errorf("délai de rappel invalide : %d minutes", minutes)
+	}
+
+	result, err := db.Exec(`UPDATE USER SET reminder_minutes = ? WHERE selected = true`, minutes)
+	if err != nil {
+		return fmt.Errorf("Erreur lors de la mise à jour du délai de rappel : %w", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Erreur lors de la vérification des lignes affectées : %w", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("Aucun utilisateur sélectionné trouvé pour la mise à jour du délai de rappel")
+	}
+	return nil
 }
 
 // ------------------------------------------------ //

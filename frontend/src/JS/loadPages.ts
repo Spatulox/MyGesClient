@@ -10,6 +10,7 @@ import { account } from "../JS-Page/account";
 import { courses } from "../JS-Page/courses";
 import { absences } from "../JS-Page/absences";
 import { projects } from "../JS-Page/projects";
+import { softwareAccount } from "../JS-Page/softwareAccount";
 
 let leDocToShow: HTMLElement | null = document.getElementById("weirdPlace");
 let isPossibleToSwitchTabs = true;
@@ -40,7 +41,7 @@ const PAGES: Record<string, PageDefinition> = {
     projects: { title: "Projets", load: () => projects() },
     events: { title: "Évènements", load: () => events() },
     account: { title: "Compte", load: () => account() },
-    softwareAccount: { title: "Compte" },
+    softwareAccount: { title: "Compte", load: () => softwareAccount() },
     credits: { title: "Crédit" },
 };
 
