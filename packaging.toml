@@ -15,6 +15,10 @@ categories = ["Education"]
 command = "bash wailsbuild.sh"
 binary = "build/bin/MyGesClient"
 icon = "build/appicon.png"
+# WM_CLASS of the window (xprop WM_CLASS): the binary name, not the app id.
+# Wails 2 applies Linux.ProgramName (main.go) after gtk_init, too late for
+# WM_CLASS. Without StartupWMClass, GNOME shows a generic icon in the dock.
+wm_class = "MyGesClient"
 
 [windows]
 command = "bash wailsbuild.sh -platform windows/amd64"
@@ -28,7 +32,6 @@ deb_suggests = ["gnome-keyring | kwalletmanager | keepassxc"]
 rpm_suggests = ["(gnome-keyring or kwalletmanager or keepassxc)"]
 
 # The version above is replaced by the release tag in the CI (.github/workflows/build.yml).
-# The window's WM_CLASS is already the app id: no wm_class needed.
 
 [output]
 formats = ["deb", "rpm", "zip", "nsis"]
