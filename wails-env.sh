@@ -14,10 +14,6 @@ if ! command -v npm >/dev/null 2>&1 && [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; t
     set -u
 fi
 
-# Wails' binding generator breaks with recent Go releases ("package ... without
-# types was imported"): use the toolchain pinned in go.mod, like the CI does.
-export GOTOOLCHAIN="${GOTOOLCHAIN:-go1.24.1}"
-
 # webkit_tags ARGS... sets WEBKIT_TAGS to the extra wails flags for these
 # arguments: -tags webkit2_41 for a Linux build when WebKitGTK 4.1 is
 # installed, like the CI (Ubuntu 24.04 and Debian 13 no longer ship

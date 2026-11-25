@@ -20,3 +20,6 @@ package-lock.json
 frontend/package.json.md5
 
 dist/
+
+# Written by wails build -nsis (WebView2 bootstrapper)
+build/windows/installer/tmp/

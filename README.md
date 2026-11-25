@@ -110,6 +110,8 @@ to this in your browser, and you can call your Go code from devtools.
 
 To build a redistributable, production mode package, use `./wailsbuild.sh` (or `wails build`).
 
-Both scripts (environment in `wails-env.sh`) add Go's `bin` folder and nvm to the `PATH`, pin the Go toolchain of
-`go.mod` (Wails' binding generator breaks with recent Go releases) and, on Linux, build with WebKitGTK 4.1
-(`-tags webkit2_41`) when it is installed.
+Both scripts (environment in `wails-env.sh`) add Go's `bin` folder and nvm to the `PATH` and, on Linux, build with
+WebKitGTK 4.1 (`-tags webkit2_41`) when it is installed.
+
+Requirements: Go 1.26 or later, and the Wails CLI of the same version as `go.mod`
+(`go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.1`): `wails dev` rewrites `go.mod` when they differ.

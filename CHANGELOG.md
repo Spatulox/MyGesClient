@@ -21,6 +21,7 @@ Le workflow de release publie le contenu de la section du tag poussé
 - Si le mot de passe doit rester dans la base locale faute de trousseau, l'application le signale (popup et page Compte).
 - Linux / macOS : le dossier de la base locale n'est plus lisible par les autres utilisateurs de la machine (dossier en 700, base en 600).
 - Un trousseau verrouillé qui attend son déverrouillage ne bloque plus le démarrage (20 s max par accès).
+- Wails passe de 2.10.1 à 2.17.1 (Go 1.26). Côté sécurité, les iframes ne peuvent plus appeler le backend sous Linux. Côté corrections, une erreur dans une méthode Go ne fait plus planter l'app sous Linux, et l'app ne plante plus sous macOS 26 (Tahoe).
 
 ### Corrections
 - Discord : le statut fonctionne aussi avec Discord installé en Flatpak ou Snap pour n'importe quel utilisateur (le chemin était codé en dur pour l'UID 1000), et avec plusieurs clients Discord (discord-ipc-0 à 9).
