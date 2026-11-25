@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.4.0
+
+### Nouveautés
+- Notes : nouvelle page (#52, #66). À gauche la liste des matières avec leur moyenne, à droite le détail de la matière choisie : moyenne, coefficient, ECTS, bonus, histogramme des notes (repère à 10/20, examen en bleu) et détail du calcul.
+- Notes : moyenne générale pondérée par les coefficients, et ECTS « en bonne voie » avec une barre par matière (10 et plus, sous 10, pas encore noté).
+- Notes : onglet « Année complète » qui regroupe les deux semestres. Une matière présente aux deux semestres n'apparaît qu'une fois, avec sa moyenne annuelle.
+- Moyenne d'une matière : 50 % moyenne des notes + 50 % examen, ou celle des deux qui existe (#51). Le bonus est affiché à part et n'entre pas dans le calcul.
+- Années précédentes : un sélecteur « Année » sur les pages Notes, Absences et Cours permet de consulter les années scolaires passées (celles listées par MyGes). L'année en cours reste l'affichage par défaut, et un bandeau signale qu'on consulte une archive.
+- Absences : nouvelle page avec le nombre d'absences non justifiées et justifiées, le cours le plus manqué, des filtres et une liste par mois (#66).
+- Cours : cartes regroupées par trimestre, filtre par trimestre, recherche par cours ou par professeur (#66).
+- Accueil : le récapitulatif des notes n'affiche plus 3 notes au hasard mais le semestre en cours (S1/S2 au choix) : moyenne générale, ECTS en bonne voie, meilleure matière, matières sous 10 et les moyennes les plus basses « À surveiller » (#53).
+- Évènements : frise chronologique par mois, filtres « À venir / Passés / Tous », délai affiché (« Aujourd'hui », « Dans 3 jours », « Terminé »…), et confirmation avant de supprimer un évènement (#54).
+- « Informations de l'Application » : la version de Go et de Wails, le système (OS et architecture) et la date du build sont lus depuis l'application, et sont donc justes pour chaque plateforme.
+
+### Corrections
+- Mode nuit : les listes déroulantes (rappels des évènements, choix de l'année) étaient blanc sur blanc ; elles suivent maintenant le thème.
+- Thème clair : le calendrier des évènements n'est plus sur un fond gris foncé.
+- Une année sans notes ou sans absences ne provoque plus d'erreur.
+
 ## v1.3.2_beta
 
 ### Nouveautés
