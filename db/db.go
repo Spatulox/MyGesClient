@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -47,8 +48,8 @@ func AppDataDir() (string, error) {
 	}
 
 	dir := filepath.Join(appDataPath, "MyGes")
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", fmt.Errorf("erreur lors de la création du dossier MyGes: %w", err)
+	if err := prepareDataDir(dir); err != nil {
+		return "", err
 	}
 	return dir, nil
 }
@@ -59,7 +60,39 @@ func InitDBConnexion() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return OpenDB(filepath.Join(dir, "db.sqlite"))
+	dbPath := filepath.Join(dir, "db.sqlite")
+	db, err := OpenDB(dbPath)
+	if err != nil {
+		return nil, err
+	}
+	restrictToOwner(dbPath, 0600)
+	return db, nil
+}
+
+// prepareDataDir creates the application data folder, readable by its owner
+// only. It holds the database, which may contain a password in clear text
+// (when the OS keyring is unavailable, see the credentials package) and
+// personal data.
+func prepareDataDir(dir string) error {
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return fmt.Errorf("erreur lors de la création du dossier MyGes: %w", err)
+	}
+	// MkdirAll leaves the permissions of an existing folder unchanged
+	// (0755 for the folders created by older versions)
+	restrictToOwner(dir, 0700)
+	return nil
+}
+
+// restrictToOwner sets the Unix permissions of path. Not fatal: the app works
+// without it. Skipped on Windows, where os.Chmod only toggles the read-only
+// attribute (the ACL of %AppData% already restrict it to the user).
+func restrictToOwner(path string, mode os.FileMode) {
+	if runtime.GOOS == "windows" {
+		return
+	}
+	if err := os.Chmod(path, mode); err != nil {
+		Log.Error(fmt.Sprintf("Impossible to restrict the permissions of %s: %v", path, err))
+	}
 }
 
 // ------------------------------------------------ //

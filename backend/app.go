@@ -286,9 +286,15 @@ func (a *App) initDB() error {
 	a.creds = credentials.New(a.db)
 	// Passwords saved by older versions (or while the keyring was unavailable)
 	// are moved to the keyring. Not fatal: they stay usable from the DB.
-	if err := a.creds.MigrateAll(); err != nil {
-		Log.Error(fmt.Sprintf("Impossible to move the passwords to the OS keyring: %v", err))
-	}
+	// In the background: a keyring waiting for an unlock prompt must not
+	// delay the startup (the selected account is moved by initUser anyway).
+	a.dbWg.Add(1)
+	go func() {
+		defer a.dbWg.Done()
+		if err := a.creds.MigrateAll(); err != nil {
+			Log.Error(fmt.Sprintf("Impossible to move the passwords to the OS keyring: %v", err))
+		}
+	}()
 	return nil
 }
 
