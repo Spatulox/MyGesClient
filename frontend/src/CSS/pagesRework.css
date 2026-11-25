@@ -53,15 +53,32 @@
     color: var(--mainPoliceColor);
 }
 
+/* appearance: none, otherwise WebKitGTK draws the select with the (light)
+   system theme and keeps our white text: white on white in dark mode. */
 .year-picker select {
-    padding: 8px 10px;
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: dark;
+    padding: 8px 32px 8px 10px;
     font-size: 14px;
     font-family: inherit;
-    border: none;
+    border: 1px solid var(--discord-lightlight);
     border-radius: 4px;
     cursor: pointer;
     background-color: var(--discord-dark);
-    color: var(--mainPoliceColor);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23dcddde' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    color: var(--text-color);
+}
+
+.year-picker select:hover {
+    background-color: var(--discord-light);
+}
+
+.year-picker select option {
+    background-color: var(--discord-dark);
+    color: var(--text-color);
 }
 
 #courses .year-picker select {
@@ -802,8 +819,19 @@
 
 .light .year-picker select,
 .light #courses .year-picker select {
+    color-scheme: light;
     background-color: var(--card-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234f5660' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     border: 1px solid var(--border-color);
+}
+
+.light .year-picker select:hover {
+    background-color: var(--hover-bg);
+}
+
+.light .year-picker select option {
+    background-color: var(--card-bg);
+    color: var(--text-color);
 }
 
 .light .archive-banner,

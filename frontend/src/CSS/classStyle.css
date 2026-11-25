@@ -247,17 +247,31 @@
     color: var(--text-muted);
 }
 
+/* appearance: none, otherwise WebKitGTK draws the select with the (light)
+   system theme and keeps our light text: unreadable in dark mode. */
 .setting-row select {
-    padding: 8px;
-    border: none;
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: dark;
+    padding: 8px 32px 8px 10px;
+    border: 1px solid var(--discord-lightlight);
     border-radius: 5px;
     background-color: var(--discord-light);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23dcddde' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
     color: var(--text-color);
+    font-family: inherit;
     cursor: pointer;
 }
 
 .setting-row select:hover {
     background-color: var(--discord-lightlight);
+}
+
+.setting-row select option {
+    background-color: var(--discord-light);
+    color: var(--text-color);
 }
 
 .setting-row input[type="checkbox"] {
