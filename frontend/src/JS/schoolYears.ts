@@ -1,4 +1,13 @@
-import { GetAbsences, GetCourses, GetGrades, GetUserData } from "../../wailsjs/go/backend/App";
+import {
+    GetAbsencesForYear,
+    GetCoursesForYear,
+    GetCurrentYear,
+    GetGradesForYear,
+    GetSchoolYears,
+    GetUserData,
+    RefreshAbsencesForYear,
+    RefreshGradesForYear,
+} from "../../wailsjs/go/backend/App";
 import { structures } from "../../wailsjs/go/models";
 
 /*
@@ -7,9 +16,9 @@ import { structures } from "../../wailsjs/go/models";
  * A school year is identified like the backend and the MyGes API do it: by its
  * starting year ("2025" = 2025-2026, see /me/{year}/grades in api/GesApi.go).
  *
- * The backend picks the current year at startup (the latest one of /me/years,
- * App.initYear) and saves it as the user's last_year, which GetUserData returns
- * in `Year`. The Get* bindings always return the data of that year.
+ * The backend picks the current year (the latest one of /me/years, App.initYear)
+ * and lists the years of the student (GetSchoolYears). Grades and absences are
+ * cached locally per year; courses are always asked to MyGes.
  */
 
 export type Course = {
@@ -34,10 +43,16 @@ function schoolYearOfDate(date: Date): string {
     return String(date.getMonth() >= 8 ? year : year - 1);
 }
 
-/** The year the backend serves (same as App.getYear), or the one of today as a fallback. */
+/**
+ * The year the backend serves by default. Offline at startup, the backend may
+ * not know it yet ("" or "1970"): fall back to the user's last year, then to today.
+ */
 export async function getCurrentYear(): Promise<string> {
-    // TODO(previous-years): use the future GetCurrentYear() binding.
     try {
+        const year = await GetCurrentYear();
+        if (YEAR_FORMAT.test(year)) {
+            return year;
+        }
         const user = await GetUserData();
         if (user && YEAR_FORMAT.test(user.Year)) {
             return user.Year;
@@ -48,43 +63,52 @@ export async function getCurrentYear(): Promise<string> {
     return schoolYearOfDate(new Date());
 }
 
-/** Every year that can be displayed, most recent first. */
+/** Every year that can be displayed, most recent first (always contains the current one). */
 export async function getAvailableYears(): Promise<string[]> {
-    // TODO(previous-years): return the future GetSchoolYears() binding
-    // (start years of /me/years as strings, most recent first). Until then
-    // only the current year is available, which hides the year select.
-    return [await getCurrentYear()];
+    const current = await getCurrentYear();
+    let years: string[] = [];
+    try {
+        years = ((await GetSchoolYears()) ?? []).map(String).filter(y => YEAR_FORMAT.test(y));
+    } catch (e) {
+        console.log(e);
+    }
+    if (!years.includes(current)) {
+        years.push(current);
+    }
+    return [...new Set(years)].sort((a, b) => Number(b) - Number(a));
 }
 
-/*
- * TODO(previous-years): the fetchers below only serve the current year, with
- * the existing bindings. Plug the future ones here, with the same signatures:
- *   fetchGrades(y)   -> GetGradesForYear(y),   then RefreshGradesForYear(y) when online
- *   fetchAbsences(y) -> GetAbsencesForYear(y), then RefreshAbsencesForYear(y) when online
- *   fetchCourses(y)  -> GetCoursesForYear(y) (raw JSON, like GetCourses)
- * Get*ForYear reads the local cache (immediate), Refresh*ForYear asks MyGes.
+/**
+ * Current year: the local cache, kept up to date by the backend every hour.
+ * Previous year: ask MyGes (one request), and fall back to the local cache
+ * when that fails (offline, or a refresh of the backend already running).
  */
-async function assertCurrentYear(year: string): Promise<void> {
-    const current = await getCurrentYear();
-    if (year !== current) {
-        throw new Error(`Les données de l'année ${formatSchoolYear(year)} ne sont pas encore disponibles`);
+async function fetchYear<T>(
+    year: string,
+    fromCache: (year: string) => Promise<T[] | null>,
+    fromMyGes: (year: string) => Promise<T[] | null>,
+): Promise<T[]> {
+    if (year !== await getCurrentYear()) {
+        try {
+            return (await fromMyGes(year)) ?? [];
+        } catch (e) {
+            console.log(e);
+        }
     }
+    return (await fromCache(year)) ?? [];
 }
 
 export async function fetchGrades(year: string): Promise<structures.LocalGrades[]> {
-    await assertCurrentYear(year);
-    return (await GetGrades() as structures.LocalGrades[] | null) ?? [];
+    return fetchYear(year, GetGradesForYear, RefreshGradesForYear);
 }
 
 export async function fetchAbsences(year: string): Promise<structures.LocalAbsences[]> {
-    await assertCurrentYear(year);
-    return (await GetAbsences() as structures.LocalAbsences[] | null) ?? [];
+    return fetchYear(year, GetAbsencesForYear, RefreshAbsencesForYear);
 }
 
 /** null when MyGes didn't answer */
 export async function fetchCourses(year: string): Promise<Course[] | null> {
-    await assertCurrentYear(year);
-    const raw = await GetCourses();
+    const raw = await GetCoursesForYear(year);
     if (!raw) {
         return null;
     }
