@@ -50,6 +50,7 @@ jobs:
     container: ubuntu:${{ matrix.ubuntu }}
     env:
       DEBIAN_FRONTEND: noninteractive
+      TAG: ${{ inputs.tag }}
       VERSION: ${{ inputs.version }}
       # 1.2.0~beta+ubuntu26.04 > 1.2.0~beta+ubuntu24.04 : apt met le paquet à
       # jour proprement après une montée de version de l'OS.
@@ -86,7 +87,8 @@ jobs:
 
       - name: Build
         # Ubuntu 24.04 ne fournit plus webkit2gtk-4.0
-        run: wails build -tags webkit2_41
+        # Le tag (v1.4.0_beta) devient la version de « Informations de l'Application »
+        run: wails build -tags webkit2_41 -ldflags "-X MyGesClient/backend.AppVersion=${TAG}"
 
       - name: Paquet .deb
         run: |
@@ -171,7 +173,7 @@ jobs:
 
       - name: Build
         run: |
-          wails build -platform windows/amd64 -nsis
+          wails build -platform windows/amd64 -nsis -ldflags "-X MyGesClient/backend.AppVersion=${TAG}"
           mkdir -p dist
           cp build/bin/MyGesClient-amd64-installer.exe "dist/MyGesClient-${TAG}-setup.exe"
           cp build/bin/MyGesClient.exe "dist/MyGesClient-${TAG}-portable.exe"
@@ -214,7 +216,7 @@ jobs:
 
       - name: Build
         # Universal binary: Intel + Apple Silicon
-        run: wails build -platform darwin/universal
+        run: wails build -platform darwin/universal -ldflags "-X MyGesClient/backend.AppVersion=${TAG}"
 
       - name: Zip de l'application
         # Not signed nor notarized: see the README to open it the first time.

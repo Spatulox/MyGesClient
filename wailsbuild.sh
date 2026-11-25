@@ -7,5 +7,6 @@ cd "$(dirname "$0")"
 . ./wails-env.sh
 
 webkit_tags "$@"
-echo "wails build ${WEBKIT_TAGS[*]} $*"
-exec wails build "${WEBKIT_TAGS[@]}" "$@"
+version_ldflags "$@"
+echo "wails build ${WEBKIT_TAGS[*]} ${VERSION_LDFLAGS[*]} $*"
+exec wails build "${WEBKIT_TAGS[@]}" "${VERSION_LDFLAGS[@]}" "$@"
