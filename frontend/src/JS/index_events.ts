@@ -31,8 +31,6 @@ const buttonSoftwareInfo = document.getElementById('buttonSoftwareInfo') as HTML
 const buttonConnection = document.getElementById('buttonConnection') as HTMLElement | null;
 const buttonCancelConnection = document.getElementById('buttonCancelConnection') as HTMLElement | null;
 
-const encryptBtn = document.getElementById("encrypt-btn") as HTMLElement | null;
-
 // ------------ Theme events -------------- //
 Array.from(lightDark).forEach((theme) => {
     theme.addEventListener('click', async function () {
@@ -170,11 +168,6 @@ buttonConnection?.addEventListener("click", async function () {
 
 buttonCancelConnection?.addEventListener('click', function () {
     closeConnexion();
-});
-
-encryptBtn?.addEventListener("click", () => {
-    const encryptInput = document.getElementById('encrypt-input');
-    popup("Under construction");
 });
 
 function loadingConnectionButton(oldInnerHtmlLoginBtn: string, bool: boolean = true): void {
