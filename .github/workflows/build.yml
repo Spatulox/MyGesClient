@@ -3,8 +3,10 @@ name: Build
 # CI de build propre à MyGesClient, appelée par release.yml une fois le tag
 # décodé par release-kit :
 #   - Linux : .deb amd64 et arm64, un par version d'Ubuntu (input "ubuntu"),
-#     construit par PackagingOnLinux d'après packaging.toml,
-#   - Windows : installeur NSIS (Wails) + .exe portable, amd64,
+#     construit par le workflow réutilisable de PackagingOnLinux d'après
+#     packaging.toml, dans l'image .github/build.Dockerfile,
+#   - Windows : installeur NSIS + .zip portable amd64, cross-compilés depuis
+#     Linux et construits par PackagingOnLinux (même workflow),
 #   - macOS : .app universelle (Intel + Apple Silicon) zippée, non signée.
 # Les livrables sont uploadés dans des artifacts "release-*", que release-kit
 # joint à la release GitHub.
@@ -29,15 +31,14 @@ on:
 env:
   WAILS_VERSION: v2.17.1  # same version as github.com/wailsapp/wails/v2 in go.mod
   NODE_VERSION: '20'
-  # Outil de packaging Linux (le .deb est décrit dans packaging.toml)
-  PACKAGINGONLINUX_VERSION: v0.3.1
 
 jobs:
   linux:
-    # Un .deb par (version d'Ubuntu × architecture). Le build tourne dans le
-    # conteneur ubuntu:<version> : l'image Docker existe dès la sortie d'une
-    # Ubuntu et le reste après le retrait du runner GitHub correspondant. Le
-    # runner ne sert qu'à faire tourner Docker sur la bonne architecture.
+    # Un .deb par (version d'Ubuntu × architecture), construit par le workflow
+    # réutilisable de PackagingOnLinux d'après packaging.toml, dans l'image
+    # .github/build.Dockerfile basée sur ubuntu:<version> : les Depends détectés
+    # (dpkg-shlibdeps) sont ceux de cette Ubuntu. La version affichée dans
+    # l'app vient du tag (git describe dans wailsbuild.sh).
     name: linux (ubuntu ${{ matrix.ubuntu }}, ${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -49,109 +50,28 @@ jobs:
             runner: ubuntu-24.04
           - arch: arm64
             runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
-    container: ubuntu:${{ matrix.ubuntu }}
-    env:
-      DEBIAN_FRONTEND: noninteractive
-      # Version de « Informations de l'Application », lue par wailsbuild.sh
-      MYGES_VERSION: ${{ inputs.tag }}
+    uses: Spatulox/PackagingOnLinux/.github/workflows/package.yml@v0
+    with:
+      formats: deb
       # 1.2.0~beta+ubuntu26.04 > 1.2.0~beta+ubuntu24.04 : apt met le paquet à
       # jour proprement après une montée de version de l'OS.
-      DEBVERSION: ${{ inputs.debversion }}+ubuntu${{ matrix.ubuntu }}
-    steps:
-      # Le conteneur est nu : outils requis par checkout/setup-* et les steps.
-      - name: Outils de base
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends git ca-certificates curl jq xz-utils python3
-
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go.mod
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Dépendances système
-        run: |
-          apt-get install -y build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev
-
-      - name: Installer Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@${WAILS_VERSION}
-
-      - name: PackagingOnLinux
-        run: |
-          git clone --depth 1 --branch "$PACKAGINGONLINUX_VERSION" \
-            https://github.com/Spatulox/PackagingOnLinux.git /opt/packagingonlinux
-
-      - name: Build et paquet .deb
-        # PackagingOnLinux lance la commande de build de packaging.toml
-        # (wailsbuild.sh : WebKitGTK 4.1 détecté, tag injecté via MYGES_VERSION),
-        # puis construit le .deb : Depends détectés depuis le binaire (propres à
-        # cette Ubuntu), Suggests, .desktop et icône décrits dans packaging.toml.
-        # La version du paquet vient du tag (PackagingOnLinux n'a pas encore
-        # d'option --version : Spatulox/PackagingOnLinux#4).
-        run: |
-          sed -i "s/^version = .*/version = \"$DEBVERSION\"/" packaging.toml
-          PYTHONPATH=/opt/packagingonlinux python3 -m packagingonlinux build -f deb -o dist
-          dpkg-deb --info dist/*.deb
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: release-linux-ubuntu${{ matrix.ubuntu }}-${{ matrix.arch }}
-          path: dist/*.deb
-          if-no-files-found: error
+      version: ${{ inputs.debversion }}+ubuntu${{ matrix.ubuntu }}
+      dockerfile: .github/build.Dockerfile
+      build-args: BASE=ubuntu:${{ matrix.ubuntu }}
+      runs-on: ${{ matrix.runner }}
+      artifact-name: release-linux-ubuntu${{ matrix.ubuntu }}-${{ matrix.arch }}
 
   windows:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
-    env:
-      TAG: ${{ inputs.tag }}
-      VERSION: ${{ inputs.version }}
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go.mod
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: NSIS
-        run: |
-          if [ ! -x "/c/Program Files (x86)/NSIS/makensis.exe" ]; then
-            choco install nsis -y --no-progress
-          fi
-          echo "C:\\Program Files (x86)\\NSIS" >> "$GITHUB_PATH"
-
-      - name: Installer Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@${WAILS_VERSION}
-
-      - name: Version dans wails.json
-        run: |
-          jq --arg v "$VERSION" '.info.productVersion = $v' wails.json > wails.tmp.json
-          mv wails.tmp.json wails.json
-
-      - name: Build
-        run: |
-          wails build -platform windows/amd64 -nsis -ldflags "-X MyGesClient/backend.AppVersion=${TAG}"
-          mkdir -p dist
-          cp build/bin/MyGesClient-amd64-installer.exe "dist/MyGesClient-${TAG}-setup.exe"
-          cp build/bin/MyGesClient.exe "dist/MyGesClient-${TAG}-portable.exe"
-          ls -l dist
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: release-windows
-          path: dist/*.exe
-          if-no-files-found: error
+    # Comme APITester : Wails cross-compile l'exe Windows depuis Linux
+    # ([windows] command de packaging.toml, wailsbuild.sh), puis PackagingOnLinux
+    # en fait l'installeur NSIS (par utilisateur, sans admin) et le .zip portable.
+    uses: Spatulox/PackagingOnLinux/.github/workflows/package.yml@v0
+    with:
+      formats: zip,nsis
+      version: ${{ inputs.debversion }}
+      dockerfile: .github/build.Dockerfile
+      build-args: BASE=ubuntu:24.04
+      artifact-name: release-windows
 
   macos:
     runs-on: macos-latest

@@ -31,7 +31,9 @@ icon = "build/windows/icon.ico"
 deb_suggests = ["gnome-keyring | kwalletmanager | keepassxc"]
 rpm_suggests = ["(gnome-keyring or kwalletmanager or keepassxc)"]
 
-# The version above is replaced by the release tag in the CI (.github/workflows/build.yml).
+# In the release (.github/workflows/build.yml), PackagingOnLinux's package.yml runs this file in
+# the build image .github/build.Dockerfile, with the version of the tag instead of the one above:
+# the .deb per Ubuntu release, and the Windows installer and .zip (exe cross-compiled by Wails).
 
 [output]
 formats = ["deb", "rpm", "zip", "nsis"]

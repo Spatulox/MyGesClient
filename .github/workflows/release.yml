@@ -9,6 +9,8 @@ name: Release
 on:
   push:
     tags: ['v*']
+  # « Run workflow » (onglet Actions) : build à blanc, tout est construit, rien n'est publié.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,6 +18,9 @@ permissions:
 jobs:
   tag:
     uses: Spatulox/release-kit/.github/workflows/tag.yml@v1
+    with:
+      # Échoue tout de suite, avant le build, sans section du tag dans CHANGELOG.md.
+      require-changelog: true
 
   build:
     needs: tag
@@ -27,6 +32,7 @@ jobs:
 
   publish:
     needs: [tag, build]
+    if: needs.tag.outputs.dry-run != 'true'
     uses: Spatulox/release-kit/.github/workflows/publish.yml@v1
     with:
       tag: ${{ needs.tag.outputs.tag }}
