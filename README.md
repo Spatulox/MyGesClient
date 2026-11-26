@@ -63,7 +63,7 @@ Les binaires sont disponibles sur la [page des releases](https://github.com/Spat
 
 | Système | Fichier | Architectures |
 |---|---|---|
-| Windows | `-setup.exe` (installeur) ou `-portable.exe` | x64, ARM64 (`-arm64`) |
+| Windows | `-windows-x64-setup.exe` (installeur, sans droits administrateur) ou `-windows-x64.zip` (portable : dézipper et lancer `MyGesClient.exe`) | x64 |
 | Linux (Debian, Ubuntu…) | `.deb` (prendre celui de sa version d'Ubuntu, ex. `+ubuntu24.04`) | amd64, arm64 |
 | macOS | `-macos-universal.zip` | Intel et Apple Silicon |
 

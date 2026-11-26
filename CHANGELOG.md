@@ -19,6 +19,11 @@
 - Thème clair : le calendrier des évènements n'est plus sur un fond gris foncé.
 - Une année sans notes ou sans absences ne provoque plus d'erreur.
 
+### Windows
+- L'installeur et la version portable sont maintenant construits comme les paquets Linux, par PackagingOnLinux : `MyGesClient-<version>-windows-x64-setup.exe` et `MyGesClient-<version>-windows-x64.zip` (la version portable est un .zip à dézipper, qui contient `MyGesClient.exe`).
+- L'installeur installe l'application pour l'utilisateur, sans droits administrateur, dans `%LOCALAPPDATA%\Programs\MyGesClient`. Une version installée avec un ancien installeur (dans Program Files) est à désinstaller une fois depuis les paramètres Windows.
+- Limite connue : la désinstallation ne retire plus l'entrée de démarrage automatique du service de rappels (`MyGesClientService`) ; la désactiver dans l'application avant de désinstaller.
+
 ## v1.3.2_beta
 
 ### Nouveautés
