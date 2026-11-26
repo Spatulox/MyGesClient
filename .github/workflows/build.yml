@@ -50,7 +50,7 @@ jobs:
             runner: ubuntu-24.04
           - arch: arm64
             runner: ubuntu-24.04-arm
-    uses: Spatulox/PackagingOnLinux/.github/workflows/package.yml@main
+    uses: Spatulox/PackagingOnLinux/.github/workflows/package.yml@v0
     with:
       formats: deb
       # 1.2.0~beta+ubuntu26.04 > 1.2.0~beta+ubuntu24.04 : apt met le paquet à
@@ -65,7 +65,7 @@ jobs:
     # Comme APITester : Wails cross-compile l'exe Windows depuis Linux
     # ([windows] command de packaging.toml, wailsbuild.sh), puis PackagingOnLinux
     # en fait l'installeur NSIS (par utilisateur, sans admin) et le .zip portable.
-    uses: Spatulox/PackagingOnLinux/.github/workflows/package.yml@main
+    uses: Spatulox/PackagingOnLinux/.github/workflows/package.yml@v0
     with:
       formats: zip,nsis
       version: ${{ inputs.debversion }}
